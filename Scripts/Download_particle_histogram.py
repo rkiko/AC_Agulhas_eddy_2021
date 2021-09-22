@@ -1,5 +1,5 @@
 from paruvpy import db_connect
-from paruvpy import read_particle_histogram_data
+from paruvpy import read_particle_histogram_data_floats
 import sys
 
 
