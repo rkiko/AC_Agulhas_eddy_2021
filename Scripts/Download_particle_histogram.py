@@ -14,5 +14,5 @@ if __name__ == '__main__':
 
     mydb = db_connect(user_, passwd)
     valid_projectid_list = '(356)'
-    df = read_particle_histogram_data(valid_projectid_list, mydb)
+    df = read_particle_histogram_data_floats(valid_projectid_list, mydb)
     df.to_csv('Ecopart_histogram_data_raw.tsv', sep='\t', index=False)
