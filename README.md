@@ -6,4 +6,4 @@ Scripts description:
 
 an01
 
-First script to load Ecopart_mip_map_flux_data.tsv
+First script to load Ecopart_mip_map_flux_data.tsv and plot the flux in the whole water column over time
