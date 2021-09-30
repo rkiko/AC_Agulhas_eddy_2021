@@ -7,3 +7,14 @@ Scripts description:
 an01
 
 First script to load Ecopart_mip_map_flux_data.tsv and plot the flux in the whole water column over time
+
+
+an02
+
+I do the scatterplot and the contourf of the flux interpolated. Before plotting, I filter the Flux values with a 
+savgol_filter function. I do also the contourf of the MiP
+
+
+an03
+
+I plot the time series of NP 128 and 256 interpolated  and filtered with savgol function
