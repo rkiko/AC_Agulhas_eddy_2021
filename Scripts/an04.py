@@ -41,23 +41,25 @@ for i in Date_Num:
     Date_Num[i] = calendar.timegm(date_time_obj.timetuple())
     #datetime.utcfromtimestamp(Date_Num[i])
 
-threshold_min_list=np.array([340,12,7,3])
-threshold_max_list=np.array([400,21,13,6])
+threshold_min_list=np.array([340,12,7,3,1.,0.4])
+threshold_max_list=np.array([400,21,13,6,2.5,.8])
+Date_Num_limit_min=1626742080+86400*np.array([0,0,0,0,0,0])
+Date_Num_limit_max=1630358605+86400*np.array([0,0,0,0,-14,-14])
 nthresholds=5 #how many thresholds I consider for each size class
-settling_vel=np.array([]);sizeclass_list=np.array([])
-iNP=28
-for iNP in range(25,29):
+settling_vel_mean=np.array([]);settling_vel_std=np.array([]);sizeclass_list=np.array([])
+iNP=30
+for iNP in range(25,31):
 #########Begin text to indent
-    settling_vel=np.append(settling_vel,0)
     threshold_value_list=np.linspace(threshold_min_list[iNP-25],threshold_max_list[iNP-25],nthresholds)
     if iNP<=27: threshold_value_list=np.round(threshold_value_list)
     threshold_value=threshold_value_list[3]
-    Date_Num_limit=[1626742080,1630358605]
+    Date_Num_limit=np.array([Date_Num_limit_min[iNP-25],Date_Num_limit_max[iNP-25]])
     NP_abun=data.values[sel_filename,iNP]
     NP_abun=NP_abun.astype('float')
     NP_sizeclass=data.axes[1][iNP]
     NP_sizeclass=NP_sizeclass.split('_')[-2]
     sizeclass_list=np.append(sizeclass_list,(float(NP_sizeclass.split('-')[0])+float(NP_sizeclass.split('-')[1]))*0.5)
+    settling_vel=np.array([])
     for threshold_value in threshold_value_list:
         # I filter the prophiles
         NP_filtered=np.array([]);pressure_NP=np.array([]);Date_Num_NP=np.array([])
@@ -82,8 +84,8 @@ for iNP in range(25,29):
                     Date_Num_threshold = np.append(Date_Num_threshold, list_dates[i])
 
         (interpol,_,_,signif,signif_label)=lin_fit(Date_Num_threshold/86400,pressure_threshold)
-        settling_vel[iNP - 25]=settling_vel[iNP-25]+interpol.slope/nthresholds
-        print('%s mm, Threshold %d #/L, settling velocity: %0.2f m/d' % (NP_sizeclass,threshold_value,interpol.slope))
+        settling_vel=np.append(settling_vel,interpol.slope)
+        print('%s mm, Threshold %0.1f #/L, settling velocity: %0.2f m/d' % (NP_sizeclass,threshold_value,interpol.slope))
         # I define the x and y arrays for the contourf plot
         x_NP = np.linspace(Date_Num_NP.min(), Date_Num_NP.max(), 100)
         y_NP = np.linspace(pressure_NP.min(), pressure_NP.max(), 50)
@@ -105,7 +107,7 @@ for iNP in range(25,29):
         plot4= plt.plot(np.linspace(Date_Num_limit[0],Date_Num_limit[1],20),np.linspace(Date_Num_limit[0]*interpol.slope/86400+interpol.intercept,Date_Num_limit[1]*interpol.slope/86400+interpol.intercept,20),c='black')
         cbar.ax.set_ylabel('NP abundance (#/L)', fontsize=18)
         plt.ylabel('Pressure (dbar)', fontsize=18)
-        plt.title('%smm, thr: %d #/L, Settling vel: %0.2f m/d, fit signif: %s' % (NP_sizeclass,threshold_value,interpol.slope,signif_label), fontsize=18)
+        plt.title('%smm, thr: %0.1f #/L, Settling vel: %0.2f m/d, fit signif: %s' % (NP_sizeclass,threshold_value,interpol.slope,signif_label), fontsize=18)
         nxticks = 10
         xticks = np.linspace(Date_Num.min(), Date_Num.max(), nxticks)
         xticklabels = []
@@ -118,17 +120,21 @@ for iNP in range(25,29):
         plt.grid(color='k', linestyle='dashed', linewidth=0.5)
         NP_sizeclass_save = NP_sizeclass
         if NP_sizeclass == '0.0806-0.102':    NP_sizeclass_save = '0.081-0.102'
-        plt.savefig('../Plots/an04/test_slope_NP%smm_thr%d_an04.pdf' % (NP_sizeclass_save,threshold_value), dpi=200)
+        plt.savefig('../Plots/an04/test_slope_NP%smm_thr%0.1f_an04.pdf' % (NP_sizeclass_save,threshold_value), dpi=200)
         #plt.show()
         #input("Press Enter to continue...")
         plt.close()
         #exit()
         #########End text to indent
 
+    settling_vel_mean=np.append(settling_vel_mean,np.mean(settling_vel))
+    settling_vel_std=np.append(settling_vel_std,np.std(settling_vel))
 
 fig = plt.figure(1, figsize=(12, 8))
-plt.plot(sizeclass_list,np.abs(settling_vel),'o')
-plt.plot(sizeclass_list,np.abs(settling_vel))
+plt.plot(sizeclass_list,np.abs(settling_vel_mean),'o')
+plt.plot(sizeclass_list,np.abs(settling_vel_mean))
+plt.errorbar(sizeclass_list,np.abs(settling_vel_mean),yerr=settling_vel_std,capsize=5)
+plt.grid(color='k', linestyle='dashed', linewidth=0.3)
 plt.xlabel('Size class (mm)', fontsize=18)
 plt.ylabel('Settling velocity (m/d)', fontsize=18)
 plt.title('Relationship between size class and settling velocity', fontsize=18)

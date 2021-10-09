@@ -78,6 +78,76 @@ for iNP in range(25,39):
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     NP_plot=NP_interp
     #NP_plot[NP_plot>maxNP]=maxNP
+    ax_1 = plot2 = plt.contourf(x_NP, y_NP, NP_plot)#, vmax=np.log(maxNP))#, cmap=cmhot)
+    # draw colorbar
+    cbar = plt.colorbar(plot2)
+    #plt.clim(np.log(1),np.log(maxNP))
+    #a=cbar.ax.get_yticklabels()[-1];a=float(cbar.ax.get_yticklabels()[-1].get_text())
+    cbar.ax.set_ylabel('NP abundance (#/L)', fontsize=18)
+    plt.ylabel('Pressure (dbar)', fontsize=18)
+    plt.title('%smm' % NP_sizeclass, fontsize=18)
+    #I set xticks
+    nxticks=10
+    xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+    xticklabels=[]
+    for i in xticks:
+        xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    plt.xticks(rotation=90,fontsize=12)
+    # I add the grid
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    NP_sizeclass_save=NP_sizeclass
+    if NP_sizeclass=='0.0806-0.102':    NP_sizeclass_save='0.081-0.102'
+    plt.savefig('../Plots/an03/test05_NP%smm_an03.pdf' % NP_sizeclass_save,dpi=200)
+    plt.close()
+
+
+
+    ####### I do the interpolate contourf up to the maximum depth
+    width, height = 0.8, 0.7
+    set_ylim_lower, set_ylim_upper = pressure_NP.min(), pressure_NP.max()
+    fig = plt.figure(1, figsize=(12,8))
+    ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
+    NP_plot=NP_interp
+    #NP_plot[NP_plot>maxNP]=maxNP
+    ax_1 = plot2 = plt.contourf(x_NP, y_NP, NP_plot)#, vmax=np.log(maxNP))#, cmap=cmhot)
+    # draw colorbar
+    cbar = plt.colorbar(plot2)
+    #plt.clim(np.log(1),np.log(maxNP))
+    #a=cbar.ax.get_yticklabels()[-1];a=float(cbar.ax.get_yticklabels()[-1].get_text())
+    cbar.ax.set_ylabel('NP abundance (#/L)', fontsize=18)
+    plt.ylabel('Pressure (dbar)', fontsize=18)
+    plt.title('%smm' % NP_sizeclass, fontsize=18)
+    #I set xticks
+    nxticks=10
+    xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+    xticklabels=[]
+    for i in xticks:
+        xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    plt.xticks(rotation=90,fontsize=12)
+    # I add the grid
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    NP_sizeclass_save=NP_sizeclass
+    if NP_sizeclass=='0.0806-0.102':    NP_sizeclass_save='0.081-0.102'
+    plt.savefig('../Plots/an03/test05B_NP%smm_an03.pdf' % NP_sizeclass_save,dpi=200)
+    plt.close()
+
+
+    ########################################################
+    ####### NP in log scale
+    ########################################################
+
+    #maxNP=np.round(NP_filtered.max()/4)
+    ####### I do the interpolate contourf
+    width, height = 0.8, 0.7
+    set_ylim_lower, set_ylim_upper = -600, pressure_NP.max()
+    fig = plt.figure(1, figsize=(12,8))
+    ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
+    NP_plot=NP_interp
+    #NP_plot[NP_plot>maxNP]=maxNP
     ax_1 = plot2 = plt.contourf(x_NP, y_NP, np.log(NP_plot))#, vmax=np.log(maxNP))#, cmap=cmhot)
     # draw colorbar
     cbar = plt.colorbar(plot2)
@@ -114,7 +184,7 @@ for iNP in range(25,39):
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     NP_sizeclass_save=NP_sizeclass
     if NP_sizeclass=='0.0806-0.102':    NP_sizeclass_save='0.081-0.102'
-    plt.savefig('../Plots/an03/test05_NP%smm_an03.pdf' % NP_sizeclass_save,dpi=200)
+    plt.savefig('../Plots/an03/LogScale/test05_NP%smm_an03.pdf' % NP_sizeclass_save,dpi=200)
     plt.close()
 
 
@@ -162,6 +232,6 @@ for iNP in range(25,39):
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     NP_sizeclass_save=NP_sizeclass
     if NP_sizeclass=='0.0806-0.102':    NP_sizeclass_save='0.081-0.102'
-    plt.savefig('../Plots/an03/test05B_NP%smm_an03.pdf' % NP_sizeclass_save,dpi=200)
+    plt.savefig('../Plots/an03/LogScale/test05B_NP%smm_an03.pdf' % NP_sizeclass_save,dpi=200)
     plt.close()
 
