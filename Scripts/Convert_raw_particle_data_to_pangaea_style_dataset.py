@@ -24,11 +24,5 @@ if __name__ == '__main__':
         df = pd.read_csv("Ecopart_histogram_data_raw.tsv", sep='\t') #use nrows for testing
     df = process_raw_ecopart_histo_df(df)
     df.to_csv('Ecopart_processed_data.tsv', sep='\t', index=False)
-    df = calculate_flux_func(df)
-    df = calculate_mip_and_map_abundance_func(df)
-    df = df[["RAWfilename", "Latitude", "Longitude", "Date_Time", "Pressure [dbar]", "Vol [L] (sampled for this depth bin)", "MiP_abun", "MaP_abun", "Flux_mgC_m2"]]
-    if test == 1:
-        df.to_csv('Ecopart_mip_map_flux_data_test.tsv', sep='\t', index=False)
-    else:
-        df.to_csv('Ecopart_mip_map_flux_data.tsv', sep='\t', index=False)
+
 
