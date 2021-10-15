@@ -10,7 +10,8 @@ import scipy.stats
 from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
-from AC_Agulhas_eddy_2021.Scripts.lin_fit import lin_fit
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts/" % home)
+from lin_fit import lin_fit
 
 
 filename='../Data/Ecopart_processed_data.tsv'
