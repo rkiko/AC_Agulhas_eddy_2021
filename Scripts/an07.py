@@ -17,7 +17,7 @@ filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_processed_data.tsv' %
 data=pd.read_csv(filename_ecopart, sep='\t', header=0)
 RAWfilename=data.RAWfilename
 
-#I select only the prophiles data, which contain 'ASC' in the filename, and I exclude the parkings
+#I select only the profiles data, which contain 'ASC' in the filename, and I exclude the parkings
 ct=0
 sel_filename = [True for i in range(RAWfilename.size)]
 for a in RAWfilename:
