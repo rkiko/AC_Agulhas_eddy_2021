@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 import scipy.stats
+import sys
 from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
