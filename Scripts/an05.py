@@ -15,11 +15,11 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
-#usr="anonymous"
-#pwd="alberto.baudena@gmail.com"
-#HOSTNAME="usgodae.org"
-#ftp_server = ftplib.FTP(HOSTNAME, usr,pwd)
-#ftp_server.cwd('pub/outgoing/argo/dac/coriolis/6903095')
+# usr="anonymous"
+# pwd="alberto.baudena@gmail.com"
+# HOSTNAME="usgodae.org"
+# ftp_server = ftplib.FTP(HOSTNAME, usr,pwd)
+# ftp_server.cwd('pub/outgoing/argo/dac/coriolis/6903095')
 #ftp_server.dir()
 #ftp_server.dir('profiles')
 #ftp_server.cwd('profiles')
@@ -29,10 +29,10 @@ filename='6903095_Rtraj.nc'
 filename='BR6903095_001.nc'
 filename='6903095_Sprof.nc'
 
-#os.chdir(storedir)
-#ftp_server.retrbinary("RETR " + filename, open('%s' % filename, 'wb').write)
-#os.chdir(actualdir)
-#ftp_server.quit()
+# os.chdir(storedir)
+# ftp_server.retrbinary("RETR " + filename, open('%s' % filename, 'wb').write)
+# os.chdir(actualdir)
+# ftp_server.quit()
 
 ds = nc.Dataset('%s/%s' % (storedir,filename))
 lon=np.array(ds.variables['LONGITUDE'])

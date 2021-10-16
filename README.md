@@ -35,3 +35,19 @@ I analyse the file 6903095_Sprof.nc and I plot the time series of chla, oxygen, 
 an06
 
 I compute the oxygen variation at a given density in order to compute the respiration rate
+
+\
+an07
+
+In this script, I take the EcoPart data (i.e., the data downloaded from Ecopart throught the
+paruvpy module functions, which contain information about the Flux, MiP and Map)
+and the Coriolis data (i.e. downloaded through ftp, and which contain the BGC variables
+such as temperature, chl-a etc.) and I create a unique data file which contain both the 
+information about the MiP MaP etc. data, both the BGC data.
+
+\
+an08
+
+This script is similar to an02, but it takes the new function in paruvpy which have been updated on 2021-10-15. It then 
+plots the MiP, Map time series expressed as (i) number of particles (ii) mgC/m3, and the flux time series.
+MiP, MaP, and Flux data are filtered with savgol function and then temporally and spatially interpolated
