@@ -11,9 +11,9 @@ from scipy.signal import savgol_filter
 from scipy.interpolate import griddata
 home = str(Path.home())
 #globals().clear()
-os.chdir('%s/GIT/Lagrangian_uvp/Scripts' % home) #changes directory
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
-storedir='%s/GIT/Lagrangian_uvp/Data' % home
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
 #usr="anonymous"
 #pwd="alberto.baudena@gmail.com"
@@ -169,6 +169,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ########################################################
     ####### I plot: versus depth
     ########################################################
+    if ipar==4:
+        parameter_interp_depth[parameter_interp_depth > 2*10**(-3)] = 2*10**(-3)
 
     width, height = 0.8, 0.7
     set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
@@ -201,6 +203,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ########################################################
     if ipar==3:
         parameter_interp_dens[parameter_interp_dens > 255] = 255
+    if ipar==4:
+        parameter_interp_dens[parameter_interp_dens > 2*10**(-3)] = 2*10**(-3)
 
     width, height = 0.8, 0.7
     set_ylim_lower, set_ylim_upper = y2_parameter.min(), y2_parameter.max()

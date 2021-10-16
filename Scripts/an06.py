@@ -11,9 +11,9 @@ from scipy.signal import savgol_filter
 from scipy.interpolate import griddata
 home = str(Path.home())
 #globals().clear()
-os.chdir('%s/GIT/Lagrangian_uvp/Scripts' % home) #changes directory
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
-storedir='%s/GIT/Lagrangian_uvp/Data' % home
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
 #usr="anonymous"
 #pwd="alberto.baudena@gmail.com"
@@ -164,7 +164,7 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=12)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/an05/OxygenTimeSeries_isopycnal%0.1f_an05.pdf' % reference_isopycnal, dpi=200)
+plt.savefig('../Plots/an06/OxygenTimeSeries_isopycnal%0.1f_an06.pdf' % reference_isopycnal, dpi=200)
 
 
 
