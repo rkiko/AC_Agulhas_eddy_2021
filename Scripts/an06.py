@@ -164,7 +164,7 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=12)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/an05/OxygenTimeSeries_isopycnal%0.1f_an05.pdf' % reference_isopycnal, dpi=200)
+plt.savefig('../Plots/an06/OxygenTimeSeries_isopycnal%0.1f_an06.pdf' % reference_isopycnal, dpi=200)
 
 
 
