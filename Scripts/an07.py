@@ -45,8 +45,8 @@ for i in Date_Num:
 ####################################################################################
 
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
-filename='6903095_Sprof.nc'
-ds = nc.Dataset('%s/%s' % (storedir,filename))
+filename_Coriolis='6903095_Sprof.nc'
+ds = nc.Dataset('%s/%s' % (storedir,filename_Coriolis))
 lon2=np.array(ds.variables['LONGITUDE'])
 lat2=np.array(ds.variables['LATITUDE'])
 
