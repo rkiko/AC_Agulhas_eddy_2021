@@ -34,7 +34,8 @@ I analyse the file 6903095_Sprof.nc and I plot the time series of chla, oxygen, 
 \
 an06
 
-I compute the oxygen variation at a given density in order to compute the respiration rate
+I compute the oxygen variation at a given density value in order to compute the respiration rate along this isopycnal.
+I choose a start and end date in order to avoid considering the profiles in which the oxygen increases.
 
 \
 an07
@@ -51,3 +52,11 @@ an08
 This script is similar to an02, but it takes the new function in paruvpy which have been updated on 2021-10-15. It then 
 plots the MiP, Map time series expressed as (i) number of particles (ii) mgC/m3, and the flux time series.
 MiP, MaP, and Flux data are filtered with savgol function and then temporally and spatially interpolated
+
+\
+an09
+
+I compute the oxygen variation at different density values in order to compute the respiration rate along these isopycnals.
+I then transform each density value into a depth value by considering all the depths corresponding with this density
+value for all the profiles, and by doing the mean value. 
+
