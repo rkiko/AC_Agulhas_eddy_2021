@@ -15,6 +15,8 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
+# To update the data, please run:
+# os.system("python Download_BGC_variables.py")
 filename='6903095_Sprof.nc'
 
 ds = nc.Dataset('%s/%s' % (storedir,filename))
