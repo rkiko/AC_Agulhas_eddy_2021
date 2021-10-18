@@ -106,7 +106,7 @@ dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
 #Here I start the loop on the different isopycnal values chosen for the study of the oxygen profile
-reference_isopycnal_list=np.r_[1026.4:1027.50001:0.01]
+reference_isopycnal_list=np.r_[1026.8:1027.50001:0.01]
 reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:10]
 Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+127]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
 
