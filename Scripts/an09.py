@@ -6,8 +6,7 @@ import netCDF4 as nc
 import seawater as sw
 import gsw
 from pathlib import Path
-from scipy.signal import savgol_filter
-from scipy.interpolate import griddata
+from itertools import compress
 home = str(Path.home())
 #globals().clear()
 sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
@@ -211,10 +210,9 @@ ax[1].set_title('Fit significance', fontsize=12)
 sel=(R_list<0) & (depth_isopycnal< 600)
 xtext=np.squeeze(np.ones((1,depth_isopycnal[sel].size)))
 ytext=depth_isopycnal[sel]
-from itertools import compress
 text_s=list(compress(signif_label_list, sel))
 for i,j,k in zip(xtext,ytext,text_s):
-    ax[1].text(i,j,k)
+    ax[1].text(i,j,k,va='top')
 fig.savefig('../Plots/an09/01_OxygenRespirationRate_vs_depth_an09.pdf', dpi=200)
 plt.close()
 
