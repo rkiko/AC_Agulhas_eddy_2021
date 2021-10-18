@@ -5,8 +5,9 @@ import datetime
 import netCDF4 as nc
 import seawater as sw
 import gsw
-from pathlib import Path
+import sys
 from itertools import compress
+from pathlib import Path
 home = str(Path.home())
 #globals().clear()
 sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
@@ -107,9 +108,63 @@ dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
 #Here I start the loop on the different isopycnal values chosen for the study of the oxygen profile
-reference_isopycnal_list=np.r_[1026.8:1027.50001:0.01]
+delta_rho=0.01
+reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
 reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:10]
 Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+127]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
+
+i_isop=0
+for i_isop in range(0,reference_isopycnal_list.size):
+    #Here, for each profile included between two dates (Date_Num_limit), I compute the oxygen concentration at a given
+    #isopycnal, given by reference_isopycnal
+    reference_isopycnal=reference_isopycnal_list[i_isop]
+    reference_isopycnal_down=reference_isopycnal-delta_rho/2
+    if reference_isopycnal_down<reference_isopycnal_list[0]:  reference_isopycnal_down=reference_isopycnal_list[0]
+    reference_isopycnal_up=reference_isopycnal+delta_rho/2
+    if reference_isopycnal_up > reference_isopycnal_list[-1]:  reference_isopycnal_up = reference_isopycnal_list[-1]
+    parameter=doxy
+    doxy_isopycnal=np.array([]);depth_isopycnal_tmp=np.array([]);Date_Num_isopycnal=np.array([])
+    i=0
+    for i in range(0,parameter.shape[0]):
+        sel = (parameter[i, :] != 99999) & (dens[i, :] != 99999)
+        z=parameter[i,sel];y=dens[i,sel];d=depth[i,sel]
+        #fig = plt.figure(1);plt.plot(y,-d);plt.show();
+        #plt.grid(color='k', linestyle='dashed', linewidth=0.5);plt.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an09/00_density_vs_depth_an09.pdf' % home);plt.close()
+        if Date_Num_limit[0] <= Date_Num[i] <= Date_Num_limit[1]:
+            sel_layer = (y >= reference_isopycnal_down) & (y < reference_isopycnal_up)
+            if np.sum(sel_layer)>0: #If sel_layer has some True values, then I take as the doxy of this isopycnal the mean of the doxy values in correspondence with these layers
+                doxy_tmp = np.mean(z[sel_layer])
+                depth_isopycnal_tmp2 = np.mean(d[sel_layer])
+                doxy_isopycnal = np.append(doxy_isopycnal, doxy_tmp)
+                Date_Num_isopycnal = np.append(Date_Num_isopycnal, Date_Num[i])
+                depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, depth_isopycnal_tmp2)
+            else: # If no values are found, then it could be that (if delta_rho is very small) the range reference_isopycnal_down–reference_isopycnal_up falls totally between two isopycnal layers: In that case, I extrapolate the oxygen concentration at that depth
+                depth_isopycnal_tmp2 = np.array([])
+                for iy in range(0, y.size - 1):
+                    if y[iy] <= reference_isopycnal < y[iy + 1]:
+                        dist = (reference_isopycnal - y[iy]) / (y[iy + 1] - y[iy])
+                        doxy_tmp = z[iy] + (z[iy + 1] - z[iy]) * dist
+                        d_tmp = d[iy] + (d[iy + 1] - d[iy]) * dist
+                        doxy_isopycnal = np.append(doxy_isopycnal, doxy_tmp)
+                        depth_isopycnal_tmp2 = np.append(depth_isopycnal_tmp2, d_tmp)
+                        Date_Num_isopycnal = np.append(Date_Num_isopycnal, Date_Num[i])
+                if depth_isopycnal_tmp2.size > 0:
+                    depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, np.mean(depth_isopycnal_tmp2))
+
+        from scipy.interpolate import UnivariateSpline
+        f=UnivariateSpline(Date_Num_isopycnal, doxy_isopycnal,k=3,s=round(Date_Num_isopycnal.size*1.5))
+        f1 = UnivariateSpline(Date_Num_isopycnal, doxy_isopycnal,k=3,s=round(Date_Num_isopycnal.size*1.2))
+        plt.scatter(Date_Num_isopycnal, doxy_isopycnal)
+        plt.plot(Date_Num_isopycnal, f(Date_Num_isopycnal), 'r')
+        plt.plot(Date_Num_isopycnal, f1(Date_Num_isopycnal), 'b')
+
+
+
+
+
+
+
+
 
 depth_isopycnal=np.squeeze(np.zeros((reference_isopycnal_list.size,1)))
 slopes_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));slopes_ci_list=np.zeros((reference_isopycnal_list.size,2))
@@ -123,7 +178,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     parameter=doxy
     doxy_isopycnal=np.array([]);depth_isopycnal_tmp=np.array([]);Date_Num_isopycnal=np.array([])
     i=0
-    for i in range(0,doxy.shape[0]):
+    for i in range(0,parameter.shape[0]):
         sel = (parameter[i, :] != 99999) & (dens[i, :] != 99999)
         z=parameter[i,sel];y=dens[i,sel];d=depth[i,sel]
         #fig = plt.figure(1);plt.plot(y,-d);plt.show();

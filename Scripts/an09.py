@@ -7,6 +7,7 @@ import seawater as sw
 import gsw
 from pathlib import Path
 from itertools import compress
+import sys
 home = str(Path.home())
 #globals().clear()
 sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
@@ -107,8 +108,10 @@ dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
 #Here I start the loop on the different isopycnal values chosen for the study of the oxygen profile
-reference_isopycnal_list=np.r_[1026.8:1027.50001:0.01]
-reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:10]
+delta_rho=0.01
+delta_rho_plot=0.1 #every how many delta_rho range I do a plot
+reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
+reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:np.round(delta_rho_plot/delta_rho)]
 Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+127]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
 
 depth_isopycnal=np.squeeze(np.zeros((reference_isopycnal_list.size,1)))
@@ -120,6 +123,10 @@ for i_isop in range(0,reference_isopycnal_list.size):
     #Here, for each profile included between two dates (Date_Num_limit), I compute the oxygen concentration at a given
     #isopycnal, given by reference_isopycnal
     reference_isopycnal=reference_isopycnal_list[i_isop]
+    reference_isopycnal_down=reference_isopycnal-delta_rho/2
+    if reference_isopycnal_down<reference_isopycnal_list[0]:  reference_isopycnal_down=reference_isopycnal_list[0]
+    reference_isopycnal_up=reference_isopycnal+delta_rho/2
+    if reference_isopycnal_up > reference_isopycnal_list[-1]:  reference_isopycnal_up = reference_isopycnal_list[-1]
     parameter=doxy
     doxy_isopycnal=np.array([]);depth_isopycnal_tmp=np.array([]);Date_Num_isopycnal=np.array([])
     i=0
@@ -128,17 +135,26 @@ for i_isop in range(0,reference_isopycnal_list.size):
         z=parameter[i,sel];y=dens[i,sel];d=depth[i,sel]
         #fig = plt.figure(1);plt.plot(y,-d);plt.show();
         #plt.grid(color='k', linestyle='dashed', linewidth=0.5);plt.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an09/00_density_vs_depth_an09.pdf' % home);plt.close()
-        depth_isopycnal_tmp2 = np.array([])
-        for iy in range(0,y.size-1):
-            if np.logical_and(Date_Num_limit[0] <= Date_Num[i] <= Date_Num_limit[1], y[iy] <= reference_isopycnal < y[iy + 1]):
-                dist = (reference_isopycnal - y[iy]) / (y[iy + 1] - y[iy])
-                doxy_tmp= z[iy] + (z[iy + 1] - z[iy]) * dist
-                d_tmp= d[iy] + (d[iy + 1] - d[iy]) * dist
+        if Date_Num_limit[0] <= Date_Num[i] <= Date_Num_limit[1]:
+            sel_layer = (y >= reference_isopycnal_down) & (y < reference_isopycnal_up)
+            if np.sum(sel_layer)>0: #If sel_layer has some True values, then I take as the doxy of this isopycnal the mean of the doxy values in correspondence with these layers
+                doxy_tmp = np.mean(z[sel_layer])
+                depth_isopycnal_tmp2 = np.mean(d[sel_layer])
                 doxy_isopycnal = np.append(doxy_isopycnal, doxy_tmp)
-                depth_isopycnal_tmp2 = np.append(depth_isopycnal_tmp2, d_tmp)
                 Date_Num_isopycnal = np.append(Date_Num_isopycnal, Date_Num[i])
-        if depth_isopycnal_tmp2.size>0:
-            depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, np.mean(depth_isopycnal_tmp2))
+                depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, depth_isopycnal_tmp2)
+            else: # If no values are found, then it could be that (if delta_rho is very small) the range reference_isopycnal_down–reference_isopycnal_up falls totally between two isopycnal layers: In that case, I extrapolate the oxygen concentration at that depth
+                depth_isopycnal_tmp2 = np.array([])
+                for iy in range(0, y.size - 1):
+                    if y[iy] <= reference_isopycnal < y[iy + 1]:
+                        dist = (reference_isopycnal - y[iy]) / (y[iy + 1] - y[iy])
+                        doxy_tmp = z[iy] + (z[iy + 1] - z[iy]) * dist
+                        d_tmp = d[iy] + (d[iy + 1] - d[iy]) * dist
+                        doxy_isopycnal = np.append(doxy_isopycnal, doxy_tmp)
+                        depth_isopycnal_tmp2 = np.append(depth_isopycnal_tmp2, d_tmp)
+                        Date_Num_isopycnal = np.append(Date_Num_isopycnal, Date_Num[i])
+                if depth_isopycnal_tmp2.size > 0:
+                    depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, np.mean(depth_isopycnal_tmp2))
 
     #Here I interpolate, so that the slope gives me the respiration rate (in micromol/kg per day)
     (interpol,slpe_ci,_,signif,signif_label)=lin_fit(Date_Num_isopycnal,doxy_isopycnal)
@@ -175,7 +191,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     ax.set_xticklabels(xticklabels)
     plt.xticks(rotation=90, fontsize=12)
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an09/02_OxygenTimeSeries_isopycnal%0.1f_an09.pdf' % reference_isopycnal, dpi=200)
+    plt.savefig('../Plots/an09/02_OxygenTimeSeries_isopycnal%0.1f_deltarho_%0.2f_an09.pdf' % (reference_isopycnal,delta_rho), dpi=200)
     plt.close()
 
 #Here I plot the respiration rate vs the depth
@@ -215,6 +231,6 @@ ytext=depth_isopycnal[sel]
 text_s=list(compress(signif_label_list, sel))
 for i,j,k in zip(xtext,ytext,text_s):
     ax[1].text(i,j,k,va='top')
-fig.savefig('../Plots/an09/01_OxygenRespirationRate_vs_depth_an09.pdf', dpi=200)
+fig.savefig('../Plots/an09/01_OxygenRespirationRate_vs_depth_deltarho_%0.2f_an09.pdf' % delta_rho, dpi=200)
 plt.close()
 
