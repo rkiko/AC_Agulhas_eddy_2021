@@ -110,9 +110,10 @@ reference_isopycnal_list=np.r_[1026.4:1027.50001:0.01]
 reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:10]
 Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+127]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
 
-depth_isopycnal=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));
+depth_isopycnal=np.squeeze(np.zeros((reference_isopycnal_list.size,1)))
 slopes_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));slopes_ci_list=np.zeros((reference_isopycnal_list.size,2))
 signif_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));signif_label_list=[]
+R2_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));R_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)))
 i_isop=0
 for i_isop in range(0,reference_isopycnal_list.size):
     #Here, for each profile included between two dates (Date_Num_limit), I compute the oxygen concentration at a given
@@ -147,6 +148,8 @@ for i_isop in range(0,reference_isopycnal_list.size):
     slopes_ci_list[i_isop,:]=slpe_ci
     signif_list[i_isop]=signif
     signif_label_list.append(signif_label)
+    R2_list[i_isop] = interpol.rvalue ** 2
+    R_list[i_isop] = interpol.rvalue
 
     if np.sum(np.isin(reference_isopycnal_list_plot,i_isop))==0:    continue
     #Here I plot
@@ -176,21 +179,42 @@ for i_isop in range(0,reference_isopycnal_list.size):
 
 #Here I plot the respiration rate vs the depth
 width, height = 0.8, 0.7
-fig = plt.figure(1, figsize=(12, 8))
-ax = fig.add_axes([0.12, 0.2, width, height])
-plot1 = plt.plot(slopes_list, depth_isopycnal, 'r')#, linestyle='dashed')
-plot2 = plt.scatter(slopes_list, depth_isopycnal, c='black',s=5)
-ax.axvline(0, linestyle='-', color='k')
-plt.fill_betweenx(depth_isopycnal,slopes_ci_list[:,0],slopes_ci_list[:,1],facecolor='b',color='gray',alpha=0.5)
-plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.ylim(depth_isopycnal.min(),600)
-plt.gca().invert_yaxis()
-ax.set_xticks(np.r_[-0.1:0.101:0.02])
-plt.xlabel('Oxygen respiration rate ($\mu$mol kg$^{-1}$d$^{-1}$)', fontsize=18)
-plt.ylabel('Depth (m)', fontsize=18)
-plt.xticks(fontsize=18),plt.yticks(fontsize=18)
-plt.xlim(-0.1,0.1)
-plt.title('Oxygen Resp. Rate vs depth (computed between 2021-04-13 and 2021-08-18)', fontsize=18)
-plt.savefig('../Plots/an09/01_OxygenRespirationRate_vs_depth_an09.pdf', dpi=200)
+fig, ax = plt.subplots(1,2,figsize=(12,8), gridspec_kw={'width_ratios': [8, 1]},sharey=True)
+plt.subplots_adjust(wspace=0.1)
+#ax = fig.add_axes([0.12, 0.2, width, height])
+ax[0].plot(slopes_list, depth_isopycnal, 'r')#, linestyle='dashed')
+ax[0].scatter(slopes_list, depth_isopycnal, c='black',s=5)
+ax[0].axvline(0, linestyle='-', color='k')
+ax[0].fill_betweenx(depth_isopycnal,slopes_ci_list[:,0],slopes_ci_list[:,1],facecolor='b',color='gray',alpha=0.5)
+ax[0].grid(color='k', linestyle='dashed', linewidth=0.5)
+ax[0].set_ylim(depth_isopycnal.min(),600)
+ax[0].invert_yaxis()
+ax[0].set_xticks(np.r_[-0.1:0.101:0.02])
+ax[0].set_yticks(np.r_[150:601:50])
+ax[0].set_xlabel('Oxygen respiration rate ($\mu$mol kg$^{-1}$d$^{-1}$)', fontsize=18)
+ax[0].set_ylabel('Depth (m)', fontsize=18)
+ax[0].tick_params(labelsize=18)
+#set_xticklabels(fontsize=18),plt.yticks(fontsize=18)
+ax[0].set_xlim(-0.1,0.1)
+ax[0].set_title('O$_2$ resp. rate vs depth (2021-04-13 to 2021-08-18)', fontsize=18)
+ax[1].scatter(R2_list[R_list<0], depth_isopycnal[R_list<0], c='r',s=3)#, linestyle='dashed')
+ax[1].set_xlim(0,1.3)
+ax[1].axvline(1, linestyle='-', color='k')
+ax[1].set_xticks(np.array([0,0.5,1.]))
+ax[1].set_xticks(np.array([0.25,0.75]),minor=True)
+ax[1].set_yticks(np.r_[150:601:50])
+ax[1].grid(color='k', linestyle='dashed', linewidth=0.5,which='both')
+ax[1].set_ylim(depth_isopycnal.min(),600)
+ax[1].invert_yaxis()
+ax[1].set_xlabel('R$^2$', fontsize=18)
+ax[1].set_title('Fit significance', fontsize=12)
+sel=(R_list<0) & (depth_isopycnal< 600)
+xtext=np.squeeze(np.ones((1,depth_isopycnal[sel].size)))
+ytext=depth_isopycnal[sel]
+from itertools import compress
+text_s=list(compress(signif_label_list, sel))
+for i,j,k in zip(xtext,ytext,text_s):
+    ax[1].text(i,j,k)
+fig.savefig('../Plots/an09/01_OxygenRespirationRate_vs_depth_an09.pdf', dpi=200)
 plt.close()
 
