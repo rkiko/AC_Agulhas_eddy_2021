@@ -6,7 +6,7 @@ import netCDF4 as nc
 import seawater as sw
 import gsw
 import sys
-from itertools import compress
+from scipy.interpolate import UnivariateSpline,griddata
 from pathlib import Path
 home = str(Path.home())
 #globals().clear()
@@ -113,6 +113,8 @@ reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
 reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:10]
 Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+127]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
 
+depth_isopycnal=np.array([])
+doxy_RR=np.array([]);Date_Num_RR=np.array([])
 i_isop=0
 for i_isop in range(0,reference_isopycnal_list.size):
     #Here, for each profile included between two dates (Date_Num_limit), I compute the oxygen concentration at a given
@@ -151,125 +153,53 @@ for i_isop in range(0,reference_isopycnal_list.size):
                 if depth_isopycnal_tmp2.size > 0:
                     depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, np.mean(depth_isopycnal_tmp2))
 
-        from scipy.interpolate import UnivariateSpline
+    if doxy_isopycnal.size>3:
         f=UnivariateSpline(Date_Num_isopycnal, doxy_isopycnal,k=3,s=round(Date_Num_isopycnal.size*1.5))
-        f1 = UnivariateSpline(Date_Num_isopycnal, doxy_isopycnal,k=3,s=round(Date_Num_isopycnal.size*1.2))
-        plt.scatter(Date_Num_isopycnal, doxy_isopycnal)
-        plt.plot(Date_Num_isopycnal, f(Date_Num_isopycnal), 'r')
-        plt.plot(Date_Num_isopycnal, f1(Date_Num_isopycnal), 'b')
+        # f1 = UnivariateSpline(Date_Num_isopycnal, doxy_isopycnal,k=3,s=round(Date_Num_isopycnal.size*1.2))
+        # plt.scatter(Date_Num_isopycnal, doxy_isopycnal)
+        # plt.plot(Date_Num_isopycnal, f(Date_Num_isopycnal), 'r')
+        # plt.plot(Date_Num_isopycnal, f1(Date_Num_isopycnal), 'b')
+        depth_isopycnal_tmp=np.squeeze(np.ones((1,Date_Num_isopycnal.size))*np.mean(depth_isopycnal_tmp))
+        depth_isopycnal = np.append(depth_isopycnal, depth_isopycnal_tmp)
+        fD =f.derivative()
+        doxy_RR_tmp=fD(Date_Num_isopycnal)
+        doxy_RR = np.append(doxy_RR, doxy_RR_tmp)
+        Date_Num_RR = np.append(Date_Num_RR, Date_Num_isopycnal)
 
+# I define the x and y arrays for the contourf plot
+x_parameter = np.linspace(Date_Num_RR.min(), Date_Num_RR.max(), 100)
+y1_parameter = np.linspace(depth_isopycnal.min(), depth_isopycnal.max(), 50)
+# I interpolate
+x_parameter_g, y_parameter_g = np.meshgrid(x_parameter, y1_parameter)
+doxy_RR_interp_depth = griddata((Date_Num_RR, depth_isopycnal), doxy_RR,(x_parameter_g, y_parameter_g), method="nearest")
 
-
-
-
-
-
-
-
-depth_isopycnal=np.squeeze(np.zeros((reference_isopycnal_list.size,1)))
-slopes_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));slopes_ci_list=np.zeros((reference_isopycnal_list.size,2))
-signif_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));signif_label_list=[]
-R2_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));R_list=np.squeeze(np.zeros((reference_isopycnal_list.size,1)))
-i_isop=0
-for i_isop in range(0,reference_isopycnal_list.size):
-    #Here, for each profile included between two dates (Date_Num_limit), I compute the oxygen concentration at a given
-    #isopycnal, given by reference_isopycnal
-    reference_isopycnal=reference_isopycnal_list[i_isop]
-    parameter=doxy
-    doxy_isopycnal=np.array([]);depth_isopycnal_tmp=np.array([]);Date_Num_isopycnal=np.array([])
-    i=0
-    for i in range(0,parameter.shape[0]):
-        sel = (parameter[i, :] != 99999) & (dens[i, :] != 99999)
-        z=parameter[i,sel];y=dens[i,sel];d=depth[i,sel]
-        #fig = plt.figure(1);plt.plot(y,-d);plt.show();
-        #plt.grid(color='k', linestyle='dashed', linewidth=0.5);plt.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an09/00_density_vs_depth_an09.pdf' % home);plt.close()
-        depth_isopycnal_tmp2 = np.array([])
-        for iy in range(0,y.size-1):
-            if np.logical_and(Date_Num_limit[0] <= Date_Num[i] <= Date_Num_limit[1], y[iy] <= reference_isopycnal < y[iy + 1]):
-                dist = (reference_isopycnal - y[iy]) / (y[iy + 1] - y[iy])
-                doxy_tmp= z[iy] + (z[iy + 1] - z[iy]) * dist
-                d_tmp= d[iy] + (d[iy + 1] - d[iy]) * dist
-                doxy_isopycnal = np.append(doxy_isopycnal, doxy_tmp)
-                depth_isopycnal_tmp2 = np.append(depth_isopycnal_tmp2, d_tmp)
-                Date_Num_isopycnal = np.append(Date_Num_isopycnal, Date_Num[i])
-        if depth_isopycnal_tmp2.size>0:
-            depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, np.mean(depth_isopycnal_tmp2))
-
-    #Here I interpolate, so that the slope gives me the respiration rate (in micromol/kg per day)
-    (interpol,slpe_ci,_,signif,signif_label)=lin_fit(Date_Num_isopycnal,doxy_isopycnal)
-
-    depth_isopycnal[i_isop]=np.mean(depth_isopycnal_tmp)
-    if depth_isopycnal[0]==3: print(np.mean(depth_isopycnal_tmp),i_isop)
-    slopes_list[i_isop]=interpol.slope
-    slopes_ci_list[i_isop,:]=slpe_ci
-    signif_list[i_isop]=signif
-    signif_label_list.append(signif_label)
-    R2_list[i_isop] = interpol.rvalue ** 2
-    R_list[i_isop] = interpol.rvalue
-
-    if np.sum(np.isin(reference_isopycnal_list_plot,i_isop))==0:    continue
-    #Here I plot
-    width, height = 0.8, 0.7
-    fig = plt.figure(1, figsize=(12, 8))
-    ax = fig.add_axes([0.12, 0.2, width, height])
-    plot3 = plt.scatter(Date_Num_isopycnal, doxy_isopycnal, c='black')
-    plot4 = plt.plot(np.linspace(Date_Num_limit[0], Date_Num_limit[1], 20),
-                     np.linspace(Date_Num_limit[0] * interpol.slope + interpol.intercept,
-                                 Date_Num_limit[1] * interpol.slope + interpol.intercept, 20), c='black')
-    plt.text(Date_Num_limit[0]+(Date_Num_limit[1]-Date_Num_limit[0])*0.1,doxy_isopycnal.min()+(doxy_isopycnal.max()-doxy_isopycnal.min())*0.2,'R$^2$=%.2f, p=%0.2e' % (interpol.rvalue**2,interpol.pvalue), fontsize=16)
-    plt.ylabel('Dissolved oxygen ($\mu$mol/kg)', fontsize=18)
-    plt.title('Doxy time series along isopycnal %.1f kg/m$^3$, slope: %0.3f $\mu$mol/kg/d fit signif: %s' % (reference_isopycnal,interpol.slope,signif_label), fontsize=15)
-    # I set xticks
-    nxticks = 10
-    xticks = np.linspace(Date_Num_limit[0], Date_Num_limit[1], nxticks)
-    xticklabels = []
-    for i in xticks:
-        date_time_obj = date_reference + datetime.timedelta(days=i)
-        xticklabels.append(date_time_obj.strftime('%d %B'))
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xticklabels)
-    plt.xticks(rotation=90, fontsize=12)
-    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an09/02_OxygenTimeSeries_isopycnal%0.1f_an09.pdf' % reference_isopycnal, dpi=200)
-    plt.close()
-
-#Here I plot the respiration rate vs the depth
 width, height = 0.8, 0.7
-fig, ax = plt.subplots(1,2,figsize=(12,8), gridspec_kw={'width_ratios': [8, 1]},sharey=True)
-plt.subplots_adjust(wspace=0.1)
-#ax = fig.add_axes([0.12, 0.2, width, height])
-ax[0].plot(slopes_list, depth_isopycnal, 'r')#, linestyle='dashed')
-ax[0].scatter(slopes_list, depth_isopycnal, c='black',s=5)
-ax[0].axvline(0, linestyle='-', color='k')
-ax[0].fill_betweenx(depth_isopycnal,slopes_ci_list[:,0],slopes_ci_list[:,1],facecolor='b',color='gray',alpha=0.5)
-ax[0].grid(color='k', linestyle='dashed', linewidth=0.5)
-ax[0].set_ylim(depth_isopycnal.min(),600)
-ax[0].invert_yaxis()
-ax[0].set_xticks(np.r_[-0.1:0.101:0.02])
-ax[0].set_yticks(np.r_[150:601:50])
-ax[0].set_xlabel('Oxygen respiration rate ($\mu$mol kg$^{-1}$d$^{-1}$)', fontsize=18)
-ax[0].set_ylabel('Depth (m)', fontsize=18)
-ax[0].tick_params(labelsize=18)
-#set_xticklabels(fontsize=18),plt.yticks(fontsize=18)
-ax[0].set_xlim(-0.1,0.1)
-ax[0].set_title('O$_2$ resp. rate vs depth (2021-04-13 to 2021-08-18)', fontsize=18)
-ax[1].scatter(R2_list[R_list<0], depth_isopycnal[R_list<0], c='r',s=3)#, linestyle='dashed')
-ax[1].set_xlim(0,1.3)
-ax[1].axvline(1, linestyle='-', color='k')
-ax[1].set_xticks(np.array([0,0.5,1.]))
-ax[1].set_xticks(np.array([0.25,0.75]),minor=True)
-ax[1].set_yticks(np.r_[150:601:50])
-ax[1].grid(color='k', linestyle='dashed', linewidth=0.5,which='both')
-ax[1].set_ylim(depth_isopycnal.min(),600)
-ax[1].invert_yaxis()
-ax[1].set_xlabel('R$^2$', fontsize=18)
-ax[1].set_title('Fit significance', fontsize=12)
-sel=(R_list<0) & (depth_isopycnal< 600)
-xtext=np.squeeze(np.ones((1,depth_isopycnal[sel].size)))
-ytext=depth_isopycnal[sel]
-text_s=list(compress(signif_label_list, sel))
-for i,j,k in zip(xtext,ytext,text_s):
-    ax[1].text(i,j,k,va='top')
-fig.savefig('../Plots/an09/01_OxygenRespirationRate_vs_depth_an09.pdf', dpi=200)
+set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
+fig = plt.figure(1, figsize=(12,8))
+ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_RR.min(), Date_Num_RR.max()))
+doxy_RR_plot=doxy_RR_interp_depth.copy()
+doxy_RR_plot[doxy_RR_plot>0.0]=0.0
+doxy_RR_plot[doxy_RR_plot<-0.07]=-0.07
+ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, doxy_RR_plot,levels=20,cmap='Blues_r')#cmap='RdBu')#,vmin=-0.05)
+plt.gca().invert_yaxis()
+# draw colorbar
+cbar = plt.colorbar(plot2)
+cbar.ax.set_ylabel('Oxygen respiration rate ($\mu$mol kg$^{-1}$d$^{-1}$)', fontsize=18)
+plt.ylabel('Depth (m)', fontsize=18)
+#plt.title('%smm' % NP_sizeclass, fontsize=18)
+#I set xticks
+nxticks=10
+xticks=np.linspace(Date_Num_RR.min(),Date_Num_RR.max(),nxticks)
+xticklabels=[]
+for i in xticks:
+    date_time_obj = date_reference + datetime.timedelta(days=i)
+    xticklabels.append(date_time_obj.strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90,fontsize=12)
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an10/OxygenRespirationRate_vs_time_and_depth_an10.pdf',dpi=200)
 plt.close()
+
 
