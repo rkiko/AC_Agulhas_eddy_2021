@@ -111,7 +111,7 @@ dens[mask_dens]=dens_tmp+1000
 delta_rho=0.01
 reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
 reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:10]
-Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+127]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
+Date_Num_limit=np.array([Date_Num.min(),Date_Num.max()]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
 
 depth_isopycnal=np.array([])
 doxy_RR=np.array([]);Date_Num_RR=np.array([])
