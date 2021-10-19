@@ -8,9 +8,11 @@ from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 import seawater as sw
 import gsw
+import pickle
 from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
 filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_mip_map_flux_data.tsv' % home
 data=pd.read_csv(filename_ecopart, sep='\t', header=0)
@@ -98,24 +100,47 @@ x_filtered_g,y_filtered_g=np.meshgrid(x_filtered,y_filtered)
 # I interpolate
 parameter_interp = griddata((Date_Num_filtered,depth_filtered), parameter_filtered, (x_filtered_g, y_filtered_g), method="nearest")
 
+##########################################
+# I import the oxygen respiration rates calculated in an10
+##########################################
+a_file = open("%s/an10/data_an10.pkl" % storedir, "rb")
+data_an10 = pickle.load(a_file)
+x_doxy_RR=data_an10['x_parameter']
+y_doxy_RR=data_an10['y1_parameter']
+doxy_RR=data_an10['doxy_RR_interp_depth']
+##########################################
+##########################################
+
 ################################################################################################################
 ####### I plot
 ################################################################################################################
+# Parameters for the plot
 width, height = 0.8, 0.7
-set_ylim_lower, set_ylim_upper = depth_filtered.min(),600
+set_ylim_lower, set_ylim_upper = 200,600
+lim_min=-0.07
+lim_max=0.0
+nlevels=20
+
+################# Plot part: PARR as contourfilled, doxy_RR as contour lines
 fig = plt.figure(1, figsize=(12,8))
 ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
 parameter_plot=parameter_interp.copy()
-parameter_plot[parameter_plot>0.0]=0.0
-parameter_plot[parameter_plot<-0.07]=-0.07
-ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot,levels=20,cmap='Blues_r')
-plt.ylim(200,600)
+parameter_plot[parameter_plot>lim_max]=lim_max
+parameter_plot[parameter_plot<lim_min]=lim_min
+doxy_RR_plot=doxy_RR.copy()
+doxy_RR_plot[doxy_RR_plot>lim_max]=lim_max
+doxy_RR_plot[doxy_RR_plot<lim_min]=lim_min
+plot1 = plt.contourf(x_filtered, y_filtered, parameter_plot,levels=nlevels,cmap='Blues_r')
+plot2 = ax.contour(x_filtered, y_doxy_RR, doxy_RR_plot,levels=5,colors='black',linestyles='solid',linewidths=1)#,cmap='Blues_r')
+ax.clabel(plot2, inline=1, fontsize=10)
+plt.ylim(set_ylim_lower, set_ylim_upper)
 plt.gca().invert_yaxis()
 # draw colorbar
-cbar = plt.colorbar(plot2)
+cbar = plt.colorbar(plot1)
 cbar.ax.get_yticklabels()
 cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
 plt.ylabel('Depth (m)', fontsize=18)
+plt.title('PARR as contour filled, doxy RR as contour lines', fontsize=18)
 #I set xticks
 nxticks=10
 xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
@@ -128,6 +153,40 @@ plt.xticks(rotation=90,fontsize=12)
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an11/PARR_vs_time_and_depth_an11.pdf',dpi=200)
+plt.close()
+
+################# Plot part: doxy_RR as contourfilled, PARR as contour lines
+fig = plt.figure(1, figsize=(12,8))
+ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
+parameter_plot=parameter_interp.copy()
+parameter_plot[parameter_plot>lim_max]=lim_max
+parameter_plot[parameter_plot<lim_min]=lim_min
+doxy_RR_plot=doxy_RR.copy()
+doxy_RR_plot[doxy_RR_plot>lim_max]=lim_max
+doxy_RR_plot[doxy_RR_plot<lim_min]=lim_min
+plot1 = plt.contourf(x_filtered, y_doxy_RR, doxy_RR_plot,levels=nlevels,cmap='Blues_r')
+plot2 = ax.contour(x_filtered, y_filtered, parameter_plot,levels=5,colors='black',linestyles='solid',linewidths=1)#,cmap='Blues_r')
+ax.clabel(plot2, inline=1, fontsize=10)
+plt.ylim(set_ylim_lower, set_ylim_upper)
+plt.gca().invert_yaxis()
+# draw colorbar
+cbar = plt.colorbar(plot1)
+cbar.ax.get_yticklabels()
+cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
+plt.ylabel('Depth (m)', fontsize=18)
+plt.title('doxy RR as contour filled, PARR as contour lines', fontsize=18)
+#I set xticks
+nxticks=10
+xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+xticklabels=[]
+for i in xticks:
+    xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90,fontsize=12)
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an11/Doxy_RR_vs_time_and_depth_an11.pdf',dpi=200)
 plt.close()
 
 

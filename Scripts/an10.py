@@ -7,6 +7,7 @@ import seawater as sw
 import gsw
 import sys
 from scipy.interpolate import UnivariateSpline,griddata
+import pickle
 from pathlib import Path
 home = str(Path.home())
 #globals().clear()
@@ -202,4 +203,8 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an10/OxygenRespirationRate_vs_time_and_depth_an10.pdf',dpi=200)
 plt.close()
 
-
+# I save the data used for the plot
+dictionary_data = {"x_parameter": x_parameter, "y1_parameter": y1_parameter, "doxy_RR_interp_depth": doxy_RR_interp_depth}
+a_file = open("%s/an10/data_an10.pkl" % storedir, "wb")
+pickle.dump(dictionary_data, a_file)
+a_file.close()
