@@ -64,4 +64,11 @@ value for all the profiles, and by doing the mean value.
 \
 an10
 
-I compute the oxygen variation at different density and over time.
+I compute the oxygen respiration rate at different densities and over time from the oxygen variation.
+
+
+\
+an11
+
+I take the PARR (particle associated respiration rate) already computed and (i) I transform in in micromol/kg/day; 
+(ii) I plot its time series as a function of the depth
