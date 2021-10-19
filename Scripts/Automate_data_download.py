@@ -11,4 +11,5 @@ if __name__ == '__main__':
     os.system("python Convert_raw_particle_data_to_pangaea_style_dataset.py")
     os.system("python Append_BGC_variables.py")
     os.system("python Calculate_particle_diagnostics.py")
+    os.system("python Append_BGC_variables_to_diagnostics.py")
 
