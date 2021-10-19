@@ -72,3 +72,16 @@ an11
 
 I take the PARR (particle associated respiration rate) already computed and (i) I transform in in micromol/kg/day; 
 (ii) I plot its time series as a function of the depth
+
+
+\
+an12
+
+I calculate the anomaly of chlorophyll along the BGC Argo float trajectory. For each profile/point of the Argo float
+I extract (ia) the mean chl value in the mixed layer (iia) the maximum chlorophyll value in the mixed layer (iiia) the mean chlorophyll
+value extracted by satellite inside the eddy maximal velocity contour (iva) and the maximum chlorophyll
+value extracted by satellite inside the eddy maximal velocity contour; these values represent the local/eddy chlorophyll
+content. Then, we fix a fixed circle centered at the location of the eddy, with radius equal to n (n at least 3) times the eddy radius, and,
+for this circle, we extract (ib) the mean chlorophyll value inside the circle, and (iib) the mean chlorophyll value inside the circle
+with the exclusion of the region covered by the eddy. The two latter values are considered as the environment chlorophyll content.
+Then, we make the difference between the 4*2=8 combinations of these quantities and we obtain 8 chlorophyll anomalies.
