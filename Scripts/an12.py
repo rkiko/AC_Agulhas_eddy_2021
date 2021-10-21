@@ -1,165 +1,233 @@
-import calendar
-import numpy as np
 import os
-import pandas as pd
-from datetime import date,datetime
 import matplotlib.pyplot as plt
-from scipy.interpolate import griddata
-from scipy.signal import savgol_filter
+import numpy as np
+import datetime
+import netCDF4 as nc
 import seawater as sw
+import gsw
+import pandas as pd
+from scipy.signal import savgol_filter
+from scipy.interpolate import griddata
 from pathlib import Path
 home = str(Path.home())
-os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+#globals().clear()
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
+actualdir=os.getcwd()
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
-filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_mip_map_flux_data.tsv' % home
-data=pd.read_csv(filename_ecopart, sep='\t', header=0)
-RAWfilename=data.RAWfilename
+#######################################################################################################################
+############### Loading Data
+#######################################################################################################################
 
-#I select only the profiles data, which contain 'ASC' in the filename, and I exclude the parkings
-ct=0
-sel_filename = [True for i in range(RAWfilename.size)]
-for a in RAWfilename:
-    if a.split('-')[-1].split('_')[0] == 'ASC':
-        sel_filename[ct]=True
-    else:
-        sel_filename[ct] = False
-    ct+=1
+#######################################################################
+# I load the Coriolis data
+#######################################################################
 
-# I extract the data
-lon=np.array(data['Longitude'][sel_filename])
-lat=np.array(data['Latitude'][sel_filename])
-Date_Time=np.array(data['Date_Time'][sel_filename])
-pressure=np.array(data['Pressure [dbar]'][sel_filename])
-Flux=np.array(data['Flux_mgC_m2'][sel_filename])
-MiP_abund=np.array(data['MiP_abun'][sel_filename])
-MaP_abund=np.array(data['MaP_abun'][sel_filename])
-MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
-MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
+# To update the data, please run:
+# os.system("python Download_BGC_variables.py")
+filename='6903095_Sprof.nc'
 
-# I convert the dates to float values (in seconds from 1970 1 1)
-Date_Num=np.r_[0:Flux.size]
-for i in Date_Num:
-    date_time_obj = datetime.strptime(Date_Time[i], '%Y-%m-%dT%H:%M:%S')
-    Date_Num[i] = calendar.timegm(date_time_obj.timetuple())
-    #datetime.utcfromtimestamp(Date_Num[i])
+ds = nc.Dataset('%s/%s' % (storedir,filename))
+lon=np.array(ds.variables['LONGITUDE'])
+lat=np.array(ds.variables['LATITUDE'])
+
+Date_Num=np.array(ds.variables['JULD'])
+date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
+Date_Vec=np.zeros([Date_Num.size,6])
+for i in range(0,Date_Num.size):
+    date_time_obj = date_reference + datetime.timedelta(days=Date_Num[i])
+    Date_Vec[i,0]=date_time_obj.year;Date_Vec[i,1]=date_time_obj.month;Date_Vec[i,2]=date_time_obj.day
+    Date_Vec[i,3]=date_time_obj.hour;Date_Vec[i,4]=date_time_obj.minute;Date_Vec[i,5]=date_time_obj.second
+
+Date_Vec=Date_Vec.astype(int)
+
+#I load the variables
+temp=np.array(ds.variables['TEMP_ADJUSTED'])
+pres=np.array(ds.variables['PRES_ADJUSTED'])
+psal=np.array(ds.variables['PSAL_ADJUSTED'])
+chla=np.array(ds.variables['CHLA_ADJUSTED'])
+
+#If adjusted values are not available yet, I take the non adjusted ones
+if np.sum(temp==99999)==temp.size:
+    print('Taking non adjusted temperature')
+    temp = np.array(ds.variables['TEMP'])
+if np.sum(pres==99999)==pres.size:
+    print('Taking non adjusted pressure')
+    pres = np.array(ds.variables['PRES'])
+if np.sum(psal==99999)==psal.size:
+    print('Taking non adjusted salinity')
+    psal = np.array(ds.variables['PSAL'])
+if np.sum(chla==99999)==chla.size:
+    print('Taking non adjusted chlorophyll-a')
+    chla = np.array(ds.variables['CHLA'])
 
 #I tranform the pressure to depth
-mask_depth=pressure!=99999 #I select only valid values
-lat_tmp=lat[mask_depth]
-pressure_tmp=pressure[mask_depth]
-depth_tmp=sw.eos80.dpth(pressure_tmp, lat_tmp)
-depth=np.ones(pressure.shape)*99999
+mask_depth=pres!=99999 #I select only valid values
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_depth]
+pres_tmp=pres[mask_depth]
+depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
+depth=np.ones(temp.shape)*99999
 depth[mask_depth]=depth_tmp
 
-list_dates=np.unique(Date_Num)
-#I start the loop on the different parameters I plot
-parameter=Flux
-ipar=1
-parameter_shortname_list=['Flux','MiP_abund','MaP_abund','MiP_POC','MaP_POC']
-parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$)','MaP abundance (# L$^{-1}$)'
-    ,'MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)']
-max_parameter_list=np.array([6,65,0.6,1.15,0.012])
+#I compute the potential density: for that, I need absolute salinity and conservative temperature, so I transform
+#salinity and temperature first
+mask_dens=np.logical_and(pres!=99999,temp!=99999,psal!=99999) # I exclude the points with value = 99999
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lon_tmp=np.tile(lon,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_dens]
+lon_tmp=lon_tmp[mask_dens]
+pres_tmp=pres[mask_dens]
+psal_tmp=psal[mask_dens]
+temp_tmp=temp[mask_dens]
+abs_psal_tmp=gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp) # I compute absolute salinity
+cons_tmp=gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
+dens_tmp=gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+dens=np.ones(temp.shape)*99999
+dens[mask_dens]=dens_tmp+1000
+
+#######################################################################
+# I load the eddy center and contours
+#######################################################################
+filename_eddyData='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_data_TOEddies.csv' % home
+filename_xVMax='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_TOEddies_Xcon_max.csv' % home
+filename_yVMax='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_TOEddies_Ycon_max.csv' % home
+data_eddy=pd.read_csv(filename_eddyData, sep=',', header=0)
+data_xVMax=pd.read_csv(filename_xVMax, sep=',', header=None)
+data_yVMax=pd.read_csv(filename_yVMax, sep=',', header=None)
+lonEddy=data_eddy['x_centroid']
+latEddy=data_eddy['y_centroid']
+radius_Vmax=data_eddy['Rmax']
+lonVmax=data_xVMax.values[:,:]
+latVmax=data_yVMax.values[:,:]
+Date_Num_Vmax=data_eddy['date_num']
+
+#######################################################################################################################
+############### Calculating Chlorophyll inside the eddy
+#######################################################################################################################
+
+#######################################################################
+# Calculating Chlorophyll along the BGC Argo float trajectory
+#######################################################################
+
+chla_float_mean=np.squeeze(np.zeros((1,chla.shape[0])))
+chla_float_max=np.squeeze(np.zeros((1,chla.shape[0])))
+
+for i in range(0,chla.shape[0]):
+    chla_tmp=chla[i,:]
+    sel_chla=chla_tmp!=99999
+    sel_in_ML=depth[i,:]
+    chla_tmp=chla_tmp[sel_chla]
+    chla_float_mean[i]=np.mean(chla_tmp)
+    chla_float_max[i]=np.max(chla_tmp)
+
+#######################################################################
+# Calculating Chlorophyll inside the eddy
+#######################################################################
+
+
+
+
+
+
+
+parameter=temp
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','Particle backscattering (10$^5$ m$^{-1}$)']
+parameter_shortname_list=['temp','psal','chla','doxy','bbp700']
+ipar=3
 for ipar in range(0,parameter_ylabel_list.__len__()):
-    if ipar==0: parameter=Flux
-    elif ipar==1:   parameter=MiP_abund
-    elif ipar == 2: parameter=MaP_abund
-    elif ipar == 3: parameter=MiP_POC
-    elif ipar == 4: parameter=MaP_POC
+    if ipar==0: parameter=temp
+    elif ipar==1:   parameter=psal
+    elif ipar == 2: parameter=chla
+    elif ipar == 3: parameter=doxy
+    elif ipar == 4: parameter=bbp700
 
-    # I filter the flux prophiles
-    parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([])
+    #I filter the profiles
+    parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
     i=0
-    for i in range(0,list_dates.size):
-        sel=Date_Num==list_dates[i];x=Date_Num[sel];y=depth[sel]
-        z=parameter[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
-        if sum(sel2)>0:
-            z=savgol_filter(z,5,1)
-            parameter_filtered = np.concatenate((parameter_filtered, z))
-            Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
-            depth_filtered = np.concatenate((depth_filtered, y2))
+    for i in range(0,parameter.shape[0]):
+        sel=(parameter[i,:]!=99999) & (depth[i,:]!=99999) & (dens[i,:]!=99999)
+        if sum(sel) > 0:
+            z=parameter[i,sel];x=np.ones(z.shape)*Date_Num[i];y1=depth[i,sel];y2=dens[i,sel];y3=pres[i,sel]
+            z = savgol_filter(z, 5, 1)
+            parameter_filtered = np.concatenate((parameter_filtered, z));Date_Num_parameter = np.concatenate((Date_Num_parameter, x))
+            depth_parameter = np.concatenate((depth_parameter, y1));dens_parameter = np.concatenate((dens_parameter, y2));pressure_parameter = np.concatenate((pressure_parameter, y3))
 
+    parameter_filtered[parameter_filtered<0]=0
     # I define the x and y arrays for the contourf plot
-    x_filtered = np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),100)
-    y_filtered = np.linspace(depth_filtered.min(),depth_filtered.max(),100)
-    x_filtered_g,y_filtered_g=np.meshgrid(x_filtered,y_filtered)
+    x_parameter = np.linspace(Date_Num_parameter.min(),Date_Num_parameter.max(),100)
+    y1_parameter = np.linspace(depth_parameter.min(),depth_parameter.max(),50)
+    y2_parameter = np.linspace(dens_parameter.min(),dens_parameter.max(),50)
+    y3_parameter = np.linspace(pressure_parameter.min(),pressure_parameter.max(),50)
     # I interpolate
-    parameter_interp = griddata((Date_Num_filtered,depth_filtered), parameter_filtered, (x_filtered_g, y_filtered_g), method="nearest")
+    x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y1_parameter)
+    parameter_interp_depth = griddata((Date_Num_parameter,depth_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
+    x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y2_parameter)
+    parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
 
-    ################################################################################################################
-    ####### I plot
-    ################################################################################################################
+
+    ########################################################
+    ####### I plot: versus depth
+    ########################################################
+    if ipar==4:
+        parameter_interp_depth[parameter_interp_depth > 2*10**(-3)] = 2*10**(-3)
+
     width, height = 0.8, 0.7
-    set_ylim_lower, set_ylim_upper = depth_filtered.min(),600
+    set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
     fig = plt.figure(1, figsize=(12,8))
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
-    parameter_plot=parameter_interp
-    parameter_plot[parameter_plot<0]=0
-    parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
-    ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
+    ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
     plt.gca().invert_yaxis()
     # draw colorbar
     cbar = plt.colorbar(plot2)
-    cbar.ax.get_yticklabels()
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
-    #I set ticks of the colorbar
-    # ncbarticks=6
-    # cbarticks=np.linspace(parameter_plot.min(),np.log(max_parameter_list[ipar]),ncbarticks)
-    # cbarticklabels=[]
-    # for i in cbarticks:
-    #     cbarticklabels.append('%d' % np.round(np.e**i))
-    # cbar.set_ticks(cbarticks)
-    # cbar.set_ticklabels(cbarticklabels)
     plt.ylabel('Depth (m)', fontsize=18)
+    #plt.title('%smm' % NP_sizeclass, fontsize=18)
     #I set xticks
     nxticks=10
     xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
     xticklabels=[]
     for i in xticks:
-        xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+        date_time_obj = date_reference + datetime.timedelta(days=i)
+        xticklabels.append(date_time_obj.strftime('%d %B'))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     plt.xticks(rotation=90,fontsize=12)
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an08/TimeSeries%02dA%s_an08.pdf' % (ipar,parameter_shortname_list[ipar]),dpi=200)
+    plt.savefig('../Plots/an05/TimeSeries_%s_vs_01depth_an05.pdf' % parameter_shortname_list[ipar],dpi=200)
     plt.close()
 
+    ########################################################
+    ####### I plot: versus density
+    ########################################################
+    if ipar==3:
+        parameter_interp_dens[parameter_interp_dens > 255] = 255
+    if ipar==4:
+        parameter_interp_dens[parameter_interp_dens > 2*10**(-3)] = 2*10**(-3)
 
-
-    ####### I do the interpolate contourf up to the maximum depth
     width, height = 0.8, 0.7
-    set_ylim_lower, set_ylim_upper = depth_filtered.min(),1000
+    set_ylim_lower, set_ylim_upper = y2_parameter.min(), y2_parameter.max()
     fig = plt.figure(1, figsize=(12,8))
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
-    parameter_plot=parameter_interp
-    parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
-    ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
+    ax_1 = plot2 = plt.contourf(x_parameter,y2_parameter, parameter_interp_dens)
     plt.gca().invert_yaxis()
     # draw colorbar
     cbar = plt.colorbar(plot2)
-    cbar.ax.get_yticklabels()
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
-    #I set ticks of the colorbar
-    # ncbarticks=6
-    # cbarticks=np.linspace(parameter_plot.min(),np.log(max_parameter_list[ipar]),ncbarticks)
-    # cbarticklabels=[]
-    # for i in cbarticks:
-    #     cbarticklabels.append('%d' % np.round(np.e**i))
-    # cbar.set_ticks(cbarticks)
-    # cbar.set_ticklabels(cbarticklabels)
-    plt.ylabel('Pressure (dbar)', fontsize=18)
+    plt.ylabel('Density (kg/m$^3$)', fontsize=18)
+    #plt.title('%smm' % NP_sizeclass, fontsize=18)
     #I set xticks
     nxticks=10
     xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
     xticklabels=[]
     for i in xticks:
-        xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+        date_time_obj = date_reference + datetime.timedelta(days=i)
+        xticklabels.append(date_time_obj.strftime('%d %B'))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     plt.xticks(rotation=90,fontsize=12)
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an08/TimeSeries%02dB%s_an08.pdf' % (ipar,parameter_shortname_list[ipar]),dpi=200)
+    plt.savefig('../Plots/an05/TimeSeries_%s_vs_02dens_an05.pdf' % parameter_shortname_list[ipar],dpi=200)
     plt.close()
-
-
