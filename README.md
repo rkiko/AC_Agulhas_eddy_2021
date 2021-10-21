@@ -85,3 +85,8 @@ content. Then, we fix a fixed circle centered at the location of the eddy, with 
 for this circle, we extract (ib) the mean chlorophyll value inside the circle, and (iib) the mean chlorophyll value inside the circle
 with the exclusion of the region covered by the eddy. The two latter values are considered as the environment chlorophyll content.
 Then, we make the difference between the 4*2=8 combinations of these quantities and we obtain 8 chlorophyll anomalies.
+
+\
+an12_plot
+
+Script in order to plot the data computed and saved with an12

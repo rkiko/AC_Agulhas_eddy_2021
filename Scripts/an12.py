@@ -10,9 +10,9 @@ import pickle
 from paruvpy import mixed_layer_depth
 from CallCppy import Chl_download
 from CallCppy import ellipsoid
-from pathlib import Path
 from scipy.interpolate import griddata
 from matplotlib import path
+from pathlib import Path
 home = str(Path.home())
 #globals().clear()
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
@@ -204,7 +204,7 @@ for i in range(0,Date_Num_Eddy.size):
 
 dictionary_data = {"chla_float_mean": chla_float_mean, "chla_float_max": chla_float_max, "chl_inside_mean": chl_inside_mean,
                    "chl_inside_max": chl_inside_max, "chl_outside_mean": chl_outside_mean, "chl_inside_and_outside_mean": chl_inside_and_outside_mean,
-                   "Date_Num_Eddy": Date_Num_Eddy, "lonEddy": lonEddy, "latEddy": latEddy,
+                   "Date_Num_Eddy": Date_Num_Eddy, "lonEddy": lonEddy, "latEddy": latEddy, "DateTime_Eddy": DateTime_Eddy,
                    "lon_float": lon, "lat_float": lat, "Date_Num_float": Date_Num, "Date_Vec_float": Date_Vec}
 a_file = open("%s/an12/data_an12.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
