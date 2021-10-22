@@ -160,7 +160,10 @@ for i in range(0,Date_Num_Eddy.size):
     lat1_Chl_Down=latEddy[i]+radius_frame+0.1
     day0 =  np.array((DateTime_Eddy[i].year,DateTime_Eddy[i].month,DateTime_Eddy[i].day))
     #### I download and load the chlorophyll data
-    chl_filename,chl_name,lonname,latname=Chl_download(day0, lonmin=lon0_Chl_Down, lonmax=lon1_Chl_Down, latmin=lat0_Chl_Down, latmax=lat1_Chl_Down)
+    if day0[0]==2021:
+        chl_filename,chl_name,lonname,latname=Chl_download(day0, nrt='Yes')
+    else:
+        chl_filename,chl_name,lonname,latname=Chl_download(day0, lonmin=lon0_Chl_Down, lonmax=lon1_Chl_Down, latmin=lat0_Chl_Down, latmax=lat1_Chl_Down)
     ds = nc.Dataset(chl_filename)
     lon_chl = np.squeeze(np.array(ds.variables[lonname]))
     lat_chl = np.squeeze(np.array(ds.variables[latname]))
