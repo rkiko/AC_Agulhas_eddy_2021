@@ -131,16 +131,35 @@ dens_tmp=gsw.density.sigma0(abs_psal_tmp, cons_tmp)
 dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
+# I transform the bbp700 to small POC (sPOC)
+from paruvpy import bbp700toPOC
+sPOC=bbp700.copy()*0+99999
+i=0
+for i in range(0,bbp700.shape[0]):
+    bbp700tmp=bbp700[i,:]
+    depth_tmp=depth[i,:]
+    temp_tmp=temp[i,:]
+    # I exclude nan values
+    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)
+    bbp700tmp=bbp700tmp[sel]
+    depth_tmp=depth_tmp[sel]
+    temp_tmp=temp_tmp[sel]
+    # I convert to small POC (sPOC) and I set to 0 values <0
+    sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
+    sPOC_tmp[sPOC_tmp<0]=0
+    sPOC[i,sel]=sPOC_tmp
+
+# I define the parameters list and I start the loop on each of them
 parameter=temp
-parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','Particle backscattering (10$^5$ m$^{-1}$)']
-parameter_shortname_list=['temp','psal','chla','doxy','bbp700']
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','bbp POC (mgC $m^{-3}$)']
+parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC']
 ipar=3
 for ipar in range(0,parameter_ylabel_list.__len__()):
-    if ipar==0: parameter=temp
-    elif ipar==1:   parameter=psal
-    elif ipar == 2: parameter=chla
-    elif ipar == 3: parameter=doxy
-    elif ipar == 4: parameter=bbp700
+    if ipar==0: parameter=temp.copy()
+    elif ipar==1:   parameter=psal.copy()
+    elif ipar == 2: parameter=chla.copy()
+    elif ipar == 3: parameter=doxy.copy()
+    elif ipar == 4: parameter=sPOC.copy()
 
     #I filter the profiles
     parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
@@ -170,7 +189,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ####### I plot: versus depth
     ########################################################
     if ipar==4:
-        parameter_interp_depth[parameter_interp_depth > 2*10**(-3)] = 2*10**(-3)
+        parameter_interp_depth[parameter_interp_depth > 40] = 40
 
     width, height = 0.8, 0.7
     set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
@@ -204,7 +223,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==3:
         parameter_interp_dens[parameter_interp_dens > 255] = 255
     if ipar==4:
-        parameter_interp_dens[parameter_interp_dens > 2*10**(-3)] = 2*10**(-3)
+        parameter_interp_dens[parameter_interp_dens > 40] = 40
 
     width, height = 0.8, 0.7
     set_ylim_lower, set_ylim_upper = y2_parameter.min(), y2_parameter.max()
