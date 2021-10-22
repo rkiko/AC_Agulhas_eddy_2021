@@ -60,11 +60,11 @@ parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$
     ,'MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)']
 max_parameter_list=np.array([6,65,0.6,1.15,0.012])
 for ipar in range(0,parameter_ylabel_list.__len__()):
-    if ipar==0: parameter=Flux
-    elif ipar==1:   parameter=MiP_abund
-    elif ipar == 2: parameter=MaP_abund
-    elif ipar == 3: parameter=MiP_POC
-    elif ipar == 4: parameter=MaP_POC
+    if ipar==0: parameter=Flux.copy()
+    elif ipar==1:   parameter=MiP_abund.copy()
+    elif ipar == 2: parameter=MaP_abund.copy()
+    elif ipar == 3: parameter=MiP_POC.copy()
+    elif ipar == 4: parameter=MaP_POC.copy()
 
     # I filter the flux prophiles
     parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([])
