@@ -55,12 +55,15 @@ chla=np.array(ds.variables['CHLA_ADJUSTED'])
 if np.sum(temp==99999)==temp.size:
     print('Taking non adjusted temperature')
     temp = np.array(ds.variables['TEMP'])
+
 if np.sum(pres==99999)==pres.size:
     print('Taking non adjusted pressure')
     pres = np.array(ds.variables['PRES'])
+
 if np.sum(psal==99999)==psal.size:
     print('Taking non adjusted salinity')
     psal = np.array(ds.variables['PSAL'])
+
 if np.sum(chla==99999)==chla.size:
     print('Taking non adjusted chlorophyll-a')
     chla = np.array(ds.variables['CHLA'])
@@ -150,7 +153,7 @@ chl_outside_mean=np.squeeze(np.zeros((1,Date_Num_Eddy.size)))
 chl_inside_and_outside_mean=np.squeeze(np.zeros((1,Date_Num_Eddy.size)))
 
 #### I start the loop on every day for which I have an eddy contour
-i=0
+i=73
 for i in range(0,Date_Num_Eddy.size):
     #### I define the frame around the eddy center, for which I want to download the satellite chl data
     radius_frame_lon=radius_frame / np.cos(lonEddy[i]*np.pi/180)
@@ -164,10 +167,25 @@ for i in range(0,Date_Num_Eddy.size):
         chl_filename,chl_name,lonname,latname=Chl_download(day0, nrt='Yes')
     else:
         chl_filename,chl_name,lonname,latname=Chl_download(day0, lonmin=lon0_Chl_Down, lonmax=lon1_Chl_Down, latmin=lat0_Chl_Down, latmax=lat1_Chl_Down)
+
     ds = nc.Dataset(chl_filename)
     lon_chl = np.squeeze(np.array(ds.variables[lonname]))
     lat_chl = np.squeeze(np.array(ds.variables[latname]))
     chl_tmp = np.squeeze(np.array(ds.variables[chl_name]))
+    # If the Chl_download is nrt, then it downloads the chlorophyll at global level. Therefore, here I select only the part of the chlorophyll matrix which I need
+    if day0[0] == 2021:
+        a=lon_chl-lon0_Chl_Down
+        idx_lon0=int(np.where(a==a[a<0].max())[0])
+        a=lon_chl-lon1_Chl_Down
+        idx_lon1=int(np.where(a==a[a>0].min())[0])
+        a=lat_chl-lat0_Chl_Down
+        idx_lat0=int(np.where(a==a[a<0].max())[0])
+        a=lat_chl-lat1_Chl_Down
+        idx_lat1=int(np.where(a==a[a>0].min())[0])
+        lon_chl=lon_chl[idx_lon0:idx_lon1+1] #The longitude goes from -180 to +180
+        lat_chl=lat_chl[idx_lat1:idx_lat0+1] #The latitude goes from +90 to -90
+        chl_tmp=chl_tmp[idx_lat1:idx_lat0+1,idx_lon0:idx_lon1+1]
+
     #### I select the eddy maximal velocity contour for the i-th day (excluding the nan values)
     lonVmaxtmp = lonVmax[:,i]
     latVmaxtmp = latVmax[:,i]
