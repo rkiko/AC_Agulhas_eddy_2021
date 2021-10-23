@@ -162,12 +162,14 @@ for i in range(0,Date_Num_Eddy.size):
     lat0_Chl_Down=latEddy[i]-radius_frame-0.1
     lat1_Chl_Down=latEddy[i]+radius_frame+0.1
     day0 =  np.array((DateTime_Eddy[i].year,DateTime_Eddy[i].month,DateTime_Eddy[i].day))
+    print('Starting download %s' % DateTime_Eddy[i].__str__())
     #### I download and load the chlorophyll data
     if day0[0]==2021:
         chl_filename,chl_name,lonname,latname=Chl_download(day0, nrt='Yes')
     else:
         chl_filename,chl_name,lonname,latname=Chl_download(day0, lonmin=lon0_Chl_Down, lonmax=lon1_Chl_Down, latmin=lat0_Chl_Down, latmax=lat1_Chl_Down)
 
+    print('Finished download %s' % DateTime_Eddy[i].__str__())
     ds = nc.Dataset(chl_filename)
     lon_chl = np.squeeze(np.array(ds.variables[lonname]))
     lat_chl = np.squeeze(np.array(ds.variables[latname]))
@@ -206,6 +208,7 @@ for i in range(0,Date_Num_Eddy.size):
     lon_chl_g, lat_chl_g = np.meshgrid(lon_chl, lat_chl)
     lon_chl_g, lat_chl_g, chl_tmp = np.squeeze(lon_chl_g.reshape(lon_chl_g.size, 1)), np.squeeze(lat_chl_g.reshape(lat_chl_g.size, 1)), np.squeeze(chl_tmp.reshape(chl_tmp.size, 1))
     chl_interp = griddata((lon_chl_g, lat_chl_g), chl_tmp, (lons, lats))
+    print('Finished interpolation %s' % DateTime_Eddy[i].__str__())
     #### I exclude the nan values (which, in chl_tmp, appear as -999 values)
     sel = chl_interp>=0
     chl_interp = chl_interp[sel]
