@@ -154,7 +154,7 @@ chl_inside_and_outside_mean=np.squeeze(np.zeros((1,Date_Num_Eddy.size)))
 
 #### I start the loop on every day for which I have an eddy contour
 i=73
-for i in range(72,lonVmax.shape[1])#Date_Num_Eddy.size):
+for i in range(72,78)#lonVmax.shape[1])#Date_Num_Eddy.size):
     #### I define the frame around the eddy center, for which I want to download the satellite chl data
     radius_frame_lon=radius_frame / np.cos(lonEddy[i]*np.pi/180)
     lon0_Chl_Down=lonEddy[i]-radius_frame_lon-0.1
@@ -174,7 +174,7 @@ for i in range(72,lonVmax.shape[1])#Date_Num_Eddy.size):
     lon_chl = np.squeeze(np.array(ds.variables[lonname]))
     lat_chl = np.squeeze(np.array(ds.variables[latname]))
     chl_tmp = np.squeeze(np.array(ds.variables[chl_name]))
-    
+
     # If the Chl_download is nrt, then it downloads the chlorophyll at global level. Therefore, here I select only the part of the chlorophyll matrix which I need
     if day0[0] == 2021:
         a=lon_chl-lon0_Chl_Down
