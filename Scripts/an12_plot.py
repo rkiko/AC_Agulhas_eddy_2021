@@ -81,30 +81,42 @@ anom_maxF_meanAll=chla_float_max-chl_inside_and_outside_mean_4float
 
 # Parameters for the plot
 width, height = 0.8, 0.7
-window_margin1=5
-set_xlim_lower, set_xlim_upper = lon_float.min()-window_margin1,lon_float.max()+window_margin1
-set_ylim_lower, set_ylim_upper = lat_float.min()-window_margin1,lat_float.max()+window_margin1
+window_margin1=3
+set_xlim_lower, set_xlim_upper = min(lonEddy.min(),lon_float.min())-window_margin1,max(lon_float.max(),lonEddy.max())+window_margin1
+set_ylim_lower, set_ylim_upper = min(latEddy.min(),lat_float.min())-window_margin1,max(lat_float.max(),latEddy.max())+window_margin1
+titles_list=['mean chl BGC Argo vs chl outside eddy','max chl BGC Argo vs chl outside eddy','mean chl BGC Argo vs chl all region','max chl BGC Argo vs chl all region']
+labels_list=['meanFloat_vs_outside','maxFloat_vs_outside','meanFloat_vs_allRegion','maxFloat_vs_allRegion']
 
 ################# Plot part
-fig = plt.figure(1, figsize=(12,8))
-#ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(set_xlim_lower, set_xlim_upper))
-ax = plt.axes(projection=cartopy.crs.PlateCarree())
-ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
-ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
-#ax.coastlines('10m')
-plot1=plt.scatter(lon_float,lat_float,c=anom_meanF_meanOut,cmap='RdBu_r')
-cbar = plt.colorbar(plot1)
-plt.title('Chl anomaly: mean chl BGC Argo vs chl outside eddy', fontsize=18)
-cbar.ax.set_ylabel('Chlorophyll anomaly (mg/m$^3$)', fontsize=18)
-gl = ax.gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True, linestyle='--', alpha=0.5)
-gl.xlabel_style = {'fontsize': 18}
-gl.ylabel_style = {'fontsize': 18}
-ax.set_xlabel('Longitude', fontsize=18)
-plt.ylabel('Latitude', fontsize=18)
-gl.xlabels_top = False
-gl.ylabels_right = False
-fig.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an12/Chl_anom01_mean_vs_outside_an12.pdf' % (home))
-plt.close()
+# I do the loop on the 4 plots
+i_anom=0
+for i_anom in range(0,titles_list.__len__()):
+    if i_anom == 0: anom=anom_meanF_meanOut
+    elif i_anom == 1:   anom=anom_maxF_meanOut
+    elif i_anom == 2:   anom=anom_meanF_meanAll
+    elif i_anom == 3:   anom=anom_maxF_meanAll
+
+    fig = plt.figure(1, figsize=(12,8))
+    #ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(set_xlim_lower, set_xlim_upper))
+    ax = plt.axes(projection=cartopy.crs.PlateCarree())
+    ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
+    ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
+    #ax.coastlines('10m')
+    plot1=plt.scatter(lon_float,lat_float,c=anom,cmap='RdBu_r',vmin=-0.5,vmax=0.5)#cmap='Blues_r')
+    plt.plot(lon_float,lat_float,'k',alpha=0.2,label='BGC float trajectory')
+    ax.legend(fontsize=15)
+    cbar = plt.colorbar(plot1)
+    plt.title('Chl anomaly: %s' % titles_list[i_anom], fontsize=18)
+    cbar.ax.set_ylabel('Chlorophyll anomaly (mg/m$^3$)', fontsize=18)
+    gl = ax.gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True, linestyle='--', alpha=0.5)
+    gl.xlabel_style = {'fontsize': 18}
+    gl.ylabel_style = {'fontsize': 18}
+    ax.set_xlabel('Longitude', fontsize=18)
+    plt.ylabel('Latitude', fontsize=18)
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    fig.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an12/Chl_anom%02d_%s_an12.pdf' % (home,i_anom+1,labels_list[i_anom]))
+    plt.close()
 
 #######################################################################################################################
 ############### I plot the eddy (E) center trajectory with the associated anomaly. There are 2 valeus of local chlorophyll
@@ -116,6 +128,40 @@ anom_maxE_meanOut=chl_inside_max-chl_outside_mean
 anom_meanE_meanAll=chl_inside_mean-chl_inside_and_outside_mean
 anom_maxE_meanAll=chl_inside_max-chl_inside_and_outside_mean
 
+# Parameters for the plot
+titles_list=['mean chl inside Eddy (satellite) vs chl outside eddy','max chl inside Eddy (satellite) vs chl outside eddy','mean chl inside Eddy (satellite) vs chl all region','max chl inside Eddy (satellite) vs chl all region']
+labels_list=['meanEddy_vs_outside','maxEddy_vs_outside','meanEddy_vs_allRegion','maxEddy_vs_allRegion']
+
+################# Plot part
+# I do the loop on the 4 plots
+i_anom=0
+for i_anom in range(0,titles_list.__len__()):
+    if i_anom == 0: anom=anom_meanE_meanOut
+    elif i_anom == 1:   anom=anom_maxE_meanOut
+    elif i_anom == 2:   anom=anom_meanE_meanAll
+    elif i_anom == 3:   anom=anom_maxE_meanAll
+
+    fig = plt.figure(1, figsize=(12,8))
+    #ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(set_xlim_lower, set_xlim_upper))
+    ax = plt.axes(projection=cartopy.crs.PlateCarree())
+    ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
+    ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
+    #ax.coastlines('10m')
+    plt.scatter(0,0,c=0.5,cmap='RdBu_r',vmin=-0.5,vmax=0.5,label='Eddy center positions')#cmap='Blues_r')
+    plot1=plt.scatter(lonEddy,latEddy,c=anom,cmap='RdBu_r',vmin=-0.5,vmax=0.5)#cmap='Blues_r')
+    ax.legend(fontsize=15)
+    cbar = plt.colorbar(plot1)
+    plt.title('Chl anomaly: %s' % titles_list[i_anom], fontsize=18)
+    cbar.ax.set_ylabel('Chlorophyll anomaly (mg/m$^3$)', fontsize=18)
+    gl = ax.gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True, linestyle='--', alpha=0.5)
+    gl.xlabel_style = {'fontsize': 18}
+    gl.ylabel_style = {'fontsize': 18}
+    ax.set_xlabel('Longitude', fontsize=18)
+    plt.ylabel('Latitude', fontsize=18)
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    fig.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an12/Chl_anom%02d_%s_an12.pdf' % (home,i_anom+5,labels_list[i_anom]))
+    plt.close()
 
 
 
