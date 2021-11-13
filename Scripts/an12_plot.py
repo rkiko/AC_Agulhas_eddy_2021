@@ -5,6 +5,7 @@ import datetime
 import pandas as pd
 import pickle
 import cartopy
+from datetime import date
 from pathlib import Path
 home = str(Path.home())
 #globals().clear()
@@ -32,6 +33,56 @@ DateTime_Eddy=data_an12['DateTime_Eddy']
 lonEddy=data_an12['lonEddy']
 latEddy=data_an12['latEddy']
 a_file.close()
+
+### I load eddy contour data
+filename_xVMax='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_TOEddies_Xcon_max.csv' % home
+filename_yVMax='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_TOEddies_Ycon_max.csv' % home
+data_xVMax=pd.read_csv(filename_xVMax, sep=',', header=None)
+data_yVMax=pd.read_csv(filename_yVMax, sep=',', header=None)
+lonVmax=data_xVMax.values[:,:]
+latVmax=data_yVMax.values[:,:]
+
+
+#######################################################################
+# I select the data only in the period when the BGC Argo float was inside the eddy
+#######################################################################
+day0_insideEddy=[2021,4,13]
+dayf_insideEddy=[2021,9,27]
+day0_insideEddy=date.toordinal(date(day0_insideEddy[0], day0_insideEddy[1], day0_insideEddy[2]))+366
+dayf_insideEddy=date.toordinal(date(dayf_insideEddy[0], dayf_insideEddy[1], dayf_insideEddy[2]))+366
+
+###BGC Argo data
+sel_insideEddy = [False for i in range(lon_float.size)]
+i=0
+for i in range(0,lon_float.size):
+    daytmp=date.toordinal(date(Date_Vec_float[i,0], Date_Vec_float[i,1], Date_Vec_float[i,2]))+366
+    if (daytmp>=day0_insideEddy)&(daytmp<=dayf_insideEddy):
+        sel_insideEddy[i] = True
+
+chla_float_mean=chla_float_mean[sel_insideEddy]
+chla_float_max=chla_float_max[sel_insideEddy]
+lon_float=lon_float[sel_insideEddy]
+lat_float=lat_float[sel_insideEddy]
+Date_Num_float=Date_Num_float[sel_insideEddy]
+Date_Vec_float=Date_Vec_float[sel_insideEddy,:]
+
+###Satellite data: here the difference is that I consider also the days before the BGC argo entered the eddy
+### I don't need to filter the eddy contour data as they are updated and contin only eddy contours of the period in which
+### BGC Argo was inside the eddy
+sel_insideEddy = [False for i in range(lonEddy.size)]
+i=0
+for i in range(0,lonEddy.size):
+    if (Date_Num_Eddy[i]<=dayf_insideEddy):
+        sel_insideEddy[i] = True
+
+chl_inside_mean=chl_inside_mean[sel_insideEddy]
+chl_inside_max=chl_inside_max[sel_insideEddy]
+chl_outside_mean=chl_outside_mean[sel_insideEddy]
+chl_inside_and_outside_mean=chl_inside_and_outside_mean[sel_insideEddy]
+Date_Num_Eddy=Date_Num_Eddy[sel_insideEddy]
+DateTime_Eddy=DateTime_Eddy[sel_insideEddy]
+lonEddy=lonEddy[sel_insideEddy]
+latEddy=latEddy[sel_insideEddy]
 
 #######################################################################
 # I select the satellite chlorophyll data in the day of the BGC Argo float profiles
@@ -69,8 +120,13 @@ chl_inside_max_4float=chl_inside_max[sel_Satel2Float[sel_eddyCont_missing_days]]
 chl_outside_mean_4float=chl_outside_mean[sel_Satel2Float[sel_eddyCont_missing_days]]
 chl_inside_and_outside_mean_4float=chl_inside_and_outside_mean[sel_Satel2Float[sel_eddyCont_missing_days]]
 
+lonEddy_4float=np.array(lonEddy[sel_Satel2Float[sel_eddyCont_missing_days]])
+latEddy_4float=np.array(latEddy[sel_Satel2Float[sel_eddyCont_missing_days]])
+lonVmax_4float=lonVmax[:,sel_Satel2Float[sel_eddyCont_missing_days]]
+latVmax_4float=latVmax[:,sel_Satel2Float[sel_eddyCont_missing_days]]
+
 #######################################################################################################################
-############### I plot the BGC Argo float (F) trajectory with the associated anomaly. There are 2 valeus of local chlorophyll
+############### I plot the BGC Argo float (F) trajectory with the associated anomaly. There are 2 values of local chlorophyll
 ############### and 2 of environmental chlorophyll, for a total of 4 anomalies.
 #######################################################################################################################
 
@@ -82,8 +138,8 @@ anom_maxF_meanAll=chla_float_max-chl_inside_and_outside_mean_4float
 # Parameters for the plot
 width, height = 0.8, 0.7
 window_margin1=3
-set_xlim_lower, set_xlim_upper = min(lonEddy.min(),lon_float.min())-window_margin1,max(lon_float.max(),lonEddy.max())+window_margin1
-set_ylim_lower, set_ylim_upper = min(latEddy.min(),lat_float.min())-window_margin1,max(lat_float.max(),latEddy.max())+window_margin1
+set_xlim_lower, set_xlim_upper = 5,20#min(lonEddy.min(),lon_float.min())-window_margin1,max(lon_float.max(),lonEddy.max())+window_margin1
+set_ylim_lower, set_ylim_upper = -37,-31#min(latEddy.min(),lat_float.min())-window_margin1,max(lat_float.max(),latEddy.max())+window_margin1
 titles_list=['mean chl BGC Argo vs chl outside eddy','max chl BGC Argo vs chl outside eddy','mean chl BGC Argo vs chl all region','max chl BGC Argo vs chl all region']
 labels_list=['meanFloat_vs_outside','maxFloat_vs_outside','meanFloat_vs_allRegion','maxFloat_vs_allRegion']
 
@@ -102,8 +158,10 @@ for i_anom in range(0,titles_list.__len__()):
     ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
     ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
     #ax.coastlines('10m')
-    plot1=plt.scatter(lon_float,lat_float,c=anom,cmap='RdBu_r',vmin=-0.5,vmax=0.5)#cmap='Blues_r')
+    plot1=plt.scatter(lon_float,lat_float,c=anom,cmap='RdBu_r',vmin=-0.2,vmax=0.2)#cmap='Blues_r')
     plt.plot(lon_float,lat_float,'k',alpha=0.2,label='BGC float trajectory')
+    plt.plot(np.nan,np.nan,'k',label='Eddy max. vel. contour')
+    plt.scatter(np.nan,np.nan, c='k', marker="^", s=20, label='Eddy center')
     ax.legend(fontsize=15)
     cbar = plt.colorbar(plot1)
     plt.title('Chl anomaly: %s' % titles_list[i_anom], fontsize=18)
@@ -115,11 +173,16 @@ for i_anom in range(0,titles_list.__len__()):
     plt.ylabel('Latitude', fontsize=18)
     gl.xlabels_top = False
     gl.ylabels_right = False
+    for i in [10,25,38,50]:
+        plt.plot(lonVmax_4float[:,i],latVmax_4float[:,i],'k')
+        plt.scatter(lonEddy_4float[i],latEddy_4float[i],c='k',marker="^",s=20,label='Eddy center')
+        plt.scatter(lon_float[i],lat_float[i],edgecolors='g',s=108, facecolors='none')
+
     fig.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an12/Chl_anom%02d_%s_an12.pdf' % (home,i_anom+1,labels_list[i_anom]))
     plt.close()
 
 #######################################################################################################################
-############### I plot the eddy (E) center trajectory with the associated anomaly. There are 2 valeus of local chlorophyll
+############### I plot the eddy (E) center trajectory with the associated anomaly. There are 2 values of local chlorophyll
 ############### and 2 of environmental chlorophyll, for a total of 4 anomalies.
 #######################################################################################################################
 
@@ -147,8 +210,8 @@ for i_anom in range(0,titles_list.__len__()):
     ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
     ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
     #ax.coastlines('10m')
-    plt.scatter(0,0,c=0.5,cmap='RdBu_r',vmin=-0.5,vmax=0.5,label='Eddy center positions')#cmap='Blues_r')
-    plot1=plt.scatter(lonEddy,latEddy,c=anom,cmap='RdBu_r',vmin=-0.5,vmax=0.5)#cmap='Blues_r')
+    plt.scatter(0,0,c=0.5,cmap='RdBu_r',vmin=-0.2,vmax=0.2,label='Eddy center positions')#cmap='Blues_r')
+    plot1=plt.scatter(lonEddy,latEddy,c=anom,cmap='RdBu_r',vmin=-0.2,vmax=0.2)#cmap='Blues_r')
     ax.legend(fontsize=15)
     cbar = plt.colorbar(plot1)
     plt.title('Chl anomaly: %s' % titles_list[i_anom], fontsize=18)
