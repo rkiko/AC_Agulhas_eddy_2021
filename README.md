@@ -97,3 +97,9 @@ an13
 
 As in an09, I compute the respiration rate obtained from the oxygen trend as a function of the depth.
 Here I calculate also the PARR as a function of the depth and I plot them together
+
+\
+an14
+
+It is the same script as an05, with two main differences: (i) I exclude the dates 
+after the float left the eddy; (ii) I plot the eddy radius and eddy-float distance as well
