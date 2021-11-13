@@ -96,7 +96,7 @@ dens[mask_dens]=temp_tmp+1000
 #######################################################################
 # I load the eddy center and contours
 #######################################################################
-filename_eddyData='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_data_TOEddies.csv' % home
+filename_eddyData='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_TOEddies.csv' % home
 filename_xVMax='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_TOEddies_Xcon_max.csv' % home
 filename_yVMax='%s/GIT/AC_Agulhas_eddy_2021/Data/an12/BE_cyclone_TOEddies_Ycon_max.csv' % home
 data_eddy=pd.read_csv(filename_eddyData, sep=',', header=0)
