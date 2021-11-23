@@ -103,3 +103,20 @@ an14
 
 It is the same script as an05, with two main differences: (i) I exclude the dates 
 after the float left the eddy; (ii) I plot the eddy radius and eddy-float distance as well
+
+\
+an15
+
+It is the same script as an08, with two main differences: (i) I exclude the dates 
+after the float left the eddy; (ii) I plot the eddy radius and eddy-float distance as well
+
+\
+an16_plot
+
+I plot the data calculated with an12, but I do only one figure, which should be the final one used
+in the paper. I plot the eddy trajectory colored proportionally to the chl anomaly (calculated as 
+the difference between the satellite chl inside and outside the eddy), I plot the 
+BGC Argo trajectory with the same color, I plot the BGC Argo profiles outside the eddy with a cross, and I plot
+4 eddy contour, colored proportionally to the chl inside the eddy.
+
+
