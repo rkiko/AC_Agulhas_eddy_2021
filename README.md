@@ -119,4 +119,16 @@ the difference between the satellite chl inside and outside the eddy), I plot th
 BGC Argo trajectory with the same color, I plot the BGC Argo profiles outside the eddy with a cross, and I plot
 4 eddy contour, colored proportionally to the chl inside the eddy.
 
+\
+an17
+
+It is the same script as an14 (plot of the times series of chl, temp etc.), with two main differences: (i) I exclude 
+the profiles in which the BGC Argo float was outside the eddy; (ii) I do not plot the eddy radius and eddy-float distance as well
+
+\
+an18
+
+It is the same script as an15 (plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
+with two main differences: (i) I exclude the profiles in which the BGC Argo float was outside the eddy; (ii) I do not
+plot the eddy radius and eddy-float distance as well
 
