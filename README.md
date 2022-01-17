@@ -132,3 +132,9 @@ It is the same script as an15 (plot of the times series of flux, Mip etc.+ integ
 with two main differences: (i) I exclude the profiles in which the BGC Argo float was outside the eddy; (ii) I do not
 plot the eddy radius and eddy-float distance as well
 
+
+\
+an19
+
+It is the same than an13, but I also calculate the bbp respiration rate. To do so, first I calculate the
+bbp (as POC) consumption in time. Then, I convert it to micromol/kg/day
