@@ -138,3 +138,12 @@ an19
 
 It is the same than an13, but I also calculate the bbp respiration rate. To do so, first I calculate the
 bbp (as POC) consumption in time. Then, I convert it to micromol/kg/day
+
+
+\
+an20
+
+I use the data calculated in an12 to plot the time series of the chlorophyll within the eddy.
+The purpose is to see whether there was a chl bloom prior to the deployment of the BGC Argo float.
+This could explain the presence of a patch of intense MiP and MaP concentration at about 300m depths at the beginning 
+of the Argo deployment.
