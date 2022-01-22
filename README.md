@@ -147,3 +147,10 @@ I use the data calculated in an12 to plot the time series of the chlorophyll wit
 The purpose is to see whether there was a chl bloom prior to the deployment of the BGC Argo float.
 This could explain the presence of a patch of intense MiP and MaP concentration at about 300m depths at the beginning 
 of the Argo deployment.
+
+
+\
+an21
+
+I plot the time series of the eddy radius and of the distance of the BGC 
+Argo float from the eddy center

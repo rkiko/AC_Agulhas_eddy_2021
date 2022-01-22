@@ -4,9 +4,7 @@ import numpy as np
 import datetime
 import pandas as pd
 import pickle
-import cartopy
 from datetime import date
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pathlib import Path
 home = str(Path.home())
 #globals().clear()
