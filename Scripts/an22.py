@@ -10,6 +10,7 @@ from itertools import compress
 import pandas as pd
 import calendar
 import sys
+from scipy.signal import savgol_filter
 home = str(Path.home())
 #globals().clear()
 sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
@@ -189,6 +190,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
         z_PARR = z_PARR[sel_PARR];y_PARR = y_PARR[sel_PARR];d_PARR = d_PARR[sel_PARR]
         sel_bbp = (~np.isnan(z_bbp)) & (~np.isnan(y_bbp))
         z_bbp = z_bbp[sel_bbp];y_bbp = y_bbp[sel_bbp];d_bbp = d_bbp[sel_bbp]
+        z_bbp = savgol_filter(z_bbp, 5, 1)
         # Here I proceed only if the date is inside the Date_Num_limit fixed
         if Date_Num_limit[0] <= Date_Num[i] <= Date_Num_limit[1]:
 
@@ -306,7 +308,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     ax.set_xticklabels(xticklabels)
     plt.xticks(rotation=90, fontsize=12)
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an19/02_bbpTimeSeries_isopycnal%0.2f_deltarho_%0.2f_an19.pdf' % (reference_isopycnal,delta_rho), dpi=200)
+    plt.savefig('../Plots/an22/02_bbpTimeSeries_isopycnal%0.2f_deltarho_%0.2f_an22.pdf' % (reference_isopycnal,delta_rho), dpi=200)
     plt.close()
     ##############################################################################
     ##############################################################################
@@ -358,6 +360,6 @@ ytext=depth_isopycnal[sel]
 text_s=list(compress(signif_label_list_doxy, sel))
 for i,j,k in zip(xtext,ytext,text_s):
     ax[1].text(i,j,k,va='top')
-fig.savefig('../Plots/an19/01_OxygenRespirationRate_vs_depth_deltarho_%0.2f_an19.pdf' % delta_rho, dpi=200)
+fig.savefig('../Plots/an22/01_OxygenRespirationRate_vs_depth_deltarho_%0.2f_an22.pdf' % delta_rho, dpi=200)
 plt.close()
 

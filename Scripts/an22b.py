@@ -10,6 +10,7 @@ from itertools import compress
 import pandas as pd
 import calendar
 import sys
+from scipy.signal import savgol_filter
 home = str(Path.home())
 #globals().clear()
 sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
@@ -149,7 +150,7 @@ delta_rho=0.05
 delta_rho_plot=0.1 #every how many delta_rho range I do a plot
 reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
 reference_isopycnal_list_plot=np.r_[0:reference_isopycnal_list.size+1:np.round(delta_rho_plot/delta_rho)]
-Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+127]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
+Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+71]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+71))
 
 depth_isopycnal=np.squeeze(np.zeros((reference_isopycnal_list.size,1)))
 slopes_list_doxy=np.squeeze(np.zeros((reference_isopycnal_list.size,1)));slopes_ci_list_doxy=np.zeros((reference_isopycnal_list.size,2))
@@ -189,6 +190,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
         z_PARR = z_PARR[sel_PARR];y_PARR = y_PARR[sel_PARR];d_PARR = d_PARR[sel_PARR]
         sel_bbp = (~np.isnan(z_bbp)) & (~np.isnan(y_bbp))
         z_bbp = z_bbp[sel_bbp];y_bbp = y_bbp[sel_bbp];d_bbp = d_bbp[sel_bbp]
+        z_bbp = savgol_filter(z_bbp, 5, 1)
         # Here I proceed only if the date is inside the Date_Num_limit fixed
         if Date_Num_limit[0] <= Date_Num[i] <= Date_Num_limit[1]:
 
@@ -306,7 +308,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     ax.set_xticklabels(xticklabels)
     plt.xticks(rotation=90, fontsize=12)
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an19/02_bbpTimeSeries_isopycnal%0.2f_deltarho_%0.2f_an19.pdf' % (reference_isopycnal,delta_rho), dpi=200)
+    plt.savefig('../Plots/an22b/02_bbpTimeSeries_isopycnal%0.2f_deltarho_%0.2f_an22b.pdf' % (reference_isopycnal,delta_rho), dpi=200)
     plt.close()
     ##############################################################################
     ##############################################################################
@@ -340,7 +342,7 @@ ax[0].set_ylabel('Depth (m)', fontsize=12)
 ax[0].tick_params(labelsize=12)
 #set_xticklabels(fontsize=18),plt.yticks(fontsize=18)
 ax[0].set_xlim(-0.08,0)
-ax[0].set_title('Resp. rate vs depth (2021-04-13 to 2021-08-18)', fontsize=10)
+ax[0].set_title('Resp. rate vs depth (2021-04-13 to 2021-06-23)', fontsize=10)
 ax[1].scatter(R2_list_doxy[R_list_doxy<0], depth_isopycnal[R_list_doxy<0], c='r',s=5)#, linestyle='dashed')
 ax[1].set_xlim(0,1.3)
 ax[1].axvline(1, linestyle='-', color='k')
@@ -358,6 +360,6 @@ ytext=depth_isopycnal[sel]
 text_s=list(compress(signif_label_list_doxy, sel))
 for i,j,k in zip(xtext,ytext,text_s):
     ax[1].text(i,j,k,va='top')
-fig.savefig('../Plots/an19/01_OxygenRespirationRate_vs_depth_deltarho_%0.2f_an19.pdf' % delta_rho, dpi=200)
+fig.savefig('../Plots/an22b/01_OxygenRespirationRate_vs_depth_deltarho_%0.2f_an22b.pdf' % delta_rho, dpi=200)
 plt.close()
 
