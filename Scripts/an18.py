@@ -242,12 +242,12 @@ POC_200_600=MiP_POC_200_600+MaP_POC_200_600+bbp_POC_200_600
 POC_0_200[POC_0_200<0]=0
 POC_200_600[POC_200_600<0]=0
 # Parameters for the plot
-width, height = 0.8, 0.7
+width, height = 0.8, 0.5
 set_ylim_lower, set_ylim_upper = min(POC_0_200.min(),POC_200_600.min()),max(POC_0_200.max(),POC_200_600.max())
 
 #POC 0-200 vs 200-600
-fig = plt.figure(1, figsize=(12,8))
-ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+fig = plt.figure(1, figsize=(13,4))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,POC_0_200,'r',label='0-200 m')
 plt.scatter(list_dates,POC_0_200,c='r')
 plt.plot(list_dates,POC_200_600,'b',label='200-600 m')
@@ -262,7 +262,7 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 plt.legend(fontsize=14)
-plt.ylabel('Integrated POC (mgC/m$^3$)', fontsize=18)
+plt.ylabel('Integrated POC (mgC/m$^3$)', fontsize=15)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an18/IntegratedPOC_vs_time_an18.pdf' ,dpi=200)
 plt.close()
@@ -270,8 +270,8 @@ plt.close()
 
 
 # 0-200 m layer
-fig = plt.figure(1, figsize=(12,8))
-ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+fig = plt.figure(1, figsize=(13,4))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,bbp_POC_0_200,'y',label='bbpPOC')
 plt.scatter(list_dates,bbp_POC_0_200,c='y')
 plt.plot(list_dates,MiP_POC_0_200,'c',label='MiP')
@@ -288,7 +288,7 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 plt.legend(fontsize=14)
-plt.ylabel('Integrated POC (mgC/m$^3$)', fontsize=18)
+plt.ylabel('Integrated POC (mgC/m$^3$)', fontsize=15)
 plt.title('0-200 m layer', fontsize=18)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an18/0_200m_MiP_MaP_bbpPOC_vs_time_an18.pdf' ,dpi=200)
@@ -299,8 +299,8 @@ plt.close()
 
 # 200-600 m layer
 set_ylim_lower, set_ylim_upper = POC_200_600.min(),POC_200_600.max()
-fig = plt.figure(1, figsize=(12,8))
-ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+fig = plt.figure(1, figsize=(13,4))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,bbp_POC_200_600,'y',label='bbpPOC')
 plt.scatter(list_dates,bbp_POC_200_600,c='y')
 plt.plot(list_dates,MiP_POC_200_600,'c',label='MiP')
@@ -317,7 +317,7 @@ ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 plt.legend(fontsize=14)
-plt.ylabel('Integrated POC (mgC/m$^3$)', fontsize=18)
+plt.ylabel('Integrated POC (mgC/m$^3$)', fontsize=15)
 plt.title('200-600 m layer', fontsize=18)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an18/200_600m_MiP_MaP_bbpPOC_vs_time_an18.pdf' ,dpi=200)
