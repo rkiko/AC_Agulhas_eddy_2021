@@ -137,7 +137,12 @@ plot the eddy radius and eddy-float distance as well
 an19
 
 It is the same than an13, but I also calculate the bbp respiration rate. To do so, first I calculate the
-bbp (as POC) consumption in time. Then, I convert it to micromol/kg/day
+bbp (as POC) consumption in time. Then, I convert it to micromol/kg/day.
+I also plot the time series of the bbp for each different isopcynal, as in an09
+
+an19b
+
+It is the same as an19, but I use a shorter time window (until the 23 June instead of mid August)
 
 
 \
@@ -154,3 +159,14 @@ an21
 
 I plot the time series of the eddy radius and of the distance of the BGC 
 Argo float from the eddy center
+
+
+\
+an22
+
+It is the same as an19, but I smooth the bbp with the savgol filter before the interpolation
+
+an22b
+
+It is the same as an22, but I use a shorter time window (until the 23 June instead of mid August)
+
