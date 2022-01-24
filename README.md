@@ -170,3 +170,13 @@ an22b
 
 It is the same as an22, but I use a shorter time window (until the 23 June instead of mid August)
 
+\
+an23
+
+I calculate all the metrics necessary to estimate the carbon budget (
+the Flux vs depth and time, the integrated POC, the PARR vs depth) and I save them
+
+an23b
+
+I use the data calculated in an23 to calculate the carbon budget
+
