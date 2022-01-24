@@ -265,7 +265,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     R2_list_doxy[i_isop] = interpol.rvalue ** 2
     R_list_doxy[i_isop] = interpol.rvalue
 
-    # Here I interpolate, so that the slope gives me the carbon (i.e. bbp_POC) consumption rate  (in mmolC/kg per day)
+    # Here I interpolate, so that the slope gives me the carbon (i.e. bbp_POC) consumption rate  (in mgC/m3 per day)
     (interpol, slpe_ci, _, signif, signif_label) = lin_fit(Date_Num_isopycnal_bbp, bbp_isopycnal)
 
     slopes_list_bbp[i_isop] = interpol.slope
@@ -311,9 +311,13 @@ for i_isop in range(0,reference_isopycnal_list.size):
     ##############################################################################
     ##############################################################################
 
-# I divide by 0.89 to convert the carbon (i.e. bbp_POC) consumption rate to oxygen consumption rate
-slopes_list_bbp = slopes_list_bbp / 0.89
-slopes_ci_list_bbp = slopes_ci_list_bbp / 0.89
+# I convert the carbon (i.e. bbp_POC) consumption rate (in mgC/m3/d) to oxygen consumption rate (in micromolO2/kg/d)
+# *1000 -> to microgC/m3/d
+# /12.0107 -> to micromolC/m3/d
+# /0.89 -> to micromol02/m3/d
+# /reference_isopycnal_list -> to micromol02/kg/d
+slopes_list_bbp = slopes_list_bbp /reference_isopycnal_list * 1000 /12.0107 / 0.89
+slopes_ci_list_bbp = slopes_ci_list_bbp /np.tile(reference_isopycnal_list,[2,1]).T * 1000 /12.0107 / 0.89
 
 
 #Here I plot the respiration rate vs the depth
