@@ -60,3 +60,4 @@ Flux_depthf_mgC_m2=np.mean(tmp)*ndays
 
 ############### I calculate the amount of POC respired (in mgC/m2)
 np.mean(O2_resp_mgC_m2)
+np.mean(POC_resp_mgC_m2)

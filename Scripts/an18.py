@@ -131,7 +131,7 @@ ipar=1
 parameter_shortname_list=['Flux','MiP_abund','MaP_abund','MiP_POC','MaP_POC']
 parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$)','MaP abundance (# L$^{-1}$)'
     ,'MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)']
-max_parameter_list=np.array([6,65,0.6,1.15,0.010])
+max_parameter_list=np.array([32,65,0.6,2.15,0.30])
 MiP_POC_0_200=np.array([]);MiP_POC_200_600=np.array([])
 MaP_POC_0_200=np.array([]);MaP_POC_200_600=np.array([])
 bbp_POC_0_200=np.array([]);bbp_POC_200_600=np.array([])
