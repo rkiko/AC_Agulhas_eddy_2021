@@ -21,7 +21,7 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
 day0=datetime(2021,4,13)        # starting date for the carbon budget calculation
 dayf=datetime(2021,8,18)        # final date for the carbon budget calculation
 ndays=(dayf-day0).days          # number of days
-depth0=200                      # starting depth
+depth0=300                      # starting depth
 depthf=600                      # final depth
 layer_thickness=depthf-depth0   # thickness of the layer considered
 delta_depth=15                  # around of the depth which I consider when extracting the flux

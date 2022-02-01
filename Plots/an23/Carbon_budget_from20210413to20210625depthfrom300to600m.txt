@@ -1,0 +1,13 @@
+######################
+Starting parameteres
+
+Starting day = 2021-04-13 00:00:00;  Final day = 2021-06-25 00:00:00
+Starting Depth = 300 m;  End Depth = 600 m
+
+######################
+
+Integrated POC Start : 458; end: 133; End - start= -326 mgC/m2
+Entering flux: 354; exiting: 520; enter - exit: -166 mgC/m2
+POC carbon theoretically respired (from integrated POC - flux): 160 mgC/m2
+POC carbon respired: 3243 mgC/m2, i.e. 20.3 times more than theoretical expectation
+Oxygen consumption: 10315 mgC/m2

@@ -44,6 +44,7 @@ idxf=np.where(np.abs(tmp)==(np.abs(tmp)).min())[0][0]
 
 Integrated_POC_day0_mgC_m2 = Integrated_POC_mgC_m3[idx0]*layer_thickness
 Integrated_POC_dayf_mgC_m2 = Integrated_POC_mgC_m3[idxf]*layer_thickness
+Delta_Integrated_POC = Integrated_POC_dayf_mgC_m2-Integrated_POC_day0_mgC_m2
 
 ############### I calculate the amount of POC entering from depht0 and exiting from dayf between day0 and dayf (in mgC/m2)
 
@@ -58,6 +59,35 @@ Flux_depth0_mgC_m2=np.mean(tmp)*ndays
 tmp=Flux_depthf[idx0:idxf]
 Flux_depthf_mgC_m2=np.mean(tmp)*ndays
 
+Delta_flux= Flux_depth0_mgC_m2-Flux_depthf_mgC_m2
+Theoretical_Budget = Delta_flux - Delta_Integrated_POC
 ############### I calculate the amount of POC respired (in mgC/m2)
-np.mean(O2_resp_mgC_m2)
 np.mean(POC_resp_mgC_m2)
+abs(np.mean(O2_resp_mgC_m2))
+
+
+############### I write the output
+filename='%s/GIT/AC_Agulhas_eddy_2021/Plots/an23/Carbon_budget_from%d%02d%02dto%d%02d%02ddepthfrom%dto%dm.txt' % (home,day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day,depth0,depthf)
+
+sentence1='######################\nStarting parameteres\n\nStarting day = %s;  Final day = %s\nStarting Depth = %d m;  End Depth = %d m\n\n######################\n' %(day0,dayf,depth0,depthf)
+sentence2='Integrated POC Start : %0.0f; end: %0.0f; End - start= %0.0f mgC/m2' % (Integrated_POC_day0_mgC_m2,Integrated_POC_dayf_mgC_m2,Delta_Integrated_POC)
+sentence3='Entering flux: %0.0f; exiting: %0.0f; enter - exit: %0.0f mgC/m2' % (Flux_depth0_mgC_m2,Flux_depthf_mgC_m2,Delta_flux)
+sentence4='POC carbon theoretically respired (from integrated POC - flux): %0.0f mgC/m2' % ( Theoretical_Budget )
+sentence5='POC carbon respired: %0.0f mgC/m2, i.e. %0.1f times more than theoretically expected' % (np.mean(POC_resp_mgC_m2),np.mean(POC_resp_mgC_m2)/Theoretical_Budget)
+sentence6='Oxygen consumption: %0.0f mgC/m2' % (abs(np.mean(O2_resp_mgC_m2)))
+
+sentences=[sentence1,sentence2,sentence3,sentence4,sentence5,sentence6]
+f = open(filename, 'w')
+for sentence in sentences:
+    f.write(sentence)
+    f.write('\n')
+
+f.close()
+
+print(sentence1)
+print(sentence2)
+print(sentence3)
+print(sentence4)
+print(sentence5)
+print(sentence6)
+
