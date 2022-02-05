@@ -19,9 +19,9 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
 #Parameters for the carbon budget calculation
 ########################################################################################################################
 day0=datetime(2021,4,13)        # starting date for the carbon budget calculation
-dayf=datetime(2021,8,18)        # final date for the carbon budget calculation
+dayf=datetime(2021,6,25)        # final date for the carbon budget calculation
 ndays=(dayf-day0).days          # number of days
-depth0=300                      # starting depth
+depth0=200                      # starting depth
 depthf=600                      # final depth
 layer_thickness=depthf-depth0   # thickness of the layer considered
 delta_depth=15                  # around of the depth which I consider when extracting the flux
@@ -79,7 +79,7 @@ for i in range(0,list_dates.size):
     sel = Date_Num == list_dates[i]
     MiP_POC_tmp=MiP_POC[sel]
     MaP_POC_tmp=MaP_POC[sel]
-    bbp_POC_tmp=MaP_POC[sel]
+    bbp_POC_tmp=bbp_POC[sel]
     y=depth[sel]
     sel2 = (~np.isnan(MiP_POC_tmp))&(~np.isnan(MaP_POC_tmp))&(~np.isnan(bbp_POC_tmp))
     MiP_POC_tmp = MiP_POC_tmp[sel2];MaP_POC_tmp = MaP_POC_tmp[sel2];bbp_POC_tmp = MaP_POC_tmp[sel2];y2 = y[sel2]
@@ -129,7 +129,7 @@ for i in range(0,Flux_interp.shape[1]):
     Flux_depthf = np.append(Flux_depthf, np.mean(z[sel_layer]))
 
 ########################################################################################################################
-# Here I calculate the carbon consumption rate due to PARR
+# Here I calculate the carbon consumption rate due to (i) oxygen consumption and (ii) PARR
 ########################################################################################################################
 
 ############### I load Coriolis data with the oxygen information
