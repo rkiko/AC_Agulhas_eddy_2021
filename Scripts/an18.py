@@ -162,7 +162,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
             if ipar==4: MaP_POC_0_200=np.append(MaP_POC_0_200,np.mean(z[sel_0_200]));MaP_POC_200_600=np.append(MaP_POC_200_600,np.mean(z[sel_200_600]))
             if ipar==5: bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
 
-    if ipar==5: continue # I do not plot the bbp as it is already plotted in an05 (with higher resolution data)
+    if ipar==5: continue # I do not plot the bbp as it is already plotted in an17 (with higher resolution data)
     # I define the x and y arrays for the contourf plot
     x_filtered = np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),100)
     y_filtered = np.linspace(depth_filtered.min(),depth_filtered.max(),100)
