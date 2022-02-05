@@ -195,3 +195,8 @@ calculating them for one parameterisation only (i.e., one fixed layer, one fixed
 I do a loop on different layers (basically every 100m between 200 and 600m) and I calculate
 the theoretical carbon disappearing due to respiration (difference of delta flux and delta integrated POC)
 and I compare it with the PARR and carbon consumption associated to oxygen consumption with a plot.
+
+\
+an26
+
+I plot the diffPSD_slope_func
