@@ -169,6 +169,8 @@ anom_meanE_meanOut_4float=anom_meanE_meanOut[sel_Satel2Float[sel_eddyCont_missin
 
 set_xlim_lower, set_xlim_upper = 5,18.5#min(lonEddy.min(),lon_float.min())-window_margin1,max(lon_float.max(),lonEddy.max())+window_margin1
 set_ylim_lower, set_ylim_upper = -37,-31#min(latEddy.min(),lat_float.min())-window_margin1,max(lat_float.max(),latEddy.max())+window_margin1
+# set_xlim_lower, set_xlim_upper = 5,22 # For the larger plot
+# set_ylim_lower, set_ylim_upper = -38,-29 # For the larger plot
 fig = plt.figure(1, figsize=(12, 8))
 ax = plt.axes(projection=cartopy.crs.PlateCarree())
 ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
@@ -216,6 +218,7 @@ gl.top_labels = False
 ax.legend(fontsize=15)
 
 fig.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an16/Eddy_Float_Trj_and_Chl_anom_an16.pdf' % (home))
+# fig.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an16/Eddy_Float_Trj_and_Chl_anom_larger_an16.pdf' % (home))
 plt.close()
 
 
