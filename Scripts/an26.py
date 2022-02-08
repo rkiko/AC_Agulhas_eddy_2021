@@ -19,6 +19,7 @@ dayf=datetime(2021,9,23)        # final date
 day0_float = calendar.timegm(day0.timetuple())
 dayf_float = calendar.timegm(dayf.timetuple())
 ndays = (dayf - day0).days  # number of days
+delta_bin=20 #thickness (in meters) of the bin I used to interpolate the psd slope
 
 ########################################################################################################################
 #I process the data
@@ -62,6 +63,10 @@ for i in range(0,list_dates.size):
     z=diffPSD_slop[sel];x=Date_Num[sel];y=depth[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
     if sum(sel2) > 0:
         z = savgol_filter(z, 5, 1)
+        iy=0
+        for iy in range(0,y2.size):
+            sel=(y2>=y2[iy]-delta_bin*0.5)&(y2<y2[iy]+delta_bin*0.5)
+            z[iy]=np.mean(z[sel])
         diffPSD_slop_filtered = np.concatenate((diffPSD_slop_filtered, z))
         Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
         depth_filtered = np.concatenate((depth_filtered, y2))
@@ -70,7 +75,7 @@ for i in range(0,list_dates.size):
 #I interpolate the data
 ########################################################################################################################
 # I define the x and y arrays for the MiP+MaP+bbp interpolation
-x_filtered = np.linspace(Date_Num_filtered.min(), Date_Num_filtered.max(), ndays)
+x_filtered = np.linspace(Date_Num_filtered.min(), Date_Num_filtered.max(), int(np.round(ndays/4)))
 y_filtered = np.linspace(depth_filtered.min(), depth_filtered.max(), 100)
 x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
 # I interpolate
@@ -94,7 +99,7 @@ cbar = plt.colorbar(plot2)
 cbar.ax.get_yticklabels()
 cbar.ax.set_ylabel('diff PSD slope', fontsize=18)
 plt.ylabel('Depth (m)', fontsize=18)
-plt.title('Filtered diff PSD slope', fontsize=18)
+plt.title('Filtered diff PSD slope, delta bin: %d m' % delta_bin, fontsize=18)
 #I set xticks
 nxticks=10
 xticks=np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),nxticks)
@@ -106,7 +111,7 @@ ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90,fontsize=12)
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/an26/01Filtered_diffPSD_slop_an26.pdf',dpi=200)
+plt.savefig('../Plots/an26/01Filtered_diffPSD_slop_bin%dm_an26.pdf' % delta_bin,dpi=200)
 plt.close()
 
 
@@ -127,6 +132,10 @@ for i in range(0,list_dates.size):
     z=diffPSD_slop[sel];x=Date_Num[sel];y=depth[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
     if sum(sel2) > 0:
         # z = savgol_filter(z, 5, 1)
+        iy=0
+        for iy in range(0,y2.size):
+            sel=(y2>=y2[iy]-delta_bin*0.5)&(y2<y2[iy]+delta_bin*0.5)
+            z[iy]=np.mean(z[sel])
         diffPSD_slop_filtered = np.concatenate((diffPSD_slop_filtered, z))
         Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
         depth_filtered = np.concatenate((depth_filtered, y2))
@@ -135,7 +144,7 @@ for i in range(0,list_dates.size):
 #I interpolate the data
 ########################################################################################################################
 # I define the x and y arrays for the MiP+MaP+bbp interpolation
-x_filtered = np.linspace(Date_Num_filtered.min(), Date_Num_filtered.max(), ndays)
+x_filtered = np.linspace(Date_Num_filtered.min(), Date_Num_filtered.max(), int(np.round(ndays/4)))
 y_filtered = np.linspace(depth_filtered.min(), depth_filtered.max(), 100)
 x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
 # I interpolate
@@ -159,7 +168,7 @@ cbar = plt.colorbar(plot2)
 cbar.ax.get_yticklabels()
 cbar.ax.set_ylabel('diff PSD slope', fontsize=18)
 plt.ylabel('Depth (m)', fontsize=18)
-plt.title('Non Filtered diff PSD slope', fontsize=18)
+plt.title('Non Filtered diff PSD slope, delta bin: %d m' % delta_bin, fontsize=18)
 #I set xticks
 nxticks=10
 xticks=np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),nxticks)
@@ -171,5 +180,5 @@ ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90,fontsize=12)
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/an26/00NonFiltered_diffPSD_slop_an26.pdf',dpi=200)
+plt.savefig('../Plots/an26/00NonFiltered_diffPSD_slop_bin%dm_an26.pdf' % delta_bin,dpi=200)
 plt.close()
