@@ -9,10 +9,6 @@ from paruvpy import calculate_mip_and_map_poc_cont_w_header_from_df_func
 from paruvpy import calculate_respi_diffusion_limited_w_header_from_df_func
 
 
-
-
-
-
 if __name__ == '__main__':
     import os, sys
     from pathlib import Path
@@ -25,9 +21,11 @@ if __name__ == '__main__':
     temperature = df["Temperature [degrees Celsius]"]
     oxygen = df["Doxy [micromol/kg]"]
 
-    df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4)
+    df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4,'Kalvelage')
+    df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4,'Iversen')
+    df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4,'Reminer')
 
-    df = df[["RAWfilename", "Latitude", "Longitude", "Date_Time", "Pressure [dbar]", "Vol [L] (sampled for this depth bin)", "MiP_abun", "MaP_abun", "Mip_POC_cont_mgC_m3", "Map_POC_cont_mgC_m3", "Flux_mgC_m2", "Respi_nmolO2_l_h"]]
+    df = df[["RAWfilename", "Latitude", "Longitude", "Date_Time", "Pressure [dbar]", "Vol [L] (sampled for this depth bin)", "MiP_abun", "MaP_abun", "Mip_POC_cont_mgC_m3", "Map_POC_cont_mgC_m3", "Flux_mgC_m2", "Respi_nmolO2_l_h", "Respi_Iversen_nmolO2_l_h", "Respi_Reminer_nmolO2_l_h"]]
 
     df.to_csv('Ecopart_mip_map_flux_data.tsv', sep='\t', index=False)
 
