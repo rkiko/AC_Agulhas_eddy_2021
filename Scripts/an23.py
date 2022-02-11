@@ -19,7 +19,7 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
 #Parameters for the carbon budget calculation
 ########################################################################################################################
 day0=datetime(2021,4,13)        # starting date for the carbon budget calculation
-dayf=datetime(2021,6,25)        # final date for the carbon budget calculation
+dayf=datetime(2021,8,18)        # final date for the carbon budget calculation
 ndays=(dayf-day0).days          # number of days
 depth0=200                      # starting depth
 depthf=600                      # final depth
