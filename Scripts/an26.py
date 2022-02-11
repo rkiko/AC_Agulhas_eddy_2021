@@ -15,7 +15,7 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
 #Time period that I plot
 ########################################################################################################################
 day0=datetime(2021,4,13)        # starting date
-dayf=datetime(2021,9,23)        # final date
+dayf=datetime(2021,9,24)        # final date
 day0_float = calendar.timegm(day0.timetuple())
 dayf_float = calendar.timegm(dayf.timetuple())
 ndays = (dayf - day0).days  # number of days
@@ -85,10 +85,10 @@ diffPSD_slop_interp = griddata((Date_Num_filtered, depth_filtered), diffPSD_slop
 #I plot the filtered data
 ########################################################################################################################
 
-width, height = 0.8, 0.7
+width, height = 0.8, 0.68
 set_ylim_lower, set_ylim_upper = depth_filtered.min(),600
-fig = plt.figure(1, figsize=(12,8))
-ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_filtered.min(), Date_Num_filtered.max()))
+fig = plt.figure(1, figsize=(7,3.5))
+ax = fig.add_axes([0.12, 0.25, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_filtered.min(), Date_Num_filtered.max()))
 parameter_plot=diffPSD_slop_interp.copy()
 # parameter_plot[parameter_plot<0]=0
 # parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
@@ -97,9 +97,9 @@ plt.gca().invert_yaxis()
 # I draw colorbar
 cbar = plt.colorbar(plot2)
 cbar.ax.get_yticklabels()
-cbar.ax.set_ylabel('diff PSD slope', fontsize=18)
-plt.ylabel('Depth (m)', fontsize=18)
-plt.title('Filtered diff PSD slope, delta bin: %d m' % delta_bin, fontsize=18)
+cbar.ax.set_ylabel('diff PSD slope', fontsize=10)
+plt.ylabel('Depth (m)', fontsize=10)
+plt.title('Filtered diff PSD slope, delta bin: %d m' % delta_bin, fontsize=10)
 #I set xticks
 nxticks=10
 xticks=np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),nxticks)
@@ -108,7 +108,7 @@ for i in xticks:
     xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
-plt.xticks(rotation=90,fontsize=12)
+plt.xticks(rotation=90,fontsize=7)
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an26/01Filtered_diffPSD_slop_bin%dm_an26.pdf' % delta_bin,dpi=200)
@@ -154,10 +154,10 @@ diffPSD_slop_interp = griddata((Date_Num_filtered, depth_filtered), diffPSD_slop
 #I plot the unfiltered data
 ########################################################################################################################
 
-width, height = 0.8, 0.7
+width, height = 0.8, 0.68
 set_ylim_lower, set_ylim_upper = depth_filtered.min(),600
-fig = plt.figure(1, figsize=(12,8))
-ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_filtered.min(), Date_Num_filtered.max()))
+fig = plt.figure(1, figsize=(7,3.5))
+ax = fig.add_axes([0.12, 0.25, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_filtered.min(), Date_Num_filtered.max()))
 parameter_plot=diffPSD_slop_interp.copy()
 # parameter_plot[parameter_plot<0]=0
 # parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
@@ -166,9 +166,9 @@ plt.gca().invert_yaxis()
 # I draw colorbar
 cbar = plt.colorbar(plot2)
 cbar.ax.get_yticklabels()
-cbar.ax.set_ylabel('diff PSD slope', fontsize=18)
-plt.ylabel('Depth (m)', fontsize=18)
-plt.title('Non Filtered diff PSD slope, delta bin: %d m' % delta_bin, fontsize=18)
+cbar.ax.set_ylabel('diff PSD slope', fontsize=10)
+plt.ylabel('Depth (m)', fontsize=10)
+plt.title('Non Filtered diff PSD slope, delta bin: %d m' % delta_bin, fontsize=10)
 #I set xticks
 nxticks=10
 xticks=np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),nxticks)
@@ -177,7 +177,7 @@ for i in xticks:
     xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
-plt.xticks(rotation=90,fontsize=12)
+plt.xticks(rotation=90,fontsize=7)
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an26/00NonFiltered_diffPSD_slop_bin%dm_an26.pdf' % delta_bin,dpi=200)
