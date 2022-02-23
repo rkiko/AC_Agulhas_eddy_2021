@@ -109,7 +109,7 @@ for i_PSD in range(0,PSD_columns_extrapolation.size):
 PSD_extrapolated_bin_mean_log=np.log(PSD_extrapolated_bin_mean)
 
 ########################################################################################################################
-#I extrapolate the PSD for the smaller sizes for each depth bin and I plot
+#I extrapolate the particule abundance for the smaller sizes for each depth bin and I plot
 ########################################################################################################################
 PSD_extrapolated_depth=np.zeros((list_depths.size-1,PSD_columns_extrapolation.size))
 

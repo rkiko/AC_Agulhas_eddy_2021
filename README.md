@@ -217,12 +217,12 @@ an28
 
 I calculate, for different depth bins, the particle size distribution(PSD). Here, I consider 
 all the profiles included between the 23 of April and the 18th of August (the final
-date can be changed), so that the PSD is a mean. Finally, I extract the PSD for the
+date can be changed), so that the PSD is a mean. Finally, I extract the particle abundance for the
 smaller size classes (for which the uvp does not work) from the fit.
 
 \
 an29
 
 The principle of this script is the same as in an28, with the difference that the PSD slope is extracted 
-for each profile separately. In this way, I can evaluate how the PSD slope changes 
-with time (even if the uncertainty would be larger)
+for each profile separately. In this way, I can evaluate how the particle abundance for 
+the smaller size classes changes with time (even if the uncertainty is larger)
