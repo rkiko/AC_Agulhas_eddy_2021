@@ -135,9 +135,15 @@ for iNP in range(27,32):
     settling_vel_mean=np.append(settling_vel_mean,np.mean(settling_vel))
     settling_vel_std=np.append(settling_vel_std,np.std(settling_vel))
 
+b_k2002 = 75 #132
+eta_k2002 = 0.95 #0.62
+sink_k2002_0 = b_k2002*(np.power(sizeclass_list/10, eta_k2002))
 b_k2002 = 132
 eta_k2002 = 0.62
-sink_k2002 = b_k2002*(np.power(sizeclass_list, eta_k2002))
+sink_k2002_1 = b_k2002*(np.power(sizeclass_list/10, eta_k2002))
+b_k2002 = 66
+eta_k2002 = 0.62
+sink_k2002_2 = b_k2002*(np.power(sizeclass_list/10, eta_k2002))
 
 width, height = 0.8, 0.68
 fig = plt.figure(1, figsize=(3.5, 3.5))
@@ -151,7 +157,9 @@ plt.ylabel('Settling velocity (m/d)', fontsize=10)
 plt.title('Relationship between size class\nand settling velocity', fontsize=10)
 plt.xticks(fontsize=10),plt.yticks(fontsize=10)
 plt.savefig('../Plots/an27/relationship_size_vs_settlingVelocity_alone_an27.pdf', dpi=200)
-plt.plot(sizeclass_list,np.abs(sink_k2002),label='xxx et al.')
+plt.plot(sizeclass_list,np.abs(sink_k2002_2),label='Kriest et al., 2002 ')
+# plt.plot(sizeclass_list,np.abs(sink_k2002_1))
+# plt.plot(sizeclass_list,np.abs(sink_k2002_2))
 plt.legend(fontsize=7)
 plt.savefig('../Plots/an27/relationship_size_vs_settlingVelocity_comparison_an27.pdf', dpi=200)
 plt.close()
