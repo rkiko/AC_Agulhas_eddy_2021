@@ -98,7 +98,7 @@ for iNP in range(27,32):
         NP_interp = griddata((Date_Num_NP, depth_NP), NP_filtered, (x_NP_g, y_NP_g), method="nearest")
 
         width, height = 0.8, 0.7
-        set_ylim_lower, set_ylim_upper = -600, depth_NP.max()
+        set_ylim_lower, set_ylim_upper = 0, 600
         fig = plt.figure(1, figsize=(12, 8))
         ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper),
                           xlim=(Date_Num.min(), Date_Num.max()))
@@ -110,6 +110,7 @@ for iNP in range(27,32):
         plot3 = plt.scatter(Date_Num_threshold, depth_threshold, c='black')
         plot4= plt.plot(np.linspace(Date_Num_limit[0],Date_Num_limit[1],20),np.linspace(Date_Num_limit[0]*interpol.slope/86400+interpol.intercept,Date_Num_limit[1]*interpol.slope/86400+interpol.intercept,20),c='black')
         cbar.ax.set_ylabel('NP abundance (#/L)', fontsize=18)
+        plt.gca().invert_yaxis()
         plt.ylabel('Depth (m)', fontsize=18)
         plt.title('%smm, thr: %0.1f #/L, Settling vel: %0.2f m/d, fit signif: %s' % (NP_sizeclass,threshold_value,interpol.slope,signif_label), fontsize=18)
         nxticks = 10
