@@ -41,7 +41,8 @@ for a in RAWfilename:
 # I extract the data
 Date_Time=np.array(data['Date_Time'][sel_filename])
 depth=np.array(data['Depth [m]'][sel_filename])
-PSD_columns=data.columns[28:42]
+PSD_columns=data.columns[28:42]         #Column labels containing the size classes for which UVP works, and that I use for the fit
+PSD_columns_extrapolation=data.columns[12:28]     #Column labels containing the size classes for which UVP does not works, and for which I extrapolate the abundance
 
 # I convert the dates to float values (in seconds from 1970 1 1)
 Date_Num=np.r_[0:depth.size]
@@ -89,8 +90,28 @@ for i_PSD in range(0,PSD_columns.size):
         PSD_depth[i_depth,i_PSD]=np.nansum(PartConc_depth)/PSD_bin_width[i_PSD] #I divide by PSD_bin_width[i_PSD] in order to normalise
 
 ########################################################################################################################
-#I plot, once for every depth bin
+#I extract the width and mean values for the smaller size classes
 ########################################################################################################################
+
+PSD_extrapolated_bin_start=np.squeeze(np.zeros((PSD_columns_extrapolation.size,1)))
+PSD_extrapolated_bin_end = np.squeeze(np.zeros((PSD_columns_extrapolation.size,1)))
+PSD_extrapolated_bin_width=np.squeeze(np.zeros((PSD_columns_extrapolation.size,1)))
+PSD_extrapolated_bin_mean=np.squeeze(np.zeros((PSD_columns_extrapolation.size,1)))
+
+i_PSD = 0
+for i_PSD in range(0,PSD_columns_extrapolation.size):
+    PSD_columns_name = PSD_columns_extrapolation[i_PSD]
+    PSD_extrapolated_bin_start[i_PSD]=float(PSD_columns_name.split()[-2].split('-')[0])
+    PSD_extrapolated_bin_end[i_PSD] = float(PSD_columns_name.split()[-2].split('-')[1])
+    PSD_extrapolated_bin_width[i_PSD] = PSD_extrapolated_bin_end[i_PSD] - PSD_extrapolated_bin_start[i_PSD]
+    PSD_extrapolated_bin_mean[i_PSD] = (PSD_extrapolated_bin_end[i_PSD] + PSD_extrapolated_bin_start[i_PSD])*0.5
+
+PSD_extrapolated_bin_mean_log=np.log(PSD_extrapolated_bin_mean)
+
+########################################################################################################################
+#I extrapolate the PSD for the smaller sizes for each depth bin and I plot
+########################################################################################################################
+PSD_extrapolated_depth=np.zeros((list_depths.size-1,PSD_columns_extrapolation.size))
 
 i_depth=0
 for i_depth in range(0,list_depths.size-1):
@@ -103,9 +124,11 @@ for i_depth in range(0,list_depths.size-1):
     y = np.log(PSD_depth_tmp)
     sel=~np.isinf(y);x=x[sel];y=y[sel]
     (interpol, slpe_ci, _, signif, signif_label) = lin_fit(x,y)
+    PSD_extrapolated_depth_tmp = np.exp(PSD_extrapolated_bin_mean_log * interpol.slope + interpol.intercept)
+    PSD_extrapolated_depth[i_depth,:]=PSD_extrapolated_depth_tmp*PSD_extrapolated_bin_width
 
     width, height = 0.7, 0.68
-    set_ylim_lower, set_ylim_upper = 0.1, 10**12
+    set_ylim_lower, set_ylim_upper = 0.1, 10**12.1
     set_xlim_lower, set_xlim_upper = 0.001,2.7
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.2, 0.25, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(set_xlim_lower, set_xlim_upper))
@@ -114,9 +137,10 @@ for i_depth in range(0,list_depths.size-1):
     plt.plot(np.exp(np.linspace(np.log(set_xlim_lower), set_xlim_upper, 20)),
              np.exp(np.linspace(np.log(set_xlim_lower) * interpol.slope + interpol.intercept,
                                 set_xlim_upper * interpol.slope + interpol.intercept, 20)), c='red',label='Fit')
+    plt.scatter(PSD_extrapolated_bin_mean, PSD_extrapolated_depth_tmp,c='red',s=3,label='Size classes\nextrapolated')
     plt.plot(PSD_bin_mean, PSD_depth_tmp,c='blue',label='data')
     plt.xlabel('Size (mm)',fontsize=10)
-    plt.ylabel('Normalised Abundance (#/L)',fontsize=10)
+    plt.ylabel('Normalised Abundance (#/L)',fontsize=8)
     plt.legend(fontsize=10)
     plt.title('Depth: %d m; R$^2$=%0.2f, Signif: %s' % (depth_tmp,interpol.rvalue**2,signif_label),fontsize=10)
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
