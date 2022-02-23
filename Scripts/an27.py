@@ -43,19 +43,19 @@ for i in Date_Num:
     Date_Num[i] = calendar.timegm(date_time_obj.timetuple())
     #datetime.utcfromtimestamp(Date_Num[i])
 
-threshold_min_list=np.array([340,12,7,3,1.,0.4])
+threshold_min_list=np.array([340,12,7,3,1.,.4])
 threshold_max_list=np.array([400,21,13,6,2.5,.8])
 Date_Num_limit_min=1626742080+86400*np.array([0,0,0,0,0,0])
 Date_Num_limit_max=1630358605+86400*np.array([0,0,0,0,-14,-14])
 nthresholds=5 #how many thresholds I consider for each size class
 settling_vel_mean=np.array([]);settling_vel_std=np.array([]);sizeclass_list=np.array([])
-iNP=30
-for iNP in range(25,31):
+iNP=27
+for iNP in range(27,32):
 #########Begin text to indent
-    threshold_value_list=np.linspace(threshold_min_list[iNP-25],threshold_max_list[iNP-25],nthresholds)
-    if iNP<=27: threshold_value_list=np.round(threshold_value_list)
+    threshold_value_list=np.linspace(threshold_min_list[iNP-27],threshold_max_list[iNP-27],nthresholds)
+    if iNP<=29: threshold_value_list=np.round(threshold_value_list)
     threshold_value=threshold_value_list[3]
-    Date_Num_limit=np.array([Date_Num_limit_min[iNP-25],Date_Num_limit_max[iNP-25]])
+    Date_Num_limit=np.array([Date_Num_limit_min[iNP-27],Date_Num_limit_max[iNP-27]])
     NP_abun=data.values[sel_filename,iNP]
     NP_abun=NP_abun.astype('float')
     NP_sizeclass=data.axes[1][iNP]
@@ -123,7 +123,7 @@ for iNP in range(25,31):
         plt.grid(color='k', linestyle='dashed', linewidth=0.5)
         NP_sizeclass_save = NP_sizeclass
         if NP_sizeclass == '0.0806-0.102':    NP_sizeclass_save = '0.081-0.102'
-        plt.savefig('../Plots/an04/test_slope_NP%smm_thr%0.1f_an04.pdf' % (NP_sizeclass_save,threshold_value), dpi=200)
+        plt.savefig('../Plots/an27/test_slope_NP%smm_thr%0.1f_an27.pdf' % (NP_sizeclass_save,threshold_value), dpi=200)
         #plt.show()
         #input("Press Enter to continue...")
         plt.close()
@@ -133,15 +133,23 @@ for iNP in range(25,31):
     settling_vel_mean=np.append(settling_vel_mean,np.mean(settling_vel))
     settling_vel_std=np.append(settling_vel_std,np.std(settling_vel))
 
-fig = plt.figure(1, figsize=(12, 8))
+b_k2002 = 132
+eta_k2002 = 0.62
+sink_k2002 = b_k2002*(np.power(sizeclass_list, eta_k2002))
+
+width, height = 0.8, 0.68
+fig = plt.figure(1, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.15, 0.15, width, height])
 plt.plot(sizeclass_list,np.abs(settling_vel_mean),'o')
-plt.plot(sizeclass_list,np.abs(settling_vel_mean))
+plt.plot(sizeclass_list,np.abs(settling_vel_mean),label='This paper')
 plt.errorbar(sizeclass_list,np.abs(settling_vel_mean),yerr=settling_vel_std,capsize=5)
+plt.plot(sizeclass_list,np.abs(sink_k2002),label='xxx et al.')
 plt.grid(color='k', linestyle='dashed', linewidth=0.3)
-plt.xlabel('Size class (mm)', fontsize=18)
-plt.ylabel('Settling velocity (m/d)', fontsize=18)
-plt.title('Relationship between size class and settling velocity', fontsize=18)
-plt.xticks(fontsize=12),plt.yticks(fontsize=12)
-plt.savefig('../Plots/an04/relationship_size_vs_settlingVelocity_an04.pdf', dpi=200)
+plt.xlabel('Size class (mm)', fontsize=10)
+plt.ylabel('Settling velocity (m/d)', fontsize=10)
+plt.title('Relationship between size class\nand settling velocity', fontsize=10)
+plt.xticks(fontsize=10),plt.yticks(fontsize=10)
+plt.legend(fontsize=7)
+plt.savefig('../Plots/an27/relationship_size_vs_settlingVelocity_an27.pdf', dpi=200)
 plt.close()
 

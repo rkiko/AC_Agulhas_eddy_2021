@@ -200,3 +200,13 @@ and I compare it with the PARR and carbon consumption associated to oxygen consu
 an26
 
 I plot the diffPSD_slope_func
+
+
+\
+an27
+
+It is exactly as an04, so that I plot the relationship between particle size and particle
+sinking speed extracted from the profiles of particle abundance in time and depth.
+The difference is that I use the data corrected for the particle concentration, 
+so I use different thresholds. I also plot a function of the sinking speed vs size from an
+a different work.
