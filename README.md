@@ -226,3 +226,15 @@ an29
 The principle of this script is the same as in an28, with the difference that the PSD slope is extracted 
 for each profile separately. In this way, I can evaluate how the particle abundance for 
 the smaller size classes changes with time (even if the uncertainty is larger)
+
+\
+an30
+
+In this script I download the data from the transect between South Africa and South America,
+I conver the raw data, I append the CTD data and I calculate the fluxes and respiration rates.
+
+\
+an31
+
+In this script I take the flux data from the transect between South Africa and South America
+and I compare it with the data from our cruise

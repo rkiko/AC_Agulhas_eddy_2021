@@ -11,15 +11,27 @@ from paruvpy import calculate_respi_diffusion_limited_w_header_from_df_func
 
 if __name__ == '__main__':
     import os, sys
+    import warnings
+    import numpy as np
     from pathlib import Path
     path_to_data = Path('~/GIT/AC_Agulhas_eddy_2021/Data').expanduser()
     os.chdir(str(path_to_data))
-    df = pd.read_csv("Ecopart_processed_data.tsv", sep='\t') #use nrows for testing
+
+    filename_processed = sys.argv[1]
+    filename_diagnostics = sys.argv[2]
+
+    df = pd.read_csv("%s" % filename_processed, sep='\t')
     df = calculate_flux_w_header_from_df_func(df)
     df = calculate_mip_and_map_abundance_w_header_from_df_func(df)
     df = calculate_mip_and_map_poc_cont_w_header_from_df_func(df)
-    temperature = df["Temperature [degrees Celsius]"]
-    oxygen = df["Doxy [micromol/kg]"]
+    temperature = df["Temperature [degrees Celsius]"].copy()
+    oxygen = df["Doxy [micromol/kg]"].copy()
+
+
+    warnings.filterwarnings("ignore", message="A value is trying to be set on a copy of a slice from a DataFrame")
+    sel = (temperature == 99999) & (oxygen == 99999)
+    temperature[sel] = np.nan
+    oxygen[sel] = np.nan
 
     df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4,'Kalvelage')
     df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4,'Iversen')
@@ -29,8 +41,8 @@ if __name__ == '__main__':
     df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4, 'Reminer', kRemPoc=0.10000)
     df = calculate_respi_diffusion_limited_w_header_from_df_func(df, temperature, oxygen, 4, 'Reminer', kRemPoc=0.50000)
 
-    df = df[["RAWfilename", "Latitude", "Longitude", "Date_Time", "Pressure [dbar]", "Vol [L] (sampled for this depth bin)", "MiP_abun", "MaP_abun", "Mip_POC_cont_mgC_m3", "Map_POC_cont_mgC_m3", "Flux_mgC_m2", "Respi_nmolO2_l_h", "Respi_Iversen_nmolO2_l_h",
+    df = df[["RAWfilename", "CTD_filename","Cruise", "Latitude", "Longitude", "Date_Time", "Pressure [dbar]", "Vol [L] (sampled for this depth bin)", "MiP_abun", "MaP_abun", "Mip_POC_cont_mgC_m3", "Map_POC_cont_mgC_m3", "Flux_mgC_m2", "Respi_nmolO2_l_h", "Respi_Iversen_nmolO2_l_h",
              "Respi_Reminer_kRemPoc0013_nmolO2_l_h","Respi_Reminer_kRemPoc0003_nmolO2_l_h","Respi_Reminer_kRemPoc0031_nmolO2_l_h","Respi_Reminer_kRemPoc0100_nmolO2_l_h","Respi_Reminer_kRemPoc0500_nmolO2_l_h"]]
 
-    df.to_csv('Ecopart_mip_map_flux_data.tsv', sep='\t', index=False)
+    df.to_csv('%s' % filename_diagnostics, sep='\t', index=False)
 
