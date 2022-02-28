@@ -17,12 +17,16 @@ if __name__ == '__main__':
     from pathlib import Path
     path_to_data = Path('~/GIT/AC_Agulhas_eddy_2021/Data').expanduser()
     os.chdir(str(path_to_data))
+
+    filename_input = sys.argv[1]
+    filename_output = sys.argv[2]
+
     test = 0
     if test == 1:
-        df = pd.read_csv("Ecopart_histogram_data_raw.tsv", sep='\t', nrows = 200) #use nrows for testing
+        df = pd.read_csv("%s" % filename_input, sep='\t', nrows=200)  # use nrows for testing
     else:
-        df = pd.read_csv("Ecopart_histogram_data_raw.tsv", sep='\t') #use nrows for testing
+        df = pd.read_csv("%s" % filename_input, sep='\t') #use nrows for testing
     df = process_raw_ecopart_histo_df(df)
-    df.to_csv('Ecopart_processed_data.tsv', sep='\t', index=False)
+    df.to_csv('%s' % filename_output, sep='\t', index=False)
 
 
