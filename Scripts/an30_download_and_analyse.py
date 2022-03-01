@@ -9,7 +9,6 @@ if __name__ == '__main__':
     os.chdir(str(path_to_scripts))
     home = str(Path.home())
     sys.path.insert(0, "%s/GIT/Lagrangian_uvp/Scripts" % home)
-    # from Download_Ecopart import Download_Ecopart
     id_project=231
     filename0='Ecopart'
 
