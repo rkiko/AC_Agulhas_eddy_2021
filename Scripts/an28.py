@@ -25,7 +25,7 @@ list_depths=np.r_[0:depth_f+delta_bin*0.5:delta_bin]
 ########################################################################################################################
 #I process the data
 ########################################################################################################################
-data = pd.read_csv("../Data/Ecopart_processed_data.tsv", sep='\t')
+data = pd.read_csv("../Data/Ecopart_processed_data_356.tsv", sep='\t')
 
 RAWfilename=data.RAWfilename
 #I select only the profiles data, which contain 'ASC' in the filename, and I exclude the parkings

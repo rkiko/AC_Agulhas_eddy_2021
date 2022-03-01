@@ -24,7 +24,7 @@ delta_bin=20 #thickness (in meters) of the bin I used to interpolate the psd slo
 ########################################################################################################################
 #I process the data
 ########################################################################################################################
-data = pd.read_csv("../Data/Ecopart_processed_data.tsv", sep='\t')
+data = pd.read_csv("../Data/Ecopart_processed_data_356.tsv", sep='\t')
 
 RAWfilename=data.RAWfilename
 #I select only the profiles data, which contain 'ASC' in the filename, and I exclude the parkings

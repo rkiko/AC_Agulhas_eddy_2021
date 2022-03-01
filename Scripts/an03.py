@@ -10,7 +10,7 @@ from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
 
-filename='../Data/Ecopart_processed_data.tsv'
+filename='../Data/Ecopart_processed_data_356.tsv'
 data=pd.read_csv(filename, sep='\t', header=0)
 data.columns = data.columns.str.replace(' ','_') # I remove spaces and [] symbols
 data.columns = data.columns.str.replace('[','')

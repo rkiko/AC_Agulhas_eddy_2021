@@ -22,7 +22,7 @@ from lin_fit import lin_fit
 ########################################################################################################################
 #I process the data
 ########################################################################################################################
-data = pd.read_csv("../Data/Ecopart_processed_data.tsv", sep='\t')
+data = pd.read_csv("../Data/Ecopart_processed_data_356.tsv", sep='\t')
 
 RAWfilename=data.RAWfilename
 #I select only the profiles data, which contain 'ASC' in the filename, and I exclude the parkings
