@@ -29,7 +29,7 @@ if __name__ == '__main__':
     os.system("python Append_CTD_data.py %s" % (filename_processed))
     print('Biogeochemical variables attached to processed data of project id %d ' % id_project)
 
-    filename_diagnostics='%s_diagnostics_data_%d.tsc' % (filename0,id_project)
+    filename_diagnostics='%s_diagnostics_data_%d.tsv' % (filename0,id_project)
     os.system("python Calculate_particle_diagnostics.py %s %s" % (filename_processed,filename_diagnostics))
     print('Calculation of diagnostics of project id %d finished' % id_project)
 

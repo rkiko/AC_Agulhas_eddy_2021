@@ -1,5 +1,4 @@
 .DS_Store
 .idea
 Scripts/__pycache__
-Data/Ecopart_histogram_data_raw_231.tsv
-Data/Ecopart_processed_data_231.tsv
+Data/*231.tsv
