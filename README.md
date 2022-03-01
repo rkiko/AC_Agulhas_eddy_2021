@@ -236,5 +236,15 @@ I conver the raw data, I append the CTD data and I calculate the fluxes and resp
 \
 an31
 
+As in an 25, I calculate all the metrics necessary to estimate the carbon budget (
+the Flux vs depth and time, the integrated POC, the PARR vs depth).
+I do a loop on different layers (basically every 100m between 200 and 600m) and I calculate
+the theoretical carbon disappearing due to respiration (difference of delta flux and delta integrated POC)
+and I compare it with the PARR and carbon consumption associated to oxygen consumption with a plot.
+The difference with an25 script is that I use (i) the respiration and MiP and MaP budgets calcualted
+considering also the smallest size classes; (ii) the flux calculated considering also the smallest size classes 
+and a different eta and b coefficient
+
+
 In this script I take the flux data from the transect between South Africa and South America
 and I compare it with the data from our cruise

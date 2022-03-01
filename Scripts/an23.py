@@ -35,7 +35,7 @@ dayf_float=calendar.timegm(dayf.timetuple())
 ########################################################################################################################
 
 #I load the file with the flux and POC
-filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_mip_map_flux_data.tsv' % home
+filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_diagnostics_data_356.tsv' % home
 data=pd.read_csv(filename_ecopart, sep='\t', header=0)
 RAWfilename=data.RAWfilename
 
@@ -189,7 +189,7 @@ dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
 ############### I load the PARR data from Ecopart
-filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_mip_map_flux_data.tsv' % home
+filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_diagnostics_data_356.tsv' % home
 data=pd.read_csv(filename_ecopart, sep='\t', header=0)
 RAWfilename=data.RAWfilename
 
