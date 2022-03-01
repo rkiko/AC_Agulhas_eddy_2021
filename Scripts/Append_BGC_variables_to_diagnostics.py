@@ -11,8 +11,10 @@ if __name__ == '__main__':
     from pathlib import Path
     path_to_data = Path('~/GIT/AC_Agulhas_eddy_2021/Data').expanduser()
     os.chdir(str(path_to_data))
-    df = pd.read_csv("Ecopart_mip_map_flux_data.tsv", sep='\t')
+
+    filename_diagnostics = sys.argv[1]
+    df = pd.read_csv(filename_diagnostics, sep='\t')
     df = include_Coriolis_data(df)
-    df.to_csv('Ecopart_mip_map_flux_data.tsv', sep='\t', index=False)
+    df.to_csv(filename_diagnostics, sep='\t', index=False)
 
 

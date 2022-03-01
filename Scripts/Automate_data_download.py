@@ -6,7 +6,6 @@ if __name__ == '__main__':
     from pathlib import Path
 
     path_to_scripts = Path('~/GIT/AC_Agulhas_eddy_2021/Scripts').expanduser()
-    path_to_data = Path('~/GIT/AC_Agulhas_eddy_2021/Data').expanduser()
     os.chdir(str(path_to_scripts))
     home = str(Path.home())
     sys.path.insert(0, "%s/GIT/Lagrangian_uvp/Scripts" % home)
@@ -35,6 +34,7 @@ if __name__ == '__main__':
     os.system("python Calculate_particle_diagnostics.py %s %s" % (filename_processed, filename_diagnostics))
     print('Calculation of diagnostics of project id %d finished' % id_project)
 
-    os.system("python Calculate_particle_diagnostics.py")
-    os.system("python Append_BGC_variables_to_diagnostics.py")
+    os.system("python Append_BGC_variables_to_diagnostics.py %s" % (filename_diagnostics))
+    print('Biogeochemical variables attached to diagnostics of project id %d ' % id_project)
+
 
