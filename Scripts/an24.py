@@ -156,7 +156,7 @@ for i in range(0,list_dates.size):
         Flux_filtered_depthf = np.append(Flux_filtered_depthf, np.mean(z[sel_depthf]) )
 
 ########################################################################################################################
-#I plot flux from our data and form literature
+#I plot flux from our data and from literature
 ########################################################################################################################
 fs=10
 width, height = 0.78, 0.75

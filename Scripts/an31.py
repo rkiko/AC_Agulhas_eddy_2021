@@ -586,7 +586,7 @@ for ndays in ndays_list:
     plt.legend(fontsize=7)
     plt.gca().invert_yaxis()
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an31/CarbonBudget_vs_depth_%d%02d%02dto%d%02d%02d_01oldway_an31.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an31/CarbonBudget_vs_depth_%d%02d%02dto%d%02d%02d_y01oldwa_an31.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
     ##################################################################
