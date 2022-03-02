@@ -93,6 +93,7 @@ for a in RAWfilename:
 Date_Time=np.array(data['Date_Time'][sel_filename])
 depth=np.array(data['Depth [m]'][sel_filename])
 Flux = np.array(data['Flux_mgC_m2'][sel_filename])
+Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
 Flux_extended = np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
 Flux_extended_eta_b = np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
 
@@ -110,6 +111,7 @@ list_dates=list_dates[(list_dates>=day0_float)&(list_dates<=dayf_float)]
 ##############################################
 # I filter the Flux
 Flux_filtered_depthf=np.array([])
+Flux_eta_b_filtered_depthf=np.array([])
 Flux_extended_filtered_depthf=np.array([])
 Flux_extended_eta_b_filtered_depthf=np.array([])
 i=0
@@ -121,6 +123,12 @@ for i in range(0,list_dates.size):
         z = savgol_filter(z, 5, 1)
         sel_depthf=(np.abs(y)>depthf-delta_depth)&(np.abs(y)<=depthf+delta_depth)
         Flux_filtered_depthf = np.append(Flux_filtered_depthf, np.mean(z[sel_depthf]) )
+    z=Flux_eta_b[sel];x=Date_Num[sel];y=depth[sel]
+    sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+    if (sum(sel2) > 0)&(y.max()>depthf):
+        z = savgol_filter(z, 5, 1)
+        sel_depthf=(np.abs(y)>depthf-delta_depth)&(np.abs(y)<=depthf+delta_depth)
+        Flux_eta_b_filtered_depthf = np.append(Flux_eta_b_filtered_depthf, np.mean(z[sel_depthf]) )
     z=Flux_extended[sel];x=Date_Num[sel];y=depth[sel]
     sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
     if (sum(sel2) > 0)&(y.max()>depthf):
@@ -164,6 +172,7 @@ sel_longitude = (Lon>lon0)&(Lon<lonf)
 Date_Time=np.array(data['Date_Time'][sel_longitude])
 depth=np.array(data['Depth [m]'][sel_longitude])
 Flux = np.array(data['Flux_mgC_m2'][sel_longitude])
+Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_longitude])
 Flux_extended = np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_longitude])
 Flux_extended_eta_b = np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_longitude])
 
@@ -180,6 +189,7 @@ list_dates=np.sort(np.unique(Date_Num))
 ##############################################
 # I filter the Flux
 Flux_filtered_depthf_231=np.array([])
+Flux_eta_b_filtered_depthf_231=np.array([])
 Flux_extended_filtered_depthf_231=np.array([])
 Flux_extended_eta_b_filtered_depthf_231=np.array([])
 i=0
@@ -191,6 +201,12 @@ for i in range(0,list_dates.size):
         z = savgol_filter(z, 5, 1)
         sel_depthf=(np.abs(y)>depthf-delta_depth)&(np.abs(y)<=depthf+delta_depth)
         Flux_filtered_depthf_231 = np.append(Flux_filtered_depthf_231, np.mean(z[sel_depthf]) )
+    z=Flux_eta_b[sel];x=Date_Num[sel];y=depth[sel]
+    sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+    if (sum(sel2) > 0)&(y.max()>depthf):
+        z = savgol_filter(z, 5, 1)
+        sel_depthf=(np.abs(y)>depthf-delta_depth)&(np.abs(y)<=depthf+delta_depth)
+        Flux_eta_b_filtered_depthf_231 = np.append(Flux_eta_b_filtered_depthf_231, np.mean(z[sel_depthf]) )
     z=Flux_extended[sel];x=Date_Num[sel];y=depth[sel]
     sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
     if (sum(sel2) > 0)&(y.max()>depthf):
@@ -226,7 +242,18 @@ plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et
 plt.savefig('../Plots/an32/01oldway_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
-# Second plot: flux calculated considering smallest size classes but with old eta and b values
+# Second plot: flux calculated without considering smallest size classes and with old eta and b values
+fig = plt.figure(1, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.18, 0.15, width, height])
+plt.boxplot([Flux_eta_b_filtered_depthf,Flux_eta_b_filtered_depthf_231,POC_in_domain])
+plt.ylim(0,100)
+plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
+plt.title('Argo Flux no small size classes, eta=0.62,b=66\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
+plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
+plt.savefig('../Plots/an32/02eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+plt.close()
+
+# Third plot: flux calculated considering smallest size classes but with old eta and b values
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_extended_filtered_depthf,Flux_extended_filtered_depthf_231,POC_in_domain])
@@ -234,10 +261,10 @@ plt.ylim(0,100)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux with small size classes, old eta and b,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
-plt.savefig('../Plots/an32/02extended_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+plt.savefig('../Plots/an32/03extended_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
-# Third plot: flux calculated considering smallest size classes and with different eta and b values (based on the
+# Fourth plot: flux calculated considering smallest size classes and with different eta and b values (based on the
 # relationship between sinking speed and particle size)
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
@@ -246,6 +273,6 @@ plt.ylim(0,100)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux with small size classes, eta=0.62,b=66,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
-plt.savefig('../Plots/an32/03extended_eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+plt.savefig('../Plots/an32/04extended_eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
