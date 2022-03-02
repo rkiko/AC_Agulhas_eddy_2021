@@ -245,6 +245,12 @@ The difference with an25 script is that I use (i) the respiration and MiP and Ma
 considering also the smallest size classes; (ii) the flux calculated considering also the smallest size classes 
 and a different eta and b coefficient
 
+\
+an32
 
 In this script I take the flux data from the transect between South Africa and South America
-and I compare it with the data from our cruise
+and I compare it with the data from our cruise and with the independent trap sediments from 
+Mouw et al. (see script an24). I calculate the flux for our transect and for the South
+Africa South America transect in 3 ways (i) the old way, in which I do not consider smallest
+size classes and old eta and b values; (ii) including smallest size classes, old eta and b values
+(iii) including smallest size classes and new eta and b values
