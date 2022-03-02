@@ -166,7 +166,7 @@ def resize_colobar(event):
 
 anom_meanE_meanOut=chl_inside_mean-chl_outside_mean
 anom_meanE_meanOut_4float=anom_meanE_meanOut[sel_Satel2Float[sel_eddyCont_missing_days]]
-
+chl_max_plot=0.6
 set_xlim_lower, set_xlim_upper = 5,18.5#min(lonEddy.min(),lon_float.min())-window_margin1,max(lon_float.max(),lonEddy.max())+window_margin1
 set_ylim_lower, set_ylim_upper = -37,-31#min(latEddy.min(),lat_float.min())-window_margin1,max(lat_float.max(),latEddy.max())+window_margin1
 # set_xlim_lower, set_xlim_upper = 5,22 # For the larger plot
@@ -181,13 +181,13 @@ plot1 = ax.scatter(lonEddy, latEddy, c=anom_meanE_meanOut, cmap='RdBu_r', vmin=-
 # plot2 = ax.scatter(lon_float_inside, lat_float_inside, facecolor='none',marker='d',edgecolor='k',linewidth=1.5,s=65,zorder=5)  # cmap='Blues_r')
 plot3 = ax.scatter(lon_float_outside, lat_float_outside, c='k',marker='x', s=100,zorder=4)  # cmap='Blues_r')
 ax.plot(lon_float, lat_float, 'k', alpha=0.9,zorder=15,linewidth=2.5)
-plot2 = plt.scatter(0, 0, c=chl_inside_mean_4float[25],cmap='Greens', vmin=0, vmax=0.5, s=1)
+plot2 = plt.scatter(0, 0, c=chl_inside_mean_4float[25],cmap='Greens', vmin=0, vmax=chl_max_plot, s=1)
 a = plot2.to_rgba(chl_inside_mean_4float[25])
 plt.plot(0, 0,c=a,linewidth=3, label='Eddy contour')
 # plt.scatter(0,0, facecolors=a, marker="^", s=100,edgecolors='k',linewidth=1.5, label='Eddy center')
 for i in [10, 25, 38, 50]:
     x = lonVmax_4float[:, i];y = latVmax_4float[:, i]
-    plot2 = plt.scatter(x, y,c=lonVmax_4float[:, i]*0+chl_inside_mean_4float[i], cmap='Greens',vmin=0,vmax=0.5,s=1)
+    plot2 = plt.scatter(x, y,c=lonVmax_4float[:, i]*0+chl_inside_mean_4float[i], cmap='Greens',vmin=0,vmax=chl_max_plot,s=1)
     a=plot2.to_rgba(chl_inside_mean_4float[i])
     plt.plot(x,y,c=a,linewidth=3,zorder=10)
     plt.scatter(lonEddy_4float[i], latEddy_4float[i], c=anom_meanE_meanOut_4float[i], cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='k',linewidth=0.5,zorder=20)
@@ -197,6 +197,17 @@ for i in [10, 25, 38, 50]:
         idtmp=np.where(y==np.nanmax(y))
     x1=x[idtmp][0];y1=y[idtmp][0]
     plt.plot(np.array([lonEddy_4float[i],x1]), np.array([latEddy_4float[i],y1]), c='k',alpha=0.2, linewidth=2, zorder=0)
+
+i=0
+for i in [0,60]:
+    x=lonVmax[:,i];y=latVmax[:,i]
+    plot2 = plt.scatter(x, y,c=lonVmax[:, i]*0+chl_inside_mean[i], cmap='Greens',vmin=0,vmax=chl_max_plot,s=1)
+    a=plot2.to_rgba(chl_inside_mean[i])
+    plt.plot(x,y,c=a,linewidth=3,zorder=10)
+    plt.scatter(lonEddy[i], latEddy[i], c=anom_meanE_meanOut[i], cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='k',linewidth=0.5,zorder=20)
+    idtmp=np.where(y==np.nanmax(y))
+    x1=x[idtmp][0];y1=y[idtmp][0]
+    plt.plot(np.array([lonEddy[i],x1]), np.array([latEddy[i],y1]), c='k',alpha=0.2, linewidth=2, zorder=0)
 
 divider = make_axes_locatable(ax)
 ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
