@@ -74,7 +74,10 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     Date_Time=np.array(data['Date_Time'][sel_filename])
     depth=np.array(data['Depth [m]'][sel_filename])
     Flux=np.array(data['Flux_mgC_m2'][sel_filename])
+    Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
+    Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
     MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
+    MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
     MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
     bbp_POC=np.array(data['bbp POC [mgC/m3]'][sel_filename])
 
@@ -99,6 +102,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     ##############################################
     # Step 1 and 2, filter and interpolation
     MiP_filtered=np.array([]);depth_MiP_filtered=np.array([]);Date_Num_MiP_filtered=np.array([])
+    MiP_extended_filtered=np.array([]);depth_MiP_extended_filtered=np.array([]);Date_Num_MiP_extended_filtered=np.array([])
     MaP_filtered=np.array([]);depth_MaP_filtered=np.array([]);Date_Num_MaP_filtered=np.array([])
     bbp_filtered=np.array([]);depth_bbp_filtered=np.array([]);Date_Num_bbp_filtered=np.array([])
 
@@ -111,6 +115,12 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
             MiP_filtered = np.concatenate((MiP_filtered, z))
             Date_Num_MiP_filtered = np.concatenate((Date_Num_MiP_filtered, x2))
             depth_MiP_filtered = np.concatenate((depth_MiP_filtered, y2))
+        z=MiP_POC_extended[sel];x=Date_Num[sel];y=depth[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            MiP_extended_filtered = np.concatenate((MiP_extended_filtered, z))
+            Date_Num_MiP_extended_filtered = np.concatenate((Date_Num_MiP_extended_filtered, x2))
+            depth_MiP_extended_filtered = np.concatenate((depth_MiP_extended_filtered, y2))
         z=MaP_POC[sel];x=Date_Num[sel];y=depth[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
@@ -130,6 +140,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     MiP_interp = griddata((Date_Num_MiP_filtered, depth_MiP_filtered), MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    MiP_extended_interp = griddata((Date_Num_MiP_extended_filtered, depth_MiP_extended_filtered), MiP_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     MaP_interp = griddata((Date_Num_MaP_filtered, depth_MaP_filtered), MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     bbp_interp = griddata((Date_Num_bbp_filtered, depth_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
@@ -137,10 +148,12 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     # Step 3, I calculate the mean MiP+MaP+bbp between depth0 and depthf between day0 and dayf
     sel_depth0_depthf = (np.abs(y_filtered) >= depth0) & (np.abs(y_filtered) < depthf)
     MiP_POC_depth0_depthf=np.mean(MiP_interp[sel_depth0_depthf,:],0)
+    MiP_POC_extended_depth0_depthf=np.mean(MiP_extended_interp[sel_depth0_depthf,:],0)
     MaP_POC_depth0_depthf=np.mean(MaP_interp[sel_depth0_depthf,:],0)
     bbp_POC_depth0_depthf=np.mean(bbp_interp[sel_depth0_depthf,:],0)
 
     Integrated_POC_mgC_m3 = MiP_POC_depth0_depthf + MaP_POC_depth0_depthf + bbp_POC_depth0_depthf
+    Integrated_POC_extended_mgC_m3 = MiP_POC_extended_depth0_depthf + MaP_POC_depth0_depthf + bbp_POC_depth0_depthf
     list_dates_Integrated_POC = x_filtered.copy()
     ########################################################################################################################
     # Here I extract the flux values at depth0 and depthf. To do so, (i) I filter it with a savgol function, then (ii) I
@@ -151,6 +164,8 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     ##############################################
     # Step 1 and 2, filter and interpolation
     Flux_filtered=np.array([]);depth_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([])
+    Flux_extended_filtered=np.array([]);depth_Flux_extended_filtered=np.array([]);Date_Num_Flux_extended_filtered=np.array([])
+    Flux_extended_filtered_eta_b=np.array([]);depth_Flux_extended_filtered_eta_b=np.array([]);Date_Num_Flux_extended_filtered_eta_b=np.array([])
     i=0
     for i in range(0,list_dates.size):
         sel=Date_Num==list_dates[i]
@@ -161,6 +176,20 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
             Flux_filtered = np.concatenate((Flux_filtered, z))
             Date_Num_Flux_filtered = np.concatenate((Date_Num_Flux_filtered, x2))
             depth_Flux_filtered = np.concatenate((depth_Flux_filtered, y2))
+        z=Flux_extended[sel];x=Date_Num[sel];y=depth[sel]
+        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            Flux_extended_filtered = np.concatenate((Flux_extended_filtered, z))
+            Date_Num_Flux_extended_filtered = np.concatenate((Date_Num_Flux_extended_filtered, x2))
+            depth_Flux_extended_filtered = np.concatenate((depth_Flux_extended_filtered, y2))
+        z=Flux_extended_eta_b[sel];x=Date_Num[sel];y=depth[sel]
+        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            Flux_extended_filtered_eta_b = np.concatenate((Flux_extended_filtered_eta_b, z))
+            Date_Num_Flux_extended_filtered_eta_b = np.concatenate((Date_Num_Flux_extended_filtered_eta_b, x2))
+            depth_Flux_extended_filtered_eta_b = np.concatenate((depth_Flux_extended_filtered_eta_b, y2))
 
     # I define the x and y arrays for the Flux interpolation
     x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
@@ -168,17 +197,34 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     Flux_interp = griddata((Date_Num_Flux_filtered, depth_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_extended_interp = griddata((Date_Num_Flux_extended_filtered, depth_Flux_extended_filtered), Flux_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_extended_eta_b_interp = griddata((Date_Num_Flux_extended_filtered_eta_b, depth_Flux_extended_filtered_eta_b), Flux_extended_filtered_eta_b,(x_filtered_g, y_filtered_g), method="nearest")
 
     ##############################################
     # Step 3, flux extraction at depth0 and depthf
     Flux_depth0 = np.array([]);Flux_depthf = np.array([])
+    Flux_extended_depth0 = np.array([]);Flux_extended_depthf = np.array([])
+    Flux_extended_eta_b_depth0 = np.array([]);Flux_extended_eta_b_depthf = np.array([])
 
     for i in range(0,Flux_interp.shape[1]):
         z=Flux_interp[:,i]
         sel_layer = (np.abs(y_filtered) >= depth0-delta_depth_flux) & (np.abs(y_filtered) < depth0+delta_depth_flux)
         Flux_depth0 = np.append(Flux_depth0, np.mean(z[sel_layer]))
-        sel_layer = (np.abs(y_filtered) >= depthf-delta_depth_flux) & (np.abs(y_filtered) < depthf+delta_depth_flux)
+        sel_layer = (np.abs(y_filtered) >= depthf - delta_depth_flux) & (np.abs(y_filtered) < depthf + delta_depth_flux)
         Flux_depthf = np.append(Flux_depthf, np.mean(z[sel_layer]))
+
+        z=Flux_extended_interp[:,i]
+        sel_layer = (np.abs(y_filtered) >= depth0 - delta_depth_flux) & (np.abs(y_filtered) < depth0 + delta_depth_flux)
+        Flux_extended_depth0 = np.append(Flux_extended_depth0, np.mean(z[sel_layer]))
+        sel_layer = (np.abs(y_filtered) >= depthf - delta_depth_flux) & (np.abs(y_filtered) < depthf + delta_depth_flux)
+        Flux_extended_depthf = np.append(Flux_extended_depthf, np.mean(z[sel_layer]))
+
+        z=Flux_extended_eta_b_interp[:,i]
+        sel_layer = (np.abs(y_filtered) >= depth0 - delta_depth_flux) & (np.abs(y_filtered) < depth0 + delta_depth_flux)
+        Flux_extended_eta_b_depth0 = np.append(Flux_extended_eta_b_depth0, np.mean(z[sel_layer]))
+        sel_layer = (np.abs(y_filtered) >= depthf - delta_depth_flux) & (np.abs(y_filtered) < depthf + delta_depth_flux)
+        Flux_extended_eta_b_depthf = np.append(Flux_extended_eta_b_depthf, np.mean(z[sel_layer]))
+
 
     ########################################################################################################################
     # Here I calculate the carbon consumption rate due to (i) oxygen consumption and (ii) PARR
@@ -417,6 +463,10 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     Integrated_POC_dayf_mgC_m2 = Integrated_POC_mgC_m3[idxf] * layer_thickness
     Delta_Integrated_POC = Integrated_POC_dayf_mgC_m2 - Integrated_POC_day0_mgC_m2
 
+    Integrated_POC_extended_day0_mgC_m2 = Integrated_POC_extended_mgC_m3[idx0] * layer_thickness
+    Integrated_POC_extended_dayf_mgC_m2 = Integrated_POC_extended_mgC_m3[idxf] * layer_thickness
+    Delta_Integrated_POC_extended = Integrated_POC_extended_dayf_mgC_m2 - Integrated_POC_extended_day0_mgC_m2
+
     ############### I calculate the amount of POC entering from depht0 and exiting from dayf between day0 and dayf (in mgC/m2)
 
     # I extract the index of Flux_depth0/Flux_depthf which correspond to day0 (and dayf)
@@ -430,8 +480,23 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     tmp = Flux_depthf[idx0:idxf]
     Flux_depthf_mgC_m2 = np.mean(tmp) * ndays
 
+    tmp = Flux_extended_depth0[idx0:idxf]
+    Flux_extended_depth0_mgC_m2 = np.mean(tmp) * ndays
+    tmp = Flux_extended_depthf[idx0:idxf]
+    Flux_extended_depthf_mgC_m2 = np.mean(tmp) * ndays
+
+    tmp = Flux_extended_eta_b_depth0[idx0:idxf]
+    Flux_extended_eta_b_depth0_mgC_m2 = np.mean(tmp) * ndays
+    tmp = Flux_extended_eta_b_depthf[idx0:idxf]
+    Flux_extended_eta_b_depthf_mgC_m2 = np.mean(tmp) * ndays
+
     Delta_flux = Flux_depth0_mgC_m2 - Flux_depthf_mgC_m2
+    Delta_flux_extended = Flux_extended_depth0_mgC_m2 - Flux_extended_depthf_mgC_m2
+    Delta_flux_extended_eta_b = Flux_extended_eta_b_depth0_mgC_m2 - Flux_extended_eta_b_depthf_mgC_m2
+
     Theoretical_Budget = Delta_flux - Delta_Integrated_POC
+    Theoretical_Budget_extended = Delta_flux_extended - Delta_Integrated_POC_extended
+    Theoretical_Budget_extended_eta_b = Delta_flux_extended_eta_b - Delta_Integrated_POC_extended
 
     ############### I calculate the PARR and oxygen consumption between depth0 and depthf (in mgC/m2)
 
@@ -452,7 +517,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     O2_resp_mgC_m2_ci=np.mean(O2_resp_mgC_m2_vs_depth_ci[idx0:idxf,:],0)*-1
 
     ############### I return the data
-    return Theoretical_Budget,POC_resp_mgC_m2_list,POC_resp_mgC_m2_std_list,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,list_Respi_types
+    return Theoretical_Budget,Theoretical_Budget_extended,Theoretical_Budget_extended_eta_b,POC_resp_mgC_m2_list,POC_resp_mgC_m2_std_list,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,list_Respi_types
 
 ########################################################################################################################
 ########################################################################################################################
@@ -469,6 +534,8 @@ for ndays in ndays_list:
     dayf = day0 + timedelta(days=int(ndays))  # final date for the carbon budget calculation
 
     Theoretical_Budget_list = np.array([])
+    Theoretical_Budget_extended_list = np.array([])
+    Theoretical_Budget_extended_eta_b_list = np.array([])
     POC_resp_mgC_m2_list = np.array([])
     POC_resp_mgC_m2_std_list = np.array([])
     O2_resp_mgC_m2_list = np.array([])
@@ -476,8 +543,10 @@ for ndays in ndays_list:
     depth0=depth0_list[0]
     for depth0 in depth0_list:
         depthf = depth0+layer_thickness
-        (Theoretical_Budget,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes)=carbon_budget_calculation(depth0,depthf,day0,dayf)
+        (Theoretical_Budget,Theoretical_Budget_extended,Theoretical_Budget_extended_eta_b,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes)=carbon_budget_calculation(depth0,depthf,day0,dayf)
         Theoretical_Budget_list=np.append(Theoretical_Budget_list,Theoretical_Budget)
+        Theoretical_Budget_extended_list=np.append(Theoretical_Budget_extended_list,Theoretical_Budget_extended)
+        Theoretical_Budget_extended_eta_b_list=np.append(Theoretical_Budget_extended_eta_b_list,Theoretical_Budget_extended_eta_b)
         POC_resp_mgC_m2_list=np.append(POC_resp_mgC_m2_list,POC_resp_mgC_m2,axis=0)
         POC_resp_mgC_m2_std_list=np.append(POC_resp_mgC_m2_std_list,POC_resp_mgC_m2_std,axis=0)
         O2_resp_mgC_m2_list=np.append(O2_resp_mgC_m2_list,O2_resp_mgC_m2)
@@ -487,8 +556,12 @@ for ndays in ndays_list:
     POC_resp_mgC_m2_list=POC_resp_mgC_m2_list.reshape(depth0_list.size,len(RespirationTypes))
     POC_resp_mgC_m2_std_list=POC_resp_mgC_m2_std_list.reshape(depth0_list.size,len(RespirationTypes))
 
+    ##################################################################
+    # I plot
     fs=10
     width, height = 0.78, 0.75
+    ##################################################################
+    # First plot: budget calculated without considering smallest size classes and with old eta and b values
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
     plt.plot(O2_resp_mgC_m2_list,depth0_list+layer_thickness/2, 'k')
@@ -509,9 +582,68 @@ for ndays in ndays_list:
     plt.xlim(-200,7500)
     plt.ylabel('Depth (m)', fontsize=fs)
     plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
-    plt.title('Start date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day), fontsize=9)
+    plt.title('Old way\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day), fontsize=9)
     plt.legend(fontsize=7)
     plt.gca().invert_yaxis()
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an25/CarbonBudget_vs_depth_%d%02d%02dto%d%02d%02d.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an31/CarbonBudget_vs_depth_%d%02d%02dto%d%02d%02d_01oldway_an31.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.close()
+
+    ##################################################################
+    # Second plot: budget calculated considering smallest size classes but with old eta and b values
+    fig = plt.figure(1, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.18, 0.15, width, height])
+    plt.plot(O2_resp_mgC_m2_list,depth0_list+layer_thickness/2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list,depth0_list+layer_thickness/2, c='black',s=5)
+    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list[:, 1], O2_resp_mgC_m2_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    for iResp in range(9,12):
+        plt.plot(POC_resp_mgC_m2_list[:,iResp], depth0_list + layer_thickness / 2, c='b')
+
+    plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list[:,10] - POC_resp_mgC_m2_std_list[:,10]*0.5, POC_resp_mgC_m2_list[:,11] + POC_resp_mgC_m2_std_list[:,11]*0.5, facecolor='b',
+                        color='b', alpha=0.5, label='PARR\n(kR=0.013;\nBelcher)')
+
+    plt.plot(POC_resp_mgC_m2_list[:, 7], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+    plt.plot(POC_resp_mgC_m2_list[:, 12], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n(kR=0.1)')
+    plt.plot(POC_resp_mgC_m2_list[:, 13], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n(kR=0.5)')
+    plt.plot(Theoretical_Budget_extended_list, depth0_list + layer_thickness / 2, c='red', label='Theoretical\nPOC\nrespired')
+    plt.scatter(Theoretical_Budget_extended_list, depth0_list + layer_thickness / 2, c='red', s=5)
+
+    plt.xlim(-200,7500)
+    plt.ylabel('Depth (m)', fontsize=fs)
+    plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
+    plt.title('With small size classes, old eta and b\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day), fontsize=9)
+    plt.legend(fontsize=7)
+    plt.gca().invert_yaxis()
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/an31/CarbonBudget_vs_depth_%d%02d%02dto%d%02d%02d_02extended_an31.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.close()
+
+    ##################################################################
+    # Third plot: budget calculated considering smallest size classes and with different eta and b values (based on the
+    # relationship between sinking speed and particle size)
+    fig = plt.figure(1, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.18, 0.15, width, height])
+    plt.plot(O2_resp_mgC_m2_list,depth0_list+layer_thickness/2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list,depth0_list+layer_thickness/2, c='black',s=5)
+    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list[:, 1], O2_resp_mgC_m2_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    for iResp in range(9,12):
+        plt.plot(POC_resp_mgC_m2_list[:,iResp], depth0_list + layer_thickness / 2, c='b')
+
+    plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list[:,10] - POC_resp_mgC_m2_std_list[:,10]*0.5, POC_resp_mgC_m2_list[:,11] + POC_resp_mgC_m2_std_list[:,11]*0.5, facecolor='b',
+                        color='b', alpha=0.5, label='PARR\n(kR=0.013;\nBelcher)')
+
+    plt.plot(POC_resp_mgC_m2_list[:, 7], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+    plt.plot(POC_resp_mgC_m2_list[:, 12], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n(kR=0.1)')
+    plt.plot(POC_resp_mgC_m2_list[:, 13], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n(kR=0.5)')
+    plt.plot(Theoretical_Budget_extended_eta_b_list, depth0_list + layer_thickness / 2, c='red', label='Theoretical\nPOC\nrespired')
+    plt.scatter(Theoretical_Budget_extended_eta_b_list, depth0_list + layer_thickness / 2, c='red', s=5)
+
+    plt.xlim(-200,7500)
+    plt.ylabel('Depth (m)', fontsize=fs)
+    plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
+    plt.title('With small size classes, eta=0.62,b=66\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day), fontsize=9)
+    plt.legend(fontsize=7)
+    plt.gca().invert_yaxis()
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/an31/CarbonBudget_vs_depth_%d%02d%02dto%d%02d%02d_03extended_eta_b_an31.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
