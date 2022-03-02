@@ -26,6 +26,7 @@ if __name__ == '__main__':
     # Here I calculate the flux
     ####################################################################################################################
     df = calculate_flux_w_header_from_df_func(df)
+    df = calculate_flux_w_header_from_df_func(df,eta=0.62,b=66)
     df = calculate_flux_w_header_from_df_func(df,lower_limit=0.02539)
     df = calculate_flux_w_header_from_df_func(df,lower_limit=0.02539,eta=0.62,b=66)
     ####################################################################################################################
