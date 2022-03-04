@@ -254,3 +254,10 @@ Mouw et al. (see script an24). I calculate the flux for our transect and for the
 Africa South America transect in 3 ways (i) the old way, in which I do not consider smallest
 size classes and old eta and b values; (ii) including smallest size classes, old eta and b values
 (iii) including smallest size classes and new eta and b values
+
+\
+an33
+
+It is the same script as an18 (plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
+with the difference that I plot also these quantities calculated with (i) a 
+different eta and b value; (ii) a different eta and b value and the smallest size classes
