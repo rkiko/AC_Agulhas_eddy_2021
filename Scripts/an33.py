@@ -120,6 +120,7 @@ list_dates=list_dates[sel_insideEddy]
 parameter=Flux
 ipar=1
 parameter_shortname_list=['Flux','Flux_eta_b','Flux_extended','Flux_extended_eta_b','MiP_abund','MaP_abund','MiP_POC','MiP_POC_extended','MaP_POC']
+parameter_panellabel_list=['a','a','a','a','f','h','f','f','h']
 parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','Flux (mgC $m^{-2}$ $d^{-1}$)','Flux (mgC $m^{-2}$ $d^{-1}$)',
                        'Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$)','MaP abundance (# L$^{-1}$)'
                         ,'MiP (mgC $m^{-3}$)','MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)']
@@ -194,6 +195,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     plt.xticks(rotation=90,fontsize=12)
+    # I add the panel label
+    ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     plt.savefig('../Plots/an33/TimeSeries%02d%s_an33.pdf' % (ipar,parameter_shortname_list[ipar]),dpi=200)
@@ -237,6 +240,7 @@ ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 plt.legend(fontsize=14)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
+ax.text(-0.075, 1.05, 'b', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an33/IntegratedPOC_vs_time_an33.pdf' ,dpi=200)
 plt.close()
@@ -260,6 +264,7 @@ ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 plt.legend(fontsize=14)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
+ax.text(-0.075, 1.05, 'b', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an33/IntegratedPOC_extended_vs_time_an33.pdf' ,dpi=200)
 plt.close()

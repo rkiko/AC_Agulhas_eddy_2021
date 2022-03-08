@@ -242,7 +242,7 @@ plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et
 plt.savefig('../Plots/an32/01oldway_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
-# Second plot: flux calculated without considering smallest size classes and with old eta and b values
+# Second plot: flux calculated without considering smallest size classes and with new eta and b values
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_eta_b_filtered_depthf,Flux_eta_b_filtered_depthf_231,POC_in_domain])
@@ -250,6 +250,7 @@ plt.ylim(0,100)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux no small size classes, eta=0.62,b=66\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
+ax.text(-0.15, 1.125, 'a', transform=ax.transAxes, fontsize=12, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.savefig('../Plots/an32/02eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
@@ -273,6 +274,7 @@ plt.ylim(0,100)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux with small size classes, eta=0.62,b=66,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
+ax.text(-0.15, 1.125, 'b', transform=ax.transAxes, fontsize=12, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.savefig('../Plots/an32/04extended_eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 

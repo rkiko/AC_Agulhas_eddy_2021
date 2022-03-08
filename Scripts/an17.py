@@ -187,6 +187,7 @@ sPOC=sPOC[sel_insideEddy,:]
 #######################################################################
 parameter=temp
 parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','bbp POC (mgC $m^{-3}$)']
+parameter_panellabel_list=['c','c','g','e','d']
 parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC']
 ipar=3
 for ipar in range(0,parameter_ylabel_list.__len__()):
@@ -251,6 +252,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
     plt.xticks(rotation=90,fontsize=12)
+    # I add the panel label
+    ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     # I save

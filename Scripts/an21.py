@@ -115,6 +115,7 @@ ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 # plt.legend(fontsize=12)
 plt.ylabel('Radius (km)', fontsize=15)
+ax.text(-0.075, 1.05, 'a', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an21/EddyRadiusAndDist_vs_time_an21.pdf' ,dpi=200)
 plt.close()
