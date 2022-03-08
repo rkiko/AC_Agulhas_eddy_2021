@@ -228,7 +228,7 @@ for i_depth in range(0,list_depths.size-1):
 
     width, height = 0.75, 0.75
     set_ylim_lower, set_ylim_upper = 0.5*10**-3, 5*10 ** 3
-    set_xlim_lower, set_xlim_upper = 0.001, 2.7
+    set_xlim_lower, set_xlim_upper = 0.0009, 2.7
     ##############
     #POC plot
     ##############
@@ -237,8 +237,8 @@ for i_depth in range(0,list_depths.size-1):
     plt.yscale('log')
     plt.xscale('log')
     plt.plot(PSD_all_bin_mean, POC, c='blue', label='UVP')
-    plt.scatter(0.016, bbp_depth, label='bbp',c='red')
-    plt.errorbar(0.016, bbp_depth, xerr=0.014,yerr=bbp_depth_std, capsize=5,c='red')
+    plt.scatter(0.0155, bbp_depth, label='bbp',c='red')
+    plt.errorbar(0.0155, bbp_depth, xerr=0.0145,yerr=bbp_depth_std, capsize=5,c='red')
     plt.xlabel('Size (mm)', fontsize=10)
     plt.ylabel('POC (mgC/m$^3$)', fontsize=8)
     plt.legend(fontsize=10)
