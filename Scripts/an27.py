@@ -50,13 +50,17 @@ Date_Num_limit_min=1626742080+86400*np.array([0,0,0,0,0,0])
 Date_Num_limit_max=1630358605+86400*np.array([0,0,0,0,-14,-14])
 nthresholds=5 #how many thresholds I consider for each size class
 settling_vel_mean=np.array([]);settling_vel_std=np.array([]);sizeclass_list=np.array([])
-iNP=27
-for iNP in range(27,32):
-#########Begin text to indent
-    threshold_value_list=np.linspace(threshold_min_list[iNP-27],threshold_max_list[iNP-27],nthresholds)
-    if iNP<=29: threshold_value_list=np.round(threshold_value_list)
+# I define a list containing the index of the columns corresponding with the size classes for which I calculate the sinking
+# velocity
+list_indexes=[107,28,29,30,31]
+idx=1
+for idx in range(0, len(list_indexes)):
+    iNP = list_indexes[idx]
+    #########Begin text to indent
+    threshold_value_list=np.linspace(threshold_min_list[idx],threshold_max_list[idx],nthresholds)
+    if idx<=2: threshold_value_list=np.round(threshold_value_list)
     threshold_value=threshold_value_list[3]
-    Date_Num_limit=np.array([Date_Num_limit_min[iNP-27],Date_Num_limit_max[iNP-27]])
+    Date_Num_limit=np.array([Date_Num_limit_min[idx],Date_Num_limit_max[idx]])
     NP_abun=data.values[sel_filename,iNP]
     NP_abun=NP_abun.astype('float')
     NP_sizeclass=data.axes[1][iNP]
@@ -109,7 +113,7 @@ for iNP in range(27,32):
         cbar = plt.colorbar(plot2)
         plot3 = plt.scatter(Date_Num_threshold, depth_threshold, c='black')
         plot4= plt.plot(np.linspace(Date_Num_limit[0],Date_Num_limit[1],20),np.linspace(Date_Num_limit[0]*interpol.slope/86400+interpol.intercept,Date_Num_limit[1]*interpol.slope/86400+interpol.intercept,20),c='black')
-        cbar.ax.set_ylabel('NP abundance (#/L)', fontsize=18)
+        cbar.ax.set_ylabel('Particle concentration (#/L)', fontsize=18)
         plt.gca().invert_yaxis()
         plt.ylabel('Depth (m)', fontsize=18)
         plt.title('%smm, thr: %0.1f #/L, Settling vel: %0.2f m/d, fit signif: %s' % (NP_sizeclass,threshold_value,interpol.slope,signif_label), fontsize=18)
@@ -121,6 +125,7 @@ for iNP in range(27,32):
         ax.set_xticks(xticks)
         ax.set_xticklabels(xticklabels)
         plt.xticks(rotation=90, fontsize=12)
+        ax.text(-0.07, 1.02, 'a', transform=ax.transAxes, fontsize=30, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
         # I add the grid
         plt.grid(color='k', linestyle='dashed', linewidth=0.5)
         NP_sizeclass_save = NP_sizeclass
@@ -158,6 +163,7 @@ plt.title('Relationship between size class\nand settling velocity', fontsize=10)
 plt.xticks(fontsize=10),plt.yticks(fontsize=10)
 plt.savefig('../Plots/an27/relationship_size_vs_settlingVelocity_alone_an27.pdf', dpi=200)
 plt.plot(sizeclass_list,np.abs(sink_k2002_2),label='Kriest et al., 2002 ')
+ax.text(-0.07, 1.10, 'b', transform=ax.transAxes, fontsize=12, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 # plt.plot(sizeclass_list,np.abs(sink_k2002_1))
 # plt.plot(sizeclass_list,np.abs(sink_k2002_2))
 plt.legend(fontsize=7)
