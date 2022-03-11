@@ -278,3 +278,19 @@ ax.text(-0.15, 1.125, 'b', transform=ax.transAxes, fontsize=12, fontweight='bold
 plt.savefig('../Plots/an32/04extended_eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
+
+from scipy.stats import ttest_ind, mannwhitneyu,shapiro
+
+mannwhitneyu(POC_in_domain, Flux_eta_b_filtered_depthf)
+mannwhitneyu(POC_in_domain, Flux_extended_eta_b_filtered_depthf)
+mannwhitneyu(POC_in_domain, Flux_extended_eta_b_filtered_depthf_231)
+mannwhitneyu(POC_in_domain, Flux_eta_b_filtered_depthf_231)
+mannwhitneyu(Flux_eta_b_filtered_depthf, Flux_eta_b_filtered_depthf_231)
+mannwhitneyu(Flux_extended_eta_b_filtered_depthf, Flux_extended_eta_b_filtered_depthf_231)
+
+# two-sample t-test
+# null hypothesis: the two groups have the same mean
+# this test assumes the two groups have the same variance and that they are gaussianly distributed
+ttest_ind(POC_in_domain, Flux_eta_b_filtered_depthf)
+# To test if the distribution is guassian
+shapiro(POC_in_domain) #not gaussian
