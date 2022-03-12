@@ -793,7 +793,7 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0201eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an34/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0201eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -850,7 +850,7 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0201eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an34/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0201eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -988,7 +988,7 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0202extended_eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an34/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0202extended_eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -1046,7 +1046,7 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0202extended_eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an34/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0202extended_eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
 
