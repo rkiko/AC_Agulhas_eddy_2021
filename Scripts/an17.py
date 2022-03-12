@@ -99,6 +99,25 @@ dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
 #######################################################################
+# I calculate the Brunt Vaisala frequency, i.e. the square of the buoyancy frequency
+#######################################################################
+bvf=np.ones((temp.shape[0],temp.shape[1]))*99999
+i=0
+for i in range(0,bbp700.shape[0]):
+    mask_bvf = np.logical_and(pres[i,:] != 99999, temp[i,:] != 99999, psal[i,:] != 99999)  # I exclude the points with value = 99999
+    lat_tmp = np.tile(lat[i], [pres[i,:].shape[0], 1])
+    lon_tmp = np.tile(lon[i], [pres[i,:].shape[0], 1])
+    lat_tmp = np.squeeze(lat_tmp[mask_bvf])
+    lon_tmp = np.squeeze(lon_tmp[mask_bvf])
+    pres_tmp = pres[i,mask_bvf]
+    psal_tmp = psal[i,mask_bvf]
+    temp_tmp = temp[i,mask_bvf]
+    abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+    cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)  # I compute conservative temperature
+    bvf_tmp=gsw.Nsquared(abs_psal_tmp, cons_tmp, pres_tmp, lat=lat_tmp)[0]
+    bvf[i,mask_bvf]= np.append(bvf_tmp,99999)
+
+#######################################################################
 # I transform the bbp700 to small POC (sPOC)
 #######################################################################
 from paruvpy import bbp700toPOC
@@ -180,22 +199,24 @@ psal=psal[sel_insideEddy,:]
 chla=chla[sel_insideEddy,:]
 doxy=doxy[sel_insideEddy,:]
 sPOC=sPOC[sel_insideEddy,:]
+bvf=bvf[sel_insideEddy,:]
 
 
 #######################################################################
 # I define the parameters list and I start the loop on each of them
 #######################################################################
 parameter=temp
-parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','bbp POC (mgC $m^{-3}$)']
-parameter_panellabel_list=['c','c','g','e','d']
-parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC']
-ipar=3
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
+parameter_panellabel_list=['c','c','g','e','d','a']
+parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC','BrVais']
+ipar=5
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
     elif ipar==1:   parameter=psal.copy()
     elif ipar == 2: parameter=chla.copy()
     elif ipar == 3: parameter=doxy.copy()
     elif ipar == 4: parameter=sPOC.copy()
+    elif ipar == 5: parameter=bvf.copy()
 
     #I filter the profiles
     parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
@@ -226,6 +247,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ########################################################
     if ipar==4:
         parameter_interp_depth[parameter_interp_depth > 40] = 40
+    elif ipar==5:
+        parameter_interp_depth[parameter_interp_depth > 3*10**-5] = 3*10**-5
 
     # I set the color of the second y-axis, the one of the distance BGC Argo eddy center and eddy radius
     if ipar == 3:   color_distance = 'b'
@@ -267,6 +290,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         parameter_interp_dens[parameter_interp_dens > 255] = 255
     if ipar==4:
         parameter_interp_dens[parameter_interp_dens > 40] = 40
+    if ipar==5:
+        parameter_interp_dens[parameter_interp_dens > 3*10**-5] = 3*10**-5
 
     width, height = 0.8, 0.7
     set_ylim_lower, set_ylim_upper = y2_parameter.min(), y2_parameter.max()
