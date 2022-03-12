@@ -261,3 +261,14 @@ an33
 It is the same script as an18 (plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
 with the difference that I plot also these quantities calculated with (i) a 
 different eta and b value; (ii) a different eta and b value and the smallest size classes
+
+\
+an33
+
+As in an 31, I calculate all the metrics necessary to estimate the carbon budget (
+the Flux vs depth and time, the integrated POC, the PARR vs depth).
+I do a loop on different layers (basically every 100m between 200 and 600m) and I calculate
+the theoretical carbon disappearing due to respiration (difference of delta flux and delta integrated POC)
+and I compare it with the PARR and carbon consumption associated to oxygen consumption with a plot.
+The difference with an31 script is that I consider two time windows: the first goes from the 
+13 April to x, the second goes from x to the 23 of September, with x which is changed.
