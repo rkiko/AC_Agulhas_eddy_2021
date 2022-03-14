@@ -2,3 +2,4 @@
 .idea
 Scripts/__pycache__
 Data/*231.tsv
+Data/an35/*
