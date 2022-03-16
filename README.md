@@ -276,4 +276,34 @@ The difference with an31 script is that I consider two time windows: the first g
 \
 an35
 
-I download the Euphotic layer depth data at 9km resolution
+I download the Euphotic layer depth data at 9km resolution at 8-day resolution
+\
+an35b
+
+I download the Euphotic layer depth data at 9km resolution at day resolution
+
+\
+an36
+
+I calculate the Euphotic layer depth along the float trajectory using the product
+at 8-day resolution
+\
+an36b
+
+I calculate the Euphotic layer depth along the float trajectory using the product
+at daily resolution. I do not save the data cos there are too nans
+
+
+\
+an37
+
+As in an 17, I plot of the times series of chl, temp,oxygen vs depth
+with the difference that I also add the euphotic depth layer calculated in an36
+
+
+\
+an38
+
+As in an33, I plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
+with the difference that I also add the euphotic depth layer calculated in an36
+
