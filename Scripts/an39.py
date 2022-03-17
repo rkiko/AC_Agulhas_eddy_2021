@@ -244,7 +244,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     elif ipar == 5: parameter=bvf.copy()
 
     #I filter the profiles
-    parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
+    parameter_filtered=np.array([]);dens_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
     i=0
     for i in range(0,parameter.shape[0]):
         sel=(parameter[i,:]!=99999) & (depth[i,:]!=99999) & (dens[i,:]!=99999)
@@ -253,8 +253,12 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
             z = savgol_filter(z, 5, 1)
             parameter_filtered = np.concatenate((parameter_filtered, z));Date_Num_parameter = np.concatenate((Date_Num_parameter, x))
             depth_parameter = np.concatenate((depth_parameter, y1));dens_parameter = np.concatenate((dens_parameter, y2));pressure_parameter = np.concatenate((pressure_parameter, y3))
+            y2 = savgol_filter(y2, 5, 1)
+            dens_filtered = np.concatenate((dens_filtered, y2))
 
     parameter_filtered[parameter_filtered<0]=0
+    dens_filtered[dens_filtered<1026]=1026
+    dens_filtered[dens_filtered>1027.5]=1027.5
     # I define the x and y arrays for the contourf plot
     x_parameter = np.linspace(Date_Num_parameter.min(),Date_Num_parameter.max(),100)
     y1_parameter = np.linspace(depth_parameter.min(),depth_parameter.max(),50)
@@ -263,9 +267,9 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I interpolate
     x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y1_parameter)
     parameter_interp_depth = griddata((Date_Num_parameter,depth_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
+    dens_interp_depth = griddata((Date_Num_parameter,depth_parameter), dens_filtered, (x_parameter_g, y_parameter_g), method="nearest")
     x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y2_parameter)
     parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
-
 
     ########################################################
     ####### I plot: versus depth
@@ -280,6 +284,9 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     fig = plt.figure(1, figsize=(12,8))
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
+    plot3 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=30,colors='black',linestyles='solid',linewidths=1)#,cmap='Blues_r')
+    ax.clabel(plot3, inline=1, fontsize=10)
+
     if ipar==0:
         plt.plot(Date_Num,mld,'w')
     elif ipar==2:
@@ -305,6 +312,6 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     # I save
-    plt.savefig('../Plots/an37/TimeSeries_%s_vs_01depth_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
+    plt.savefig('../Plots/an39/TimeSeries_%s_vs_01depth_an39.pdf' % parameter_shortname_list[ipar],dpi=200)
     plt.close()
 

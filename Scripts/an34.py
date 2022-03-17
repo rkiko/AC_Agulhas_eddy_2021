@@ -381,6 +381,8 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
         # (in micromol/kg per day)
         if Date_Num_isopycnal.size>2:
             (interpol,slpe_ci,_,signif,signif_label)=lin_fit(Date_Num_isopycnal,doxy_isopycnal)
+            # fig = plt.figure(1, figsize=(12, 8))
+            # plot1 = plt.scatter(Date_Num_isopycnal,doxy_isopycnal)
             depth_isopycnal = np.append(depth_isopycnal ,np.mean(depth_isopycnal_tmp))
             slopes_list_doxy = np.append(slopes_list_doxy ,interpol.slope)
             reference_isopycnal_list_sel = np.append(reference_isopycnal_list_sel ,reference_isopycnal)
