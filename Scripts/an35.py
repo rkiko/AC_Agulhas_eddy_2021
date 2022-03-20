@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from pathlib import Path
 home = str(Path.home())
 sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
@@ -70,7 +71,6 @@ for i in range(0,list_index_day0.size):
 
 
 import netCDF4 as nc
-import numpy as np
 lonmin,lonmax = 5,18
 latmin,latmax = -40, -30
 
