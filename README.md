@@ -293,17 +293,51 @@ an36b
 I calculate the Euphotic layer depth along the float trajectory using the product
 at daily resolution. I do not save the data cos there are too nans
 
-
 \
 an37
 
 As in an 17, I plot of the times series of chl, temp,oxygen vs depth
 with the difference that I also add the euphotic depth layer calculated in an36
 
-
 \
 an38
 
 As in an33, I plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
 with the difference that I also add the euphotic depth layer calculated in an36
+
+\
+an39
+
+As in an 37, I plot of the times series of chl, temp,oxygen vs depth
+with the difference that I also add the contour lines of the density
+
+\
+an40
+
+I use the dataset from Bouman et al. (https://doi.org/10.5194/essd-10-251-2018)
+to calculate the alpha^B in the region of our eddy
+
+\
+an41
+
+I download the attenuation coefficient k490
+
+\
+an42
+
+I calculate the attenuation coefficient k490 along the float trajectory using the product
+at 8-day resolution downloaded in an42
+
+\
+an43
+
+I take the surface irradiance downloaded from Eumetsat for every day between the 13
+April and the 23 September and I reduce the size of the matrix by considering only 
+the region in which the eddy was trapped, in an analogous way to what I did
+for the attenuation coefficient k490 (an41) and the Euphotic layer depth (an35)
+
+
+
+
+
 
