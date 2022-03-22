@@ -232,10 +232,16 @@ for i in range(0,chla.shape[0]):
 #######################################################################
 a_file = open("%s/an45/data_an45.pkl" % storedir, "rb")
 data_an45 = pickle.load(a_file)
-zeu_float=data_an45['zeu_float']
-zeu_datenum=data_an45['zeu_datenum']
-zeu_datenum = zeu_datenum[~np.isnan(zeu_float)]
-zeu_float = zeu_float[~np.isnan(zeu_float)]
+critical_depth=data_an45['critical_depth']
+critical_depth_1=data_an45['critical_depth_1']
+critical_depth_2=data_an45['critical_depth_2']
+critical_depth_datenum=data_an45['critical_depth_datenum']
+critical_depth_datenum_1 = critical_depth_datenum[~np.isnan(critical_depth_1)]
+critical_depth_datenum_2 = critical_depth_datenum[~np.isnan(critical_depth_2)]
+critical_depth_datenum = critical_depth_datenum[~np.isnan(critical_depth)]
+critical_depth = critical_depth[~np.isnan(critical_depth)]
+critical_depth_1 = critical_depth_1[~np.isnan(critical_depth_1)]
+critical_depth_2 = critical_depth_2[~np.isnan(critical_depth_2)]
 
 #######################################################################
 # I define the parameters list and I start the loop on each of them
@@ -244,7 +250,7 @@ parameter=temp
 parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
 parameter_panellabel_list=['c','c','g','e','d','a']
 parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC','BrVais']
-ipar=5
+ipar=3
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
     elif ipar==1:   parameter=psal.copy()
@@ -290,10 +296,9 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     fig = plt.figure(1, figsize=(12,8))
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
-    if ipar==0:
-        plt.plot(Date_Num,mld,'w')
-    elif ipar==2:
-        plt.plot(zeu_datenum,zeu_float,'w')
+    plt.plot(critical_depth_datenum,critical_depth,'w');plt.plot(critical_depth_datenum,critical_depth,'w.')
+    plt.plot(critical_depth_datenum_1,critical_depth_1,'w')#;plt.plot(critical_depth_datenum_1,critical_depth_1,'w.')
+    plt.plot(critical_depth_datenum_2,critical_depth_2,'w')#;plt.plot(critical_depth_datenum_2,critical_depth_2,'w.')
     plt.gca().invert_yaxis()
     # draw colorbar
     cbar = plt.colorbar(plot2)
@@ -315,7 +320,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     # I save
-    plt.savefig('../Plots/an37/TimeSeries_%s_vs_01depth_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
+    plt.savefig('../Plots/an46/TimeSeries_%s_vs_01depth_an46.pdf' % parameter_shortname_list[ipar],dpi=200)
     plt.close()
 
 
