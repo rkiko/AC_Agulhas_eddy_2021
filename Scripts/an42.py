@@ -11,7 +11,7 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
 from matlab_datenum import matlab_datenum
 
 
-dayf=(2021,9,28) # Last day for which I calculate the euphotic depth
+dayf=(2021,9,28) # Last day for which I calculate the attenuation coefficient k490
 #######################################################################
 # I load the BGC Argo data
 #######################################################################
@@ -24,7 +24,7 @@ lat_BGC=np.array(ds.variables['LATITUDE'])
 Date_Num=np.array(ds.variables['JULD'])+matlab_datenum(1950,1,1)
 
 #######################################################################
-# I load and calculate the euphotic layer depth in the days of the BGC Argo profiles and in a given neighborhood
+# I load and calculate the attenuation coefficient k490 in the days of the BGC Argo profiles and in a given neighborhood
 #######################################################################
 year=2021
 filename1_Kd_490='A'
@@ -46,7 +46,7 @@ for i in range(0,Date_Num.size):
     index0=list_index_day0[index_day]
     indexf=list_index_dayf[index_day]
     filename_Kd_490 = '%s%d%03d%d%03d.%s' % (filename1_Kd_490, year, index0, year, indexf, filename2_Kd_490)
-    ds = nc.Dataset("../Data/an35/8D/%s" % (filename_Kd_490))
+    ds = nc.Dataset("../Data/an41/8D/%s" % (filename_Kd_490))
     lon_Kd_490 = np.array(ds.variables['lon'])
     lat_Kd_490 = np.array(ds.variables['lat'])
     Kd_490 = np.array(ds.variables['Kd_490']).copy()

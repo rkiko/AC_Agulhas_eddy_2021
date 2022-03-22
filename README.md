@@ -336,6 +336,24 @@ April and the 23 September and I reduce the size of the matrix by considering on
 the region in which the eddy was trapped, in an analogous way to what I did
 for the attenuation coefficient k490 (an41) and the Euphotic layer depth (an35)
 
+\
+an44
+
+I calculate the surface irradiance downloaded (per hour) along the float trajectory using the product
+at daily resolution downloaded in an43 from Eumetsat
+
+
+\
+an45
+
+I calculate the critical depth
+
+
+\
+an46
+
+I plot the critical depth over the chlorphyll, temperature, doxy etc. 
+profile vs depth and time (as for an17 and an37)
 
 
 

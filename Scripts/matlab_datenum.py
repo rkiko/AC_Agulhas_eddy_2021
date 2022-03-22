@@ -1,12 +1,16 @@
 import numpy as np
 import datetime
 from datetime import date
+import datetime
 
 def matlab_datenum(*argv):
     if argv.__len__()==1:
         x=argv[0]
         if (type(x) is list)|(type(x) is tuple):
             x = np.array(x)
+
+        if (type(x) is datetime.datetime):
+            x = np.array([x.year,x.month,x.day,x.hour,x.minute,x.second])
 
         if x.size==3:
             year,month,day,hour,minute,seconds=x[0],x[1],x[2],0,0,0
