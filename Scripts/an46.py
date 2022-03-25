@@ -293,8 +293,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
     plt.plot(critical_depth_datenum,critical_depth,'w');plt.plot(critical_depth_datenum,critical_depth,'w.')
-    plt.plot(critical_depth_datenum_1,critical_depth_1,'w--')#;plt.plot(critical_depth_datenum_1,critical_depth_1,'w.')
-    plt.plot(critical_depth_datenum_2,critical_depth_2,'w--')#;plt.plot(critical_depth_datenum_2,critical_depth_2,'w.')
+    # plt.plot(critical_depth_datenum_1,critical_depth_1,'w--')#;plt.plot(critical_depth_datenum_1,critical_depth_1,'w.')
+    # plt.plot(critical_depth_datenum_2,critical_depth_2,'w--')#;plt.plot(critical_depth_datenum_2,critical_depth_2,'w.')
     plt.gca().invert_yaxis()
     # draw colorbar
     cbar = plt.colorbar(plot2)
@@ -319,4 +319,19 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     plt.savefig('../Plots/an46/TimeSeries_%s_vs_01depth_an46.pdf' % parameter_shortname_list[ipar],dpi=200)
     plt.close()
 
-
+#To plot SSI and K490
+# fig = plt.figure(1, figsize=(12, 8))
+#  ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, 500),
+#                    xlim=(Date_Num.min(), Date_Num.max()))
+# # ax_1 = plot2 = plt.contourf(x_parameter, y1_parameter, parameter_interp_depth)
+# plt.plot(ssi_datenum, ssi_per_hour_float, 'b');
+# plt.plot(ssi_datenum, Kd_490_float*1000, 'r');
+# nxticks=10
+# xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+# xticklabels=[]
+# for i in xticks:
+#     date_time_obj = date_reference + datetime.timedelta(days=i)
+#     xticklabels.append(date_time_obj.strftime('%d %B'))
+# ax.set_xticks(xticks)
+# ax.set_xticklabels(xticklabels)
+# plt.xticks(rotation=90,fontsize=12)
