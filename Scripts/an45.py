@@ -39,6 +39,11 @@ a_file = open("%s/an40/data_an40.pkl" % storedir, "rb")
 data_an40 = pickle.load(a_file)
 mean_alpha_in_domain=data_an40['mean_alpha_in_domain']
 std_alpha_in_domain=data_an40['std_alpha_in_domain']
+joule_per_mole=217503
+# Alpha unit is [(mg C/mg Chl a/h)/(µmol/m**2/s)]: I need to convert it to [(mg C/mg Chl a/h)/(W/m**2)]
+mean_alpha_in_domain = mean_alpha_in_domain *10**6              #[(mg C/mg Chl a/h)/(mol/m**2/s)]
+mean_alpha_in_domain = mean_alpha_in_domain / joule_per_mole    #[(mg C/mg Chl a/h)/(J/m**2/s)] i.e. [(mg C/mg Chl a/h)/(W/m**2)]
+std_alpha_in_domain  = std_alpha_in_domain * 10**6/joule_per_mole
 a_file.close()
 
 #######################################################################
@@ -47,11 +52,10 @@ a_file.close()
 #######################################################################
 a_file = open("%s/an44/data_an44.pkl" % storedir, "rb")
 data_an44 = pickle.load(a_file)
-ssi_per_hour_float=data_an44['ssi_per_hour_float']
+ssi_per_hour_float=data_an44['ssi_per_hour_float'] # W/m2
 ssi_datenum=data_an44['ssi_datenum']
 ssi_matlab_datenum=data_an44['ssi_matlab_datenum']
 hour_daylight=data_an44['hour_daylight']
-ssi_per_day_float = ssi_per_hour_float*hour_daylight
 a_file.close()
 
 #######################################################################
@@ -60,26 +64,27 @@ a_file.close()
 # According to Zhai et al. (2008, doi: 10.1029/2008GL035666)
 #######################################################################
 LTB=1.75*24 #mgC/(mg Chla)/day
-LTB_std=2.5
+LTB_std=2.5*24
 
 #######################################################################
 #######################################################################
 # I calculate the critical depth according to the analytical formulation by Kovac et al. (2021, doi: 10.1093/icesjms/fsab013)
+# A is the ratio of surface production to losses
 #######################################################################
 #######################################################################
-x = -mean_alpha_in_domain*ssi_per_day_float/LTB
-x[x>-1]=np.nan
-critical_depth = 1/Kd_490_float * (  lambertw( x*np.exp(x) ) - x  )
+A = -mean_alpha_in_domain*ssi_per_hour_float*hour_daylight/LTB
+A[A>-1]=np.nan
+critical_depth = 1/Kd_490_float * (  lambertw( A*np.exp(A) ) - A  )
 critical_depth = np.real(critical_depth)
 
-x = -(mean_alpha_in_domain+std_alpha_in_domain*0.5)*ssi_per_day_float/(LTB-LTB_std*0.5)
-x[x>-1]=np.nan
-critical_depth_2 = 1/Kd_490_float * (  lambertw( x*np.exp(x) ) - x  )
+A = -(mean_alpha_in_domain+std_alpha_in_domain*0.5)*ssi_per_hour_float*hour_daylight/(LTB-LTB_std*0.5)
+A[A>-1]=np.nan
+critical_depth_2 = 1/Kd_490_float * (  lambertw( A*np.exp(A) ) - A  )
 critical_depth_2 = np.real(critical_depth_2)
 
-x = -(mean_alpha_in_domain-std_alpha_in_domain*0.5)*ssi_per_day_float/(LTB+LTB_std*0.5)
-x[x>-1]=np.nan
-critical_depth_1 = 1/Kd_490_float * (  lambertw( x*np.exp(x) ) - x  )
+A = -(mean_alpha_in_domain-std_alpha_in_domain*0.5)*ssi_per_hour_float*hour_daylight/(LTB+LTB_std*0.5)
+A[A>-1]=np.nan
+critical_depth_1 = 1/Kd_490_float * (  lambertw( A*np.exp(A) ) - A  )
 critical_depth_1 = np.real(critical_depth_1)
 
 
@@ -90,9 +95,9 @@ pickle.dump(dictionary_data, a_file)
 a_file.close()
 
 
-#These lines are just to check how the critical depth changes when x increases (in absolute value). Answer: it increases
-x=-np.r_[0.03:2.1:0.03];x=x[0:61]
-critical_depth = 1/Kd_490_float * (  lambertw( x*np.exp(x) ) - x  )
+#These lines are just to check how the critical depth changes when A increases (in absolute value). Answer: it increases
+A=-np.r_[0.03:2.1:0.03];A=A[0:61]
+critical_depth = 1/Kd_490_float * (  lambertw( A*np.exp(A) ) - A  )
 critical_depth = np.real(critical_depth)
 import matplotlib.pyplot as plt
-plt.plot(x,critical_depth)
+plt.plot(A,critical_depth)

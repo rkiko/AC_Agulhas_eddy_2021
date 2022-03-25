@@ -1,5 +1,4 @@
 import os
-import ftplib
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
@@ -18,9 +17,6 @@ os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
-filename='6903095_BRtraj.nc'
-filename='6903095_Rtraj.nc'
-filename='BR6903095_001.nc'
 filename='6903095_Sprof.nc'
 
 #######################################################################
