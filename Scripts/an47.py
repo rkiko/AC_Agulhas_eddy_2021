@@ -73,7 +73,7 @@ tmp=data_an16['sel_insideEddy']
 a_file.close()
 sel_insideEddy[0:tmp.size]=tmp.copy()
 
-width, height = 0.65, 0.7
+width, height = 0.65, 0.65
 date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
 
 #TEMPvsPRES
