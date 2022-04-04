@@ -90,6 +90,13 @@ DateTime_Eddy=DateTime_Eddy[sel_insideEddy]
 lonEddy=lonEddy[sel_insideEddy]
 latEddy=latEddy[sel_insideEddy]
 
+#I save sel_insideEddy
+dictionary_data = {"sel_insideEddy": sel_insideEddy}
+a_file = open("%s/an16/data_an16.pkl" % storedir, "wb")
+pickle.dump(dictionary_data, a_file)
+a_file.close()
+
+
 #######################################################################
 # I select the satellite chlorophyll data in the day of the BGC Argo float profiles
 #######################################################################
