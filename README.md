@@ -356,6 +356,10 @@ I plot the critical depth over the chlorphyll, temperature, doxy etc.
 profile vs depth and time (as for an17 and an37)
 
 
+\
+an47
+
+I try to do some delayed-time quality control on lon lat and juld (ie time)
 
 
 
