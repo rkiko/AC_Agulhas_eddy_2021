@@ -99,6 +99,7 @@ for i in range (0,pres.shape[0]):
     plt.close()
 
 #PSALvsPRES
+i=0
 for i in range(0, pres.shape[0]):
     x = psal[i,:]
     y = pres[i,:]
@@ -117,6 +118,29 @@ for i in range(0, pres.shape[0]):
     plt.gca().invert_yaxis()
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     plt.savefig('../Plots/an47/PSALvsPRES/PsalVsPres_Profile%03d_an47.pdf' % int(i+1), dpi=200)
+    plt.close()
+
+
+#TEMPvsPSAL
+i=0
+for i in range(0, pres.shape[0]):
+    x = psal[i,:]
+    y = temp[i,:]
+    sel = (~np.isnan(x)) & (x!=99999) & (~np.isnan(y)) & (y!=99999)
+    x=x[sel];y=y[sel]
+    fig = plt.figure(1, figsize=(3, 3))
+    ax = fig.add_axes([0.25, 0.2, width, height], ylim=(0, 23), xlim=(34, 36))
+    plt.scatter(x,y,c='b',s=0.1)
+    plt.plot(x,y,'b',linewidth=0.1)
+    plt.xlabel('Salinity (PSU)', fontsize=10)
+    plt.ylabel('Temperature (°C)', fontsize=10)
+    date_time_obj = date_reference + datetime.timedelta(days=Date_Num[i])
+    inoutEddy='inside'
+    if sel_insideEddy[i] is False:  inoutEddy='outside'
+    plt.title('Profile %d, %02d-%02d-%d, %02d:%02d\nFloat %s eddy' % (int(i+1),date_time_obj.day,date_time_obj.month,date_time_obj.year,date_time_obj.hour,date_time_obj.minute,inoutEddy), fontsize=10)
+    plt.gca().invert_yaxis()
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/an47/TEMPvsPSAL/TempVsPsal_Profile%03d_an47.pdf' % int(i+1), dpi=200)
     plt.close()
 
 
