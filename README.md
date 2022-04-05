@@ -362,4 +362,11 @@ an47
 I try to do some delayed-time quality control on lon lat and juld (ie time)
 
 
+\
+an48
+
+I analyse data from Argo floats which were in the surrounding region of our 
+float between the 13 April and the 27 September 2021, and which were validated
+as delayed time quality
+
 
