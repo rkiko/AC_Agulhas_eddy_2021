@@ -10,7 +10,7 @@ home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_all.nc'
 
 #######################################################################
 # I load the data

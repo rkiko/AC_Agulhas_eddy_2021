@@ -366,7 +366,20 @@ I try to do some delayed-time quality control on lon lat and juld (ie time)
 an48
 
 I analyse data from Argo floats which were in the surrounding region of our 
-float between the 13 April and the 27 September 2021, and which were validated
-as delayed time quality
+float between the 13 April and the 5 April 2022, and which were validated
+as delayed time quality. I plot temp vs pres vs salinity for each profile of our argo 
+float, and then I superpose the profiles of the neighbor floats
 
+
+\
+an49
+
+I do the same thing then in an49, but only for the profiles which sampled below
+1000m 
+
+
+\
+an50
+
+I plot the time series of the flux at 200 and 600 m
 

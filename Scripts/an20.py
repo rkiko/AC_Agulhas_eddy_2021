@@ -79,10 +79,11 @@ anom_meanE_meanOut=chl_inside_mean-chl_outside_mean
 
 
 width, height = 0.8, 0.5
-set_ylim_lower, set_ylim_upper = -1,1#anom_meanE_meanOut.min()*1.1,chl_inside_mean.max()*1.1
+set_ylim_lower, set_ylim_upper = -1,1.2#anom_meanE_meanOut.min()*1.1,chl_inside_mean.max()*1.1
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_Eddy.min(), Date_Num_Eddy.max()+10))
-plt.plot(Date_Num_Eddy,chl_inside_mean,'r',label='Mean Chl')
+plt.plot(Date_Num_Eddy,chl_inside_mean,'r',label='Mean Eddy Chl')
+plt.plot(Date_Num_Eddy,chl_outside_mean,'g',label='Mean Chl outside')
 plt.plot(Date_Num_Eddy,anom_meanE_meanOut,'b',label='Chl Anomaly')
 plt.vlines([day0_insideEddy,dayf_insideEddy],set_ylim_lower, set_ylim_upper,colors='black',label='Float inside eddy',linewidth=3,linestyles='dashed')
 plt.hlines([set_ylim_lower+0.05,set_ylim_upper-0.05],day0_insideEddy, dayf_insideEddy,colors='black',linewidth=3,linestyles='dashed')
@@ -95,7 +96,7 @@ for i in xticks:
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
-plt.legend(fontsize=12)
+plt.legend(ncol=2,fontsize=12)
 plt.ylabel('Eddy Chlorophyll (mg/m$^3$)', fontsize=15)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an20/EddyChl_vs_time_an20.pdf' ,dpi=200)

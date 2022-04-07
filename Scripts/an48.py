@@ -28,7 +28,7 @@ if os.path.isdir(plotdir) is False:
 #######################################################################
 # I load the BGC Argo data of the reference float (690..)
 #######################################################################
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_all.nc'
 ds = nc.Dataset('%s/%s' % (storedir,filename))
 
 lon0=np.array(ds.variables['LONGITUDE'])
@@ -39,7 +39,7 @@ psal0 = np.array(ds.variables['PSAL'])
 temp0 = np.array(ds.variables['TEMP'])
 
 #######################################################################
-# I list the .nc files
+# I list the .nc files downloaded from https://dataselection.euro-argo.eu/
 #######################################################################
 listfiles = os.listdir('%s/an48/' % (storedir))
 
