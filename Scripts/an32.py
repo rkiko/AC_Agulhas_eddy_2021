@@ -31,7 +31,7 @@ StartDate_trap=data['Date/Time (Deployed)']
 ########################################################################################################################
 lon0,lon1 = -10, 20
 lat0, lat1 = -40,-20
-Depth_max_trap = 60000
+Depth_max_trap = 600
 ########################################################################################################################
 #I extract the data according to the domain selection
 ########################################################################################################################
@@ -46,14 +46,6 @@ StartDate_trap_in_domain = StartDate_trap[sel_in_domain]
 
 print('Mean Flux is %0.1f mgC/m2/d' % np.mean(POC_in_domain))
 print('Mean sediment trap depth is %0.0f' % np.mean(Depth_trap_in_domain))
-
-########################################################################################################################
-#Here I extract only 600m traps
-########################################################################################################################
-Depth_max_trap = 600
-sel_in_domain=(lon>=lon0)&(lon<=lon1)&(lat>=lat0)&(lat<=lat1)&(Depth_trap<=Depth_max_trap)
-POC_in_domain=POC[sel_in_domain]
-
 
 
 ########################################################################################################################
@@ -153,7 +145,7 @@ for i in range(0,list_dates.size):
 ########################################################################################################################
 #Parameters for the carbon budget calculation
 ########################################################################################################################
-lon0=0                          # Longitudinal limits of
+lon0=10                          # Longitudinal limits of
 lonf=18                         # the flux data
 depthf=600                      # Final depth
 delta_depth=15                  # Around of the depth which I consider when extracting the flux
@@ -235,21 +227,21 @@ width, height = 0.78, 0.75
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_filtered_depthf,Flux_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,100)
+plt.ylim(0,60)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux old way,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
-plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
+plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 plt.savefig('../Plots/an32/01oldway_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
 # Second plot: flux calculated without considering smallest size classes and with new eta and b values
-fig = plt.figure(1, figsize=(3.5, 3.5))
+fig = plt.figure(2, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_eta_b_filtered_depthf,Flux_eta_b_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,100)
+plt.ylim(0,60)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux no small size classes, eta=0.62,b=66\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
-plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
+plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 ax.text(-0.15, 1.125, 'a', transform=ax.transAxes, fontsize=12, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.savefig('../Plots/an32/02eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
@@ -258,10 +250,10 @@ plt.close()
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_extended_filtered_depthf,Flux_extended_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,100)
+plt.ylim(0,60)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux with small size classes, old eta and b,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
-plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
+plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 plt.savefig('../Plots/an32/03extended_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
@@ -270,10 +262,10 @@ plt.close()
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_extended_eta_b_filtered_depthf,Flux_extended_eta_b_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,100)
+plt.ylim(0,60)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
 plt.title('Argo Flux with small size classes, eta=0.62,b=66,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
-plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect 231','Sediment trap\n(Mouw et al.)'], fontsize=fs)
+plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 ax.text(-0.15, 1.125, 'b', transform=ax.transAxes, fontsize=12, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.savefig('../Plots/an32/04extended_eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
