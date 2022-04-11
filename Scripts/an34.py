@@ -699,7 +699,7 @@ for ndays in ndays_list:
     plt.title('No small size classes, eta=0.62,b=66\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)
     plt.legend(fontsize=7)
     plt.gca().invert_yaxis()
-    ax.text(-0.05, 1.125, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    ax.text(-0.05, 1.125, 'c', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0101eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
@@ -736,7 +736,7 @@ for ndays in ndays_list:
     plt.title('No small size classes, eta=0.62,b=66\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day), fontsize=9)
     plt.legend(fontsize=7)
     plt.gca().invert_yaxis()
-    ax.text(-0.05, 1.125, 'c', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    ax.text(-0.05, 1.125, 'd', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0101eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
@@ -890,7 +890,7 @@ for ndays in ndays_list:
     plt.title('With small size classes, eta=0.62,b=66\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)
     plt.legend(fontsize=7)
     plt.gca().invert_yaxis()
-    ax.text(-0.05, 1.125, 'd', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    ax.text(-0.05, 1.125, 'e', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0102extended_eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
@@ -930,7 +930,7 @@ for ndays in ndays_list:
     plt.title('With small size classes, eta=0.62,b=66\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day), fontsize=9)
     plt.legend(fontsize=7)
     plt.gca().invert_yaxis()
-    ax.text(-0.05, 1.125, 'e', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    ax.text(-0.05, 1.125, 'f', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     plt.savefig('../Plots/an34/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0102extended_eta_b_an34.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()

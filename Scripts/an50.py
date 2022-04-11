@@ -136,7 +136,7 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
-ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=10, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
 plt.legend(fontsize=7)#,ncol=2)
@@ -156,7 +156,7 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_eta_b_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_eta_b_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
-ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=10, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
 plt.legend(fontsize=7)#,ncol=2)
@@ -176,7 +176,7 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_extended_eta_b_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_extended_eta_b_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
-ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=10, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
 plt.legend(fontsize=7)#,ncol=2)
@@ -197,7 +197,7 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
-ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=10, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
 plt.legend(fontsize=7)#,ncol=2)

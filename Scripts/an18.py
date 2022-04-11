@@ -129,7 +129,7 @@ list_dates=list_dates[sel_insideEddy]
 parameter=Flux
 ipar=1
 parameter_shortname_list=['Flux','MiP_abund','MaP_abund','MiP_POC','MaP_POC']
-parameter_panellabel_list=['a','f','h','f','h']
+parameter_panellabel_list=['b','f','h','f','h']
 parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$)','MaP abundance (# L$^{-1}$)'
     ,'MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)']
 max_parameter_list=np.array([32,65,0.6,2.15,0.30])
