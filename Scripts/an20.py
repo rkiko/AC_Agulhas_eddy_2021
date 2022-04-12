@@ -18,6 +18,7 @@ storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 a_file = open("%s/an12/data_an12.pkl" % storedir, "rb")
 data_an12 = pickle.load(a_file)
 chla_float_mean=data_an12['chla_float_mean']
+chla_float_integrated=data_an12['chla_float_integrated']
 chla_float_max=data_an12['chla_float_max']
 lon_float=data_an12['lon_float']
 lat_float=data_an12['lat_float']
@@ -103,6 +104,30 @@ plt.savefig('../Plots/an20/EddyChl_vs_time_an20.pdf' ,dpi=200)
 plt.close()
 
 
+date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
+# I exclude the 46 element cos it is the profile outside the eddy
+sel = [True for i in range(chla_float_integrated.size)]
+sel[46]=False
+y=chla_float_integrated[sel]
+x=Date_Num_float[sel]
+
+fig = plt.figure(1, figsize=(7,3.5))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, y.max()*1.1), xlim=(x.min(), x.max()-27))
+plt.plot(x,y,'green')
+# I set xticks
+nxticks = 10
+xticks = np.linspace(x.min(), x.max()-27, nxticks)
+xticklabels = []
+for i in xticks:
+    date_time_obj = date_reference + datetime.timedelta(days=i)
+    xticklabels.append(date_time_obj.strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=10)
+plt.ylabel('Integrated\nchlorophyll a (mg/m$^2$)', fontsize=10)
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an20/IntegratedChl_vs_time_an20.pdf' ,dpi=200)
+plt.close()
 
 
 
