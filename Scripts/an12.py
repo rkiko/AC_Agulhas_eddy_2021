@@ -124,6 +124,7 @@ for i in Date_Num_Eddy:
 #######################################################################
 
 chla_float_mean=np.squeeze(np.zeros((1,chla.shape[0])))
+chla_float_integrated=np.squeeze(np.zeros((1,chla.shape[0])))
 chla_float_max=np.squeeze(np.zeros((1,chla.shape[0])))
 
 i=0
@@ -139,6 +140,7 @@ for i in range(0,chla.shape[0]):
     sel_in_ML=depth_tmp<=mld
     chla_tmp=chla_tmp[sel_in_ML]
     chla_float_mean[i]=np.mean(chla_tmp)
+    chla_float_integrated[i]=np.mean(chla_tmp)*mld
     chla_float_max[i]=np.max(chla_tmp)
 
 #######################################################################################################################
@@ -227,7 +229,7 @@ for i in range(0,lonVmax.shape[1]):#Date_Num_Eddy.size):
 # Saving data
 #######################################################################
 
-dictionary_data = {"chla_float_mean": chla_float_mean, "chla_float_max": chla_float_max, "chl_inside_mean": chl_inside_mean,
+dictionary_data = {"chla_float_mean": chla_float_mean, "chla_float_integrated": chla_float_integrated, "chla_float_max": chla_float_max, "chl_inside_mean": chl_inside_mean,
                    "chl_inside_max": chl_inside_max, "chl_outside_mean": chl_outside_mean, "chl_inside_and_outside_mean": chl_inside_and_outside_mean,
                    "Date_Num_Eddy": Date_Num_Eddy, "lonEddy": lonEddy, "latEddy": latEddy, "DateTime_Eddy": DateTime_Eddy,
                    "lon_float": lon, "lat_float": lat, "Date_Num_float": Date_Num, "Date_Vec_float": Date_Vec}
