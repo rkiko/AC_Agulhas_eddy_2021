@@ -144,7 +144,7 @@ zeu_float = zeu_float[~np.isnan(zeu_float)]
 parameter=Flux
 ipar=1
 parameter_shortname_list=['Flux','Flux_eta_b','Flux_extended','Flux_extended_eta_b','MiP_abund','MaP_abund','MiP_POC','MiP_POC_extended','MaP_POC']
-parameter_panellabel_list=['b','b','b','b','f','h','f','f','h']
+parameter_panellabel_list=['b','b','b','b','g','h','g','g','h']
 parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','Flux (mgC $m^{-2}$ $d^{-1}$)','Flux (mgC $m^{-2}$ $d^{-1}$)',
                        'Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$)','MaP abundance (# L$^{-1}$)'
                         ,'MiP (mgC $m^{-3}$)','MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)']
@@ -265,7 +265,7 @@ ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 plt.legend(fontsize=14)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
-ax.text(-0.075, 1.05, 'b', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an38/IntegratedPOC_vs_time_an38.pdf' ,dpi=200)
 plt.close()
@@ -289,7 +289,7 @@ ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
 plt.legend(fontsize=14)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
-ax.text(-0.075, 1.05, 'b', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an38/IntegratedPOC_extended_vs_time_an38.pdf' ,dpi=200)
 plt.close()
