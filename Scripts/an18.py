@@ -2,15 +2,103 @@ import calendar
 import numpy as np
 import os
 import pandas as pd
-from datetime import date,datetime
+from datetime import date,datetime,timedelta
 from time import gmtime
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from scipy.signal import savgol_filter
 import seawater as sw
+import gsw
+import netCDF4 as nc
 from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from matlab_datenum import matlab_datenum
+from matlab_datevec import matlab_datevec
+
+
+#######################################################################
+#######################################################################
+#######################################################################
+# I load the bbp data
+#######################################################################
+#######################################################################
+#######################################################################
+filename='6903095_Sprof.nc'
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+ds = nc.Dataset('%s/%s' % (storedir,filename))
+lon=np.array(ds.variables['LONGITUDE'])
+lat=np.array(ds.variables['LATITUDE'])
+
+Date_Num_bbp=np.array(ds.variables['JULD'])+matlab_datenum(1950,1,1)
+date_reference = datetime.strptime("1/1/1950", "%d/%m/%Y")
+date_reference_datenum=date.toordinal(date_reference)+366
+
+Date_Vec=np.zeros([Date_Num_bbp.size,6])
+for i in range(0,Date_Num_bbp.size):
+    date_time_obj = date_reference + timedelta(days=Date_Num_bbp[i])
+    Date_Vec[i,0]=date_time_obj.year;Date_Vec[i,1]=date_time_obj.month;Date_Vec[i,2]=date_time_obj.day
+    Date_Vec[i,3]=date_time_obj.hour;Date_Vec[i,4]=date_time_obj.minute;Date_Vec[i,5]=date_time_obj.second
+
+Date_Vec=Date_Vec.astype(int)
+
+#Standard variables
+pres=np.array(ds.variables['PRES_ADJUSTED'])
+temp=np.array(ds.variables['TEMP_ADJUSTED'])
+
+#BGC Variables
+bbp700=np.array(ds.variables['BBP700_ADJUSTED'])
+
+#If adjusted values are not available yet, I take the non adjusted ones
+if np.sum(temp==99999)==temp.size:
+    print('Taking non adjusted temperature')
+    temp = np.array(ds.variables['TEMP'])
+if np.sum(pres==99999)==pres.size:
+    print('Taking non adjusted pressure')
+    pres = np.array(ds.variables['PRES'])
+if np.sum(bbp700==99999)==bbp700.size:
+    print('Taking non adjusted bbp700')
+    bbp700 = np.array(ds.variables['BBP700'])
+
+#######################################################################
+#I tranform the pressure to depth
+#######################################################################
+mask_depth=pres!=99999 #I select only valid values
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_depth]
+pres_tmp=pres[mask_depth]
+depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
+depth_bbp=np.ones(pres.shape)*99999
+depth_bbp[mask_depth]=depth_tmp
+
+#######################################################################
+# I transform the bbp700 to small POC (sPOC)
+#######################################################################
+from paruvpy import bbp700toPOC
+bbp_POC=bbp700.copy()*0+99999
+i=0
+for i in range(0,bbp700.shape[0]):
+    bbp700tmp=bbp700[i,:]
+    depth_tmp=depth_bbp[i,:]
+    temp_tmp=temp[i,:]
+    # I exclude nan values
+    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)
+    bbp700tmp=bbp700tmp[sel]
+    depth_tmp=depth_tmp[sel]
+    temp_tmp=temp_tmp[sel]
+    # I convert to small POC (sPOC) and I set to 0 values <0
+    sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
+    sPOC_tmp[sPOC_tmp<0]=0
+    bbp_POC[i,sel]=sPOC_tmp
+
+#######################################################################
+#######################################################################
+#######################################################################
+# I load the MiP MaP data
+#######################################################################
+#######################################################################
+#######################################################################
 
 filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_diagnostics_data_356.tsv' % home
 data=pd.read_csv(filename_ecopart, sep='\t', header=0)
@@ -36,15 +124,17 @@ MiP_abund=np.array(data['MiP_abun'][sel_filename])
 MaP_abund=np.array(data['MaP_abun'][sel_filename])
 MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
 MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
-bbp_POC=np.array(data['bbp POC [mgC/m3]'][sel_filename])
 depth=np.array(data['Depth [m]'][sel_filename])
 
 # I convert the dates to float values (in seconds from 1970 1 1)
 Date_Num=np.r_[0:Flux.size]
+Date_Num_matlab=np.squeeze( np.zeros((Flux.size,1)) )
 for i in Date_Num:
     date_time_obj = datetime.strptime(Date_Time[i], '%Y-%m-%dT%H:%M:%S')
     Date_Num[i] = calendar.timegm(date_time_obj.timetuple())
+    Date_Num_matlab[i] = matlab_datenum(date_time_obj.year,date_time_obj.month,date_time_obj.day,date_time_obj.hour,date_time_obj.minute,date_time_obj.second)
     #datetime.utcfromtimestamp(Date_Num[i])
+
 
 #######################################################################
 # I load the eddy position calculated from satellite, which I need to calculate the distance with the BGC Argo
@@ -112,16 +202,16 @@ list_dates=list_dates[sel_insideEddy]
 
 # lon=lon[sel_insideEddy]
 # lat=lat[sel_insideEddy]
-# Date_Num=Date_Num[sel_insideEddy]
+Date_Num_bbp=Date_Num_bbp[sel_insideEddy]
 # Date_Time=Date_Time[sel_insideEddy]
-# depth=depth[sel_insideEddy]
+depth_bbp=depth_bbp[sel_insideEddy]
 # pressure=pressure[sel_insideEddy]
 # Flux=Flux[sel_insideEddy]
 # MiP_abund=MiP_abund[sel_insideEddy]
 # MiP_POC=MiP_POC[sel_insideEddy]
 # MaP_abund=MaP_abund[sel_insideEddy]
 # MaP_POC=MaP_POC[sel_insideEddy]
-# bbp_POC=bbp_POC[sel_insideEddy]
+bbp_POC=bbp_POC[sel_insideEddy,:]
 
 #######################################################################
 # I start the loop on the different parameters I plot
@@ -144,6 +234,20 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
     elif ipar == 4: parameter=MaP_POC.copy()
     elif ipar == 5: parameter=bbp_POC.copy()
 
+    if ipar == 5:
+        i=0
+        for i in range(0, bbp_POC.shape[0]):
+            z=parameter[i,:];x=Date_Num_bbp[i];y=depth_bbp[i,:]
+            z[z>100] = 99999
+            sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
+            if sum(sel2) > 0:
+                z = savgol_filter(z, 5, 1)
+                # sel_200 and sel_200_600 are used only for the POC integrated in time
+                sel_0_200 = np.abs(y2) < 200
+                sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
+                bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
+        continue
+
     # I filter the flux prophiles
     parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([])
     i=0
@@ -151,7 +255,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
         sel=Date_Num==list_dates[i];x=Date_Num[sel];y=depth[sel]
         z=parameter[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2)>0:
-            if (ipar==5)&(i==36):   z[-1]=0 #With this line, I exclude a spike measured in one bbpPOC profile at 600 m which was making the bbpPOC integrated time series odd (in the sense that it had a anamalous spike corresponding to that profile)
+            # if (ipar==5)&(i==36):   z[-1]=0 #With this line, I exclude a spike measured in one bbpPOC profile at 600 m which was making the bbpPOC integrated time series odd (in the sense that it had a anamalous spike corresponding to that profile)
             z=savgol_filter(z,5,1)
             parameter_filtered = np.concatenate((parameter_filtered, z))
             Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
@@ -161,7 +265,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
             sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
             if ipar==3: MiP_POC_0_200=np.append(MiP_POC_0_200,np.mean(z[sel_0_200]));MiP_POC_200_600=np.append(MiP_POC_200_600,np.mean(z[sel_200_600]))
             if ipar==4: MaP_POC_0_200=np.append(MaP_POC_0_200,np.mean(z[sel_0_200]));MaP_POC_200_600=np.append(MaP_POC_200_600,np.mean(z[sel_200_600]))
-            if ipar==5: bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
+            # if ipar==5: bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
 
     if ipar==5: continue # I do not plot the bbp as it is already plotted in an17 (with higher resolution data)
     # I define the x and y arrays for the contourf plot
@@ -246,11 +350,11 @@ POC_0_200[POC_0_200<0]=0
 POC_200_600[POC_200_600<0]=0
 # Parameters for the plot
 width, height = 0.8, 0.5
-set_ylim_lower, set_ylim_upper = min(POC_0_200.min(),POC_200_600.min()),max(POC_0_200.max(),POC_200_600.max())
+set_ylim_lower, set_ylim_upper = min(POC_0_200.min(),POC_200_600.min()*10),max(POC_0_200.max(),POC_200_600.max()*10)
 
 #POC 0-200 vs 200-600
 fig = plt.figure(1, figsize=(13,4))
-ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,POC_0_200,'r',label='0-200 m')
 plt.scatter(list_dates,POC_0_200,c='r')
 plt.plot(list_dates,POC_200_600*10,'b',label='200-600 m')
@@ -275,7 +379,7 @@ plt.close()
 
 # 0-200 m layer
 fig = plt.figure(1, figsize=(13,4))
-ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,bbp_POC_0_200,'y',label='bbpPOC')
 plt.scatter(list_dates,bbp_POC_0_200,c='y')
 plt.plot(list_dates,MiP_POC_0_200,'c',label='MiP')
@@ -304,7 +408,7 @@ plt.close()
 # 200-600 m layer
 set_ylim_lower, set_ylim_upper = POC_200_600.min(),POC_200_600.max()
 fig = plt.figure(1, figsize=(13,4))
-ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,bbp_POC_200_600,'y',label='bbpPOC')
 plt.scatter(list_dates,bbp_POC_200_600,c='y')
 plt.plot(list_dates,MiP_POC_200_600,'c',label='MiP')
