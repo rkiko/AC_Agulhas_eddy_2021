@@ -383,3 +383,16 @@ an50
 
 I plot the time series of the flux at 200 and 600 m
 
+
+\
+an51
+
+I calculate the sinking speed of the flux
+
+
+\
+an52
+
+I analyse the CTD data token by the vessel in the days of the Argo float 
+deployment
+

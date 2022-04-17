@@ -209,7 +209,7 @@ parameter=temp
 parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
 parameter_panellabel_list=['c','c','g','e','d','a']
 parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC','BrVais']
-ipar=5
+ipar=4
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
     elif ipar==1:   parameter=psal.copy()
