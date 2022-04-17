@@ -10,6 +10,7 @@ from scipy.signal import savgol_filter
 import seawater as sw
 import gsw
 import netCDF4 as nc
+import pickle
 from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
@@ -91,6 +92,7 @@ for i in range(0,bbp700.shape[0]):
     sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
     sPOC_tmp[sPOC_tmp<0]=0
     bbp_POC[i,sel]=sPOC_tmp
+
 
 #######################################################################
 #######################################################################
@@ -195,8 +197,16 @@ dist_km=dist*111
 
 #######################################################################
 # I select the data only in the period when the BGC Argo float was inside the eddy
+# Before that, I save the bbpPOC and the depth so that it is easier to include it in other scripts
 #######################################################################
 sel_insideEddy = dist_km <= radius_Vmax_4float
+
+dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
+                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"sel_insideEddy": sel_insideEddy}
+a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
+pickle.dump(dictionary_data, a_file)
+a_file.close()
+
 
 list_dates=list_dates[sel_insideEddy]
 
@@ -430,4 +440,5 @@ plt.title('200-600 m layer', fontsize=18)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an18/200_600m_MiP_MaP_bbpPOC_vs_time_an18.pdf' ,dpi=200)
 plt.close()
+
 
