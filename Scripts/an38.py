@@ -44,7 +44,6 @@ MaP_abund=np.array(data['MaP_abun'][sel_filename])
 MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
 MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
 MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
-bbp_POC=np.array(data['bbp POC [mgC/m3]'][sel_filename])
 depth=np.array(data['Depth [m]'][sel_filename])
 
 # I convert the dates to float values (in seconds from 1970 1 1)
@@ -139,6 +138,21 @@ zeu_datenum = zeu_datenum[~np.isnan(zeu_float)]
 zeu_float = zeu_float[~np.isnan(zeu_float)]
 
 #######################################################################
+#I load the bbp data and I select only those taken inside the eddy
+#######################################################################
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
+data_an18 = pickle.load(a_file)
+bbp_POC=data_an18['bbp_POC']
+Date_Num_bbp=data_an18['Date_Num_bbp']
+depth_bbp=data_an18['depth_bbp']
+a_file.close()
+
+Date_Num_bbp=Date_Num_bbp[sel_insideEddy]
+depth_bbp=depth_bbp[sel_insideEddy,:]
+bbp_POC=bbp_POC[sel_insideEddy,:]
+
+#######################################################################
 # I start the loop on the different parameters I plot
 #######################################################################
 parameter=Flux
@@ -164,6 +178,20 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
     elif ipar == 7: parameter=MiP_POC_extended.copy()
     elif ipar == 8: parameter=MaP_POC.copy()
     elif ipar == 9: parameter=bbp_POC.copy()
+
+    if ipar == 9:
+        i=0
+        for i in range(0, bbp_POC.shape[0]):
+            z=parameter[i,:];y=depth_bbp[i,:]
+            z[z>100] = 99999
+            sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
+            if sum(sel2) > 0:
+                z = savgol_filter(z, 5, 1)
+                # I define sel_200 and sel_200_600
+                sel_0_200 = np.abs(y2) < 200
+                sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
+                bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
+        continue
 
     # I filter the flux prophiles
     parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([])
@@ -247,7 +275,7 @@ POC_200_600_extended[POC_200_600_extended<0]=0
 width, height = 0.8, 0.5
 
 #POC 0-200 vs 200-600
-set_ylim_lower, set_ylim_upper = min(POC_0_200.min(),POC_200_600.min()),70 #max(POC_0_200.max(),POC_200_600.max())
+set_ylim_lower, set_ylim_upper = min(POC_0_200.min(),POC_200_600.min()),40 #max(POC_0_200.max(),POC_200_600.max())
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,POC_0_200,'r',label='0-200 m')
@@ -271,7 +299,7 @@ plt.savefig('../Plots/an38/IntegratedPOC_vs_time_an38.pdf' ,dpi=200)
 plt.close()
 
 #POC 0-200 vs 200-600 extended
-set_ylim_lower, set_ylim_upper = min(POC_0_200_extended.min(),POC_200_600_extended.min()),70 #max(POC_0_200_extended.max(),POC_200_600_extended.max())
+set_ylim_lower, set_ylim_upper = min(POC_0_200_extended.min(),POC_200_600_extended.min()),40 #max(POC_0_200_extended.max(),POC_200_600_extended.max())
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates,POC_0_200_extended,'r',label='0-200 m')

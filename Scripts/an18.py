@@ -38,7 +38,7 @@ date_reference_datenum=date.toordinal(date_reference)+366
 
 Date_Vec=np.zeros([Date_Num_bbp.size,6])
 for i in range(0,Date_Num_bbp.size):
-    date_time_obj = date_reference + timedelta(days=Date_Num_bbp[i])
+    date_time_obj = date_reference + timedelta(days=Date_Num_bbp[i]-matlab_datenum(1950,1,1))
     Date_Vec[i,0]=date_time_obj.year;Date_Vec[i,1]=date_time_obj.month;Date_Vec[i,2]=date_time_obj.day
     Date_Vec[i,3]=date_time_obj.hour;Date_Vec[i,4]=date_time_obj.minute;Date_Vec[i,5]=date_time_obj.second
 
@@ -202,11 +202,10 @@ dist_km=dist*111
 sel_insideEddy = dist_km <= radius_Vmax_4float
 
 dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
-                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"sel_insideEddy": sel_insideEddy}
+                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
-
 
 list_dates=list_dates[sel_insideEddy]
 
@@ -247,12 +246,12 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
     if ipar == 5:
         i=0
         for i in range(0, bbp_POC.shape[0]):
-            z=parameter[i,:];x=Date_Num_bbp[i];y=depth_bbp[i,:]
+            z=parameter[i,:];y=depth_bbp[i,:]
             z[z>100] = 99999
             sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
             if sum(sel2) > 0:
                 z = savgol_filter(z, 5, 1)
-                # sel_200 and sel_200_600 are used only for the POC integrated in time
+                # I define sel_200 and sel_200_600
                 sel_0_200 = np.abs(y2) < 200
                 sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
                 bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))

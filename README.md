@@ -274,6 +274,12 @@ The difference with an31 script is that I consider two time windows: the first g
 13 April to x, the second goes from x to the 23 of September, with x which is changed.
 
 \
+an34b
+
+I go only untile the 9 of September rather than to the 23, to see if it improves
+(it does not, so I do not use these plots in principle)
+
+\
 an35
 
 I download the Euphotic layer depth data at 9km resolution at 8-day resolution
@@ -396,3 +402,16 @@ an52
 I analyse the CTD data token by the vessel in the days of the Argo float 
 deployment
 
+
+\
+an53
+
+As in an 34, I calculate all the metrics necessary to estimate the carbon budget (
+the Flux vs depth and time, the integrated POC, the PARR vs depth).
+I do a loop on different layers (basically every 100m between 200 and 600m) and I calculate
+the theoretical carbon disappearing due to respiration (difference of delta flux and delta integrated POC)
+and I compare it with the PARR and carbon consumption associated to oxygen consumption with a plot.
+I consider two time windows: the first goes from the 
+13 April to x, the second goes from x to the 23 of September, with x which is changed.
+The difference with an34 is that here I use the bbp from the BGC Argo float (Coriolis)
+and not from Ecopart, so that the bbp is in higher resolution
