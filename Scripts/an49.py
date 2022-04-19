@@ -13,12 +13,12 @@ storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 #######################################################################
 # Parameters
 #######################################################################
-dist_thr=0.5 # How many degrees shall a profile be distant to exclude it
-time_lag=50 # How many days shall a profile be distant to exclude it
+dist_thr=5 # How many degrees shall a profile be distant to exclude it
+time_lag=5 # How many days shall a profile be distant to exclude it
 # For the plot:
 width, height = 0.65, 0.65
 date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
-plotdir = '%s/GIT/AC_Agulhas_eddy_2021/Plots/an49/%05.2fdegreee%02ddays' % (home,dist_thr,time_lag)
+plotdir = '%s/GIT/AC_Agulhas_eddy_2021/Plots/an49/%05.2fdegree%02ddays' % (home,dist_thr,time_lag)
 if os.path.isdir(plotdir) is False:
     os.system('mkdir %s' % plotdir)
     os.system('mkdir %s/PSALvsPRES' % plotdir)
@@ -37,6 +37,7 @@ Date_Num0=np.array(ds.variables['JULD'])
 pres0 = np.array(ds.variables['PRES'])
 psal0 = np.array(ds.variables['PSAL'])
 temp0 = np.array(ds.variables['TEMP'])
+doxy0 = np.array(ds.variables['DOXY_ADJUSTED'])
 
 #######################################################################
 # I list the .nc files downloaded from https://dataselection.euro-argo.eu/
@@ -58,7 +59,7 @@ sel_insideEddy[0:tmp.size]=tmp.copy()
 # I start the loop on each profile of the Argo float
 #######################################################################
 
-i=0
+i=84
 for i in range(0, pres0.shape[0]):
 
     lontmp=lon0[i]
@@ -113,11 +114,26 @@ for i in range(0, pres0.shape[0]):
     plt.gca().invert_yaxis()
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 
+    #DOXYvsPRES
+    x = doxy0[i, :]
+    y = pres0[i, :]
+    sel = (~np.isnan(x)) & (x != 99999) & (~np.isnan(y)) & (y != 99999)
+    x = x[sel];y = y[sel]
+    fig = plt.figure(4, figsize=(3, 3))
+    ax = fig.add_axes([0.25, 0.15, width, height], ylim=(1000, 2000))#, xlim=(180, 230))
+    plt.scatter(x, y, c='b', s=0.1,zorder=10)
+    plt.plot(x, y, 'b', linewidth=0.25,zorder=11)
+    plt.xlabel('Dissolved oxygen (\micro mol/kg)', fontsize=10)
+    plt.ylabel('Pressure (dbar)', fontsize=10)
+    plt.gca().invert_yaxis()
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+
 
     #######################################################################
     # I load the data
     #######################################################################
     n_profiles_ext = 0
+    n_profiles_ext_doxy = 0
     j=0
     for j in range(0,listfiles.__len__()):
         filename=listfiles[j]
@@ -153,6 +169,15 @@ for i in range(0, pres0.shape[0]):
         else:
             temp = np.array(ds.variables['TEMP_ADJUSTED'])
 
+        if 'DOXY_ADJUSTED' in ds.variables:
+            doxy = np.array(ds.variables['DOXY_ADJUSTED'])
+        elif 'DOX2_ADJUSTED' in ds.variables:
+            doxy = np.array(ds.variables['DOX2_ADJUSTED'])
+        elif 'DOXY' in ds.variables:
+            doxy = np.array(ds.variables['DOXY'])
+        else:
+            doxy = np.array([])
+
         sel = np.where( (abs(lon-lontmp)<dist_thr) & (abs(lat-lattmp)<dist_thr) & (abs(Date_Num-daytmp)<time_lag) )[0]
         if sel.size > 0:
             n_profiles_ext = n_profiles_ext + sel.size
@@ -172,6 +197,17 @@ for i in range(0, pres0.shape[0]):
                 plt.figure(3)
                 plt.scatter(z, x, c='gray', s=0.1)
                 plt.plot(z, x, 'gray', linewidth=0.25)
+                if doxy.size>0:
+                    n_profiles_ext_doxy = n_profiles_ext_doxy +1
+                    y = pres[sel[k], :]
+                    x = doxy[sel[k], :]
+                    sel2 = (~np.isnan(x)) & (x != 99999) & (x > -2*10**-9) & (~np.isnan(y)) & (y != 99999) & (y > -2*10**-9)
+                    x = x[sel2];y = y[sel2]
+                    plt.figure(4)
+                    plt.scatter(x, y, c='gray', s=0.1)
+                    plt.plot(x, y, 'gray', linewidth=0.25)
+
+
 
     date_time_obj = date_reference + datetime.timedelta(days=Date_Num0[i])
     inoutEddy = 'inside'
@@ -196,6 +232,13 @@ for i in range(0, pres0.shape[0]):
     int(i + 1), date_time_obj.day, date_time_obj.month, date_time_obj.year, date_time_obj.hour, date_time_obj.minute,
     inoutEddy,n_profiles_ext,dist_thr*111,time_lag), fontsize=10)
     plt.savefig('%s/TEMPvsPSAL/TempVsPsal_Profile%03d_%05.2fdegreee%02ddays_an49.pdf' % (plotdir,int(i+1),dist_thr,time_lag), dpi=200)
+    plt.close()
+
+    plt.figure(4)
+    plt.title('Profile %d, %02d-%02d-%d, %02d:%02d\nFloat %s eddy, %d ext. profiles\n less than %dkm, within %ddays' % (
+    int(i + 1), date_time_obj.day, date_time_obj.month, date_time_obj.year, date_time_obj.hour, date_time_obj.minute,
+    inoutEddy,n_profiles_ext_doxy,dist_thr*111,time_lag), fontsize=10)
+    plt.savefig('%s/DOXYvsPRES/DoxyVsPres_Profile%03d_%05.2fdegreee%02ddays_an49.pdf' % (plotdir,int(i+1),dist_thr,time_lag), dpi=200)
     plt.close()
 
 
