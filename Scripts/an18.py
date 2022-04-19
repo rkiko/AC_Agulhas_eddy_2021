@@ -384,6 +384,9 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an18/IntegratedPOC_vs_time_an18.pdf' ,dpi=200)
 plt.close()
 
+#I calculate also the difference of the integrated POC 200—600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
+datetime.utcfromtimestamp(list_dates[27])
+(POC_200_600[0]-POC_200_600[27])*400
 
 
 # 0-200 m layer
@@ -439,5 +442,6 @@ plt.title('200-600 m layer', fontsize=18)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an18/200_600m_MiP_MaP_bbpPOC_vs_time_an18.pdf' ,dpi=200)
 plt.close()
+
 
 

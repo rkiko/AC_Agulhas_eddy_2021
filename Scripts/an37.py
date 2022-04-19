@@ -308,4 +308,59 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     plt.savefig('../Plots/an37/TimeSeries_%s_vs_01depth_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
     plt.close()
 
+    #Here, for the temperature, I analyse how much it changed in the top 200m
+    if ipar == 1:
+        x_parameter = np.linspace(Date_Num_parameter.min(), Date_Num_parameter.max(), 100)
+        y1_parameter = np.linspace(depth_parameter.min(), depth_parameter.max(), 200)
+        # I interpolate
+        x_parameter_g, y_parameter_g = np.meshgrid(x_parameter, y1_parameter)
+        parameter_interp_depth = griddata((Date_Num_parameter, depth_parameter), parameter_filtered,
+                                          (x_parameter_g, y_parameter_g), method="nearest")
+
+        sel200=y1_parameter<=200
+        tmp=parameter_interp_depth[sel200,:]
+        tmp=np.mean(tmp,axis=0)
+
+        # Parameter in the top 200m
+        fig = plt.figure(1, figsize=(12, 4))
+        ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+        plt.plot(x_parameter,tmp)
+        plt.ylabel(parameter_ylabel_list[ipar])
+        #I set xticks
+        nxticks=10
+        xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+        xticklabels=[]
+        for i in xticks:
+            date_time_obj = date_reference + datetime.timedelta(days=i)
+            xticklabels.append(date_time_obj.strftime('%d %B'))
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels)
+        plt.xticks(rotation=90,fontsize=12)
+        # I add the grid
+        plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+        # I save
+        plt.savefig('../Plots/an37/ZTimeSeries_%s_top200m_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
+        plt.close()
+
+        # Parameter in the mixed layer: I approximate the temperature at 50m as representative of the ML, but should be improved in future
+        fig = plt.figure(1, figsize=(12, 4))
+        ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+        plt.plot(x_parameter,parameter_interp_depth[10,:])
+        plt.ylabel(parameter_ylabel_list[ipar])
+        #I set xticks
+        nxticks=10
+        xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+        xticklabels=[]
+        for i in xticks:
+            date_time_obj = date_reference + datetime.timedelta(days=i)
+            xticklabels.append(date_time_obj.strftime('%d %B'))
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels)
+        plt.xticks(rotation=90,fontsize=12)
+        # I add the grid
+        plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+        # I save
+        plt.savefig('../Plots/an37/ZTimeSeries_%s_ML_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
+        plt.close()
+
 
