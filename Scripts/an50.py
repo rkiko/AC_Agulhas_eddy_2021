@@ -169,6 +169,9 @@ ax.set_xticklabels([])
 plt.xticks(rotation=90, fontsize=7)
 plt.savefig('../Plots/an50/02eta_b_POCFlux_200_600m_%d%02d%02dto%d%02d%02d_an50.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
+#I calculate also the difference of the flux at 200 and 600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
+datetime.utcfromtimestamp(x[41])
+np.mean(Flux_eta_b_filtered_depthf_200[0:42])-np.mean(Flux_eta_b_filtered_depthf_600[0:42])
 
 # Third plot: flux calculated considering smallest size classes but with old eta and b values
 fig = plt.figure(1, figsize=(5.5, 1.0))
