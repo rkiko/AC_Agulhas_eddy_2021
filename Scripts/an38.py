@@ -200,7 +200,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
         sel=Date_Num==list_dates[i];x=Date_Num[sel];y=depth[sel]
         z=parameter[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2)>0:
-            if (ipar==9)&(i==36):   z[-1]=0 #With this line, I exclude a spike measured in one bbpPOC profile at 600 m which was making the bbpPOC integrated time series odd (in the sense that it had a anamalous spike corresponding to that profile)
+            # if (ipar==9)&(i==36):   z[-1]=0 #With this line, I exclude a spike measured in one bbpPOC profile at 600 m which was making the bbpPOC integrated time series odd (in the sense that it had a anamalous spike corresponding to that profile)
             z=savgol_filter(z,5,1)
             parameter_filtered = np.concatenate((parameter_filtered, z))
             Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
@@ -211,7 +211,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
             if ipar==6: MiP_POC_0_200=np.append(MiP_POC_0_200,np.mean(z[sel_0_200]));MiP_POC_200_600=np.append(MiP_POC_200_600,np.mean(z[sel_200_600]))
             if ipar==7: MiP_POC_extended_0_200=np.append(MiP_POC_extended_0_200,np.mean(z[sel_0_200]));MiP_POC_extended_200_600=np.append(MiP_POC_extended_200_600,np.mean(z[sel_200_600]))
             if ipar==8: MaP_POC_0_200=np.append(MaP_POC_0_200,np.mean(z[sel_0_200]));MaP_POC_200_600=np.append(MaP_POC_200_600,np.mean(z[sel_200_600]))
-            if ipar==9: bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
+            # if ipar==9: bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
 
     if ipar==9: continue # I do not plot the bbp as it is already plotted in an17 (with higher resolution data)
     # I define the x and y arrays for the contourf plot

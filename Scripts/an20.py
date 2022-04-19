@@ -76,8 +76,20 @@ lonEddy=lonEddy[sel_insideEddy]
 latEddy=latEddy[sel_insideEddy]
 anom_meanE_meanOut=chl_inside_mean-chl_outside_mean
 
+#######################################################################
+# I calculate the difference (in terms of percentage) between the mean chl inside
+# and outside the eddy (chl which was measured by satellite).
+#######################################################################
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+sel_tmp= np.array(Date_Num_Eddy)>=day0_insideEddy
+tmp = np.mean( chl_inside_mean[sel_tmp]-chl_outside_mean[sel_tmp] )
+tmp = np.mean( chl_inside_mean[sel_tmp]/chl_outside_mean[sel_tmp] )
 
-
+#######################################################################
+# I plot
+#######################################################################
 
 width, height = 0.8, 0.5
 set_ylim_lower, set_ylim_upper = -1,1.2#anom_meanE_meanOut.min()*1.1,chl_inside_mean.max()*1.1

@@ -229,6 +229,8 @@ for i_depth in range(0,list_depths.size-1):
     width, height = 0.75, 0.75
     set_ylim_lower, set_ylim_upper = 0.5*10**-3, 5*10 ** 3
     set_xlim_lower, set_xlim_upper = 0.0009, 2.7
+    a=11
+    b=16
     ##############
     #POC plot
     ##############
@@ -236,7 +238,8 @@ for i_depth in range(0,list_depths.size-1):
     ax = fig.add_axes([0.2, 0.15, width, height], xlim=(set_xlim_lower, set_xlim_upper), ylim=(set_ylim_lower, set_ylim_upper))
     plt.yscale('log')
     plt.xscale('log')
-    plt.plot(PSD_all_bin_mean, POC, c='blue', label='UVP')
+    plt.plot(PSD_all_bin_mean[b:-1], POC[b:-1], '--b.', label='UVP',linewidth=1)
+    plt.plot(PSD_all_bin_mean[a:b+1], POC[a:b+1], c='b', label='UVP\n(extrap.)')
     plt.scatter(0.0155, bbp_depth, label='bbp',c='red')
     plt.errorbar(0.0155, bbp_depth, xerr=0.0145,yerr=bbp_depth_std, capsize=5,c='red')
     plt.xlabel('Size (mm)', fontsize=10)
