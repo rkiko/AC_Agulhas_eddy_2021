@@ -123,7 +123,7 @@ for i in range(0, pres0.shape[0]):
     ax = fig.add_axes([0.25, 0.15, width, height], ylim=(1000, 2000))#, xlim=(180, 230))
     plt.scatter(x, y, c='b', s=0.1,zorder=10)
     plt.plot(x, y, 'b', linewidth=0.25,zorder=11)
-    plt.xlabel('Dissolved oxygen (\micro mol/kg)', fontsize=10)
+    plt.xlabel('Dissolved oxygen ($\mu$mol/kg)', fontsize=10)
     plt.ylabel('Pressure (dbar)', fontsize=10)
     plt.gca().invert_yaxis()
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)

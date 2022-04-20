@@ -172,7 +172,7 @@ plt.close()
 #I calculate also the difference of the flux at 200 and 600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
 datetime.utcfromtimestamp(x[41])
 ndays=(x[41]-x[0])/86400
-np.mean(Flux_eta_b_filtered_depthf_200[0:42])-np.mean(Flux_eta_b_filtered_depthf_600[0:42])*ndays
+np.mean(Flux_eta_b_filtered_depthf_200[0:42])*ndays-np.mean(Flux_eta_b_filtered_depthf_600[0:42])*ndays
 np.mean(Flux_eta_b_filtered_depthf_200[0:42]-Flux_eta_b_filtered_depthf_600[0:42])*ndays
 
 # Third plot: flux calculated considering smallest size classes but with old eta and b values

@@ -69,7 +69,8 @@ doxy0 = np.array(ds.variables['DOXY_ADJUSTED']) #micromol/kg
 # I convert the oxygen of the BGC Argo float from micromol/kg to ml/l
 ########################################################################
 mask_doxy=doxy0 > 99990
-liter_per_mole=22.414 #approximation at 0 degree
+liter_per_mole0=22.414 #approximation at 0 degree
+liter_per_mole=liter_per_mole0*(temp0+273.15)/273.15 #approximation at 0 degree
 doxy0 = doxy0*liter_per_mole #microl/kg
 doxy0 = doxy0/1000 #ml/kg
 
