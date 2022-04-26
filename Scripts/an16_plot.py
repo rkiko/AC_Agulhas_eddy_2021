@@ -96,7 +96,6 @@ a_file = open("%s/an16/data_an16.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
 
-
 #######################################################################
 # I select the satellite chlorophyll data in the day of the BGC Argo float profiles
 #######################################################################
@@ -160,6 +159,26 @@ lon_float_inside=lon_float[sel_insideEddy]
 lat_float_inside=lat_float[sel_insideEddy]
 lon_float_outside=lon_float[~sel_insideEddy]
 lat_float_outside=lat_float[~sel_insideEddy]
+
+#######################################################################
+# I save the chl values for the latex document
+#######################################################################
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from write_latex_data import write_latex_data
+from matlab_datevec import matlab_datevec
+
+Date_Vec_Eddy=np.zeros((Date_Num_Eddy.size,6))
+for i in range(0,Date_Num_Eddy.size):
+    Date_Vec_Eddy[i,:] = matlab_datevec(Date_Num_Eddy[i])
+
+Date_Vec_Eddy = Date_Vec_Eddy.astype(int)
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'chl_eddy_20201018'
+arg_value=np.mean(chl_inside_mean[0:3])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'chl_percentage_difference_inside_outside'
+arg_value = np.mean(chl_inside_mean[175:339]-chl_outside_mean[175:339])/np.mean(chl_outside_mean[175:339])*100
+write_latex_data(filename,argument,'%0.d' % arg_value)
 
 #######################################################################################################################
 ############### I plot the BGC Argo float (F) trajectory with the associated anomaly. There are 2 values of local chlorophyll

@@ -115,6 +115,16 @@ i=Date_Num_Eddy[0]
 for i in Date_Num_Eddy:
     DateTime_Eddy=np.append(DateTime_Eddy,datetime.datetime.fromordinal(int(i)-366))
 
+#######################################################################
+# I save the radius_frame values for the latex document
+#######################################################################
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'radius_frame'
+arg_value=radius_frame
+write_latex_data(filename,argument,'%d' % arg_value)
+
 #######################################################################################################################
 ############### Calculating Chlorophyll using BGC Argo data
 #######################################################################################################################

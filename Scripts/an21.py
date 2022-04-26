@@ -96,6 +96,34 @@ for i in range(0, list_dates.size):
 dist=np.arccos(np.sin(lat_float*np.pi/180)*np.sin(latEddy_4float*np.pi/180)+np.cos(lat_float*np.pi/180)*np.cos(latEddy_4float*np.pi/180)*np.cos((lonEddy_4float-lon_float)*np.pi/180))*180/np.pi
 dist_km=dist*111
 
+#######################################################################
+# I save the radius Vmax values for the latex document
+#######################################################################
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from write_latex_data import write_latex_data
+from matlab_datevec import matlab_datevec
+
+Date_Vec_Eddy=np.zeros((Date_Num_Eddy.size,6))
+for i in range(0,Date_Num_Eddy.size):
+    Date_Vec_Eddy[i,:] = matlab_datevec(Date_Num_Eddy[i])
+
+Date_Vec_Eddy = Date_Vec_Eddy.astype(int)
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'radius_Vmax_20201018'
+arg_value=radius_Vmax[0]
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'radius_Vmax_20210413'
+arg_value=radius_Vmax[175]
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'max_radius_Vmax'
+arg_value=radius_Vmax.max()
+write_latex_data(filename,argument,'%d' % arg_value)
+arg_value=Date_Vec_Eddy[np.where(radius_Vmax == radius_Vmax.max()),:]
+write_latex_data(filename,'max_radius_Vmax_date','%d August' % arg_value[0][0][2])
+
+#######################################################################
+# I plot
+#######################################################################
 
 width, height = 0.8, 0.5
 set_ylim_lower, set_ylim_upper = 0,150

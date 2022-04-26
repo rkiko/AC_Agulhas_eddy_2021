@@ -268,6 +268,12 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y2_parameter)
     parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
 
+    if ipar==0: temp_interp = parameter_interp_depth.copy()
+    elif ipar==1:   psal_interp = parameter_interp_depth.copy()
+    elif ipar == 2: chla_interp = parameter_interp_depth.copy()
+    elif ipar == 3: doxy_interp = parameter_interp_depth.copy()
+    elif ipar == 4: sPOC_interp = parameter_interp_depth.copy()
+    elif ipar == 5: bvf_interp = parameter_interp_depth.copy()
 
     ########################################################
     ####### I plot: versus depth
@@ -310,11 +316,6 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     plt.savefig('../Plots/an37/TimeSeries_%s_vs_01depth_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
     plt.close()
 
-    if ipar==0: temp_interp = parameter_interp_depth.copy()
-    elif ipar==1:   psal_interp = parameter_interp_depth.copy()
-    elif ipar == 2: chla_interp = parameter_interp_depth.copy()
-    elif ipar == 3: doxy_interp = parameter_interp_depth.copy()
-    elif ipar == 4: sPOC_interp = parameter_interp_depth.copy()
 
     #Here, for the temperature, I analyse how much it changed in the top 200m
     if (ipar == 0)|(ipar == 3):
@@ -351,6 +352,10 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         plt.close()
 
         # Parameter in the mixed layer: I approximate the temperature at 50m as representative of the ML, but should be improved in future
+        if ipar==0:
+            temp50m = parameter_interp_depth[10,:]
+        elif ipar==3:
+            doxy50m = parameter_interp_depth[10,:]
         fig = plt.figure(1, figsize=(12, 4))
         ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
         plt.plot(x_parameter,parameter_interp_depth[10,:])
@@ -409,7 +414,7 @@ plt.savefig('../Plots/an37/TimeSeries_AOU_vs_01depth_an37.pdf',dpi=200)
 plt.close()
 
 
-# Parameter in the mixed layer: I approximate the temperature at 50m as representative of the ML, but should be improved in future
+# Parameter in the mixed layer: I approximate the AOU at 20m as representative of the ML, but should be improved in future
 fig = plt.figure(1, figsize=(12, 4))
 ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
 plt.plot(x_parameter,AOU_interp[1,:])
@@ -430,3 +435,75 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an37/ZTimeSeries_AOU_ML_an37.pdf' ,dpi=200)
 plt.close()
 
+#######################################################################
+# I save the mixed layer depth and BVfreq values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+from matlab_datenum import matlab_datenum
+from matlab_datevec import matlab_datevec
+
+Date_Vec_matlab=np.zeros((Date_Num.size,6))
+for i in range(0,Date_Num.size):
+    Date_Vec_matlab[i,:] = matlab_datevec(Date_Num[i]+matlab_datenum(1950,1,1))
+Date_Vec_matlab = Date_Vec_matlab.astype(int)
+
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'mld_beginning'
+arg_value=np.mean(mld[0:6])
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'mld_maximum'
+arg_value=mld.max()
+write_latex_data(filename,argument,'%d' % arg_value)
+arg_value=Date_Vec_matlab[np.where(mld == mld.max()),:]
+write_latex_data(filename,'mld_maximum_date','%d August' % arg_value[0][0][2])
+argument = 'mld_end'
+arg_value=mld[-1]
+write_latex_data(filename,argument,'%d' % arg_value)
+
+Date_Vec_parameter=np.zeros((x_parameter.size,6))
+for i in range(0,x_parameter.size):
+    Date_Vec_parameter[i,:] = matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1))
+Date_Vec_parameter = Date_Vec_parameter.astype(int)
+
+argument = 'bvf_75percentile_MLD'
+arg_value=np.percentile(bvf_interp[0:5,:],75)*10**6
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'bvf_75percentile_exponent_MLD'
+arg_value=-6
+write_latex_data(filename,argument,'%d' % arg_value)
+
+argument = 'bvf_102m_0413to0607'
+arg_value=np.mean(bvf_interp[5,0:34])*10**4
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'bvf_102m_0413to0607_exponent'
+arg_value=-4
+write_latex_data(filename,argument,'%d' % arg_value)
+
+argument = 'bvf_200to600m'
+arg_value=np.mean(bvf_interp[10:-1,:])*10**6
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'bvf_200to600m_exponent'
+arg_value=-6
+write_latex_data(filename,argument,'%d' % arg_value)
+
+argument = 'temp_ML_beginning'
+arg_value=temp50m[0]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'temp_ML_end'
+arg_value=temp50m[-1]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+
+argument = 'doxy_ML_beginning'
+arg_value=doxy50m[0]
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'doxy_ML_end'
+arg_value=doxy50m[-1]
+write_latex_data(filename,argument,'%d' % arg_value)
+
+AOU_20m=AOU_interp[1,:]
+argument = 'AOU_ML_0413to0625'
+arg_value=np.mean(AOU_20m[0:44])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'AOU_ML_0625to0905'
+arg_value=np.mean(AOU_20m[44:89])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
