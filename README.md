@@ -417,3 +417,10 @@ I consider two time windows: the first goes from the
 13 April to x, the second goes from x to the 23 of September, with x which is changed.
 The difference with an34 is that here I use the bbp from the BGC Argo float (Coriolis)
 and not from Ecopart, so that the bbp is in higher resolution
+
+\
+an54
+
+I analyse the dissolved oxygen climatological data downloaded from MIMOC oxygen climatology
+(https://cloud.geomar.de/s/qp4ddYBFxpH2yCa)
+
