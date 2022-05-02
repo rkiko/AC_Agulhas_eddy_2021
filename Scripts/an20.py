@@ -142,6 +142,23 @@ plt.savefig('../Plots/an20/IntegratedChl_vs_time_an20.pdf' ,dpi=200)
 plt.close()
 
 
+#######################################################################
+# I save the integrated chl concentration values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'integrated_chl_202104'
+arg_value=np.round(np.mean(y[0]))
+write_latex_data(filename,argument,'%d' % arg_value)
+
+i=47;print(matlab_datevec(x[i]+matlab_datenum(1950,1,1)),y[i])
+
+argument = 'integrated_chl_20210821'
+arg_value=np.round(np.mean(y[47]))
+write_latex_data(filename,argument,'%d' % arg_value)
+
 
 
 

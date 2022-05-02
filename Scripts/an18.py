@@ -226,7 +226,7 @@ bbp_POC=bbp_POC[sel_insideEddy,:]
 # I start the loop on the different parameters I plot
 #######################################################################
 parameter=Flux
-ipar=1
+ipar=4
 parameter_shortname_list=['Flux','MiP_abund','MaP_abund','MiP_POC','MaP_POC']
 parameter_panellabel_list=['b','g','h','g','h']
 parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$)','MaP abundance (# L$^{-1}$)'
@@ -283,6 +283,11 @@ for ipar in range(0,parameter_ylabel_list.__len__()+1):
     x_filtered_g,y_filtered_g=np.meshgrid(x_filtered,y_filtered)
     # I interpolate
     parameter_interp = griddata((Date_Num_filtered,depth_filtered), parameter_filtered, (x_filtered_g, y_filtered_g), method="nearest")
+
+    if ipar==4:
+        MAP_POC_interp = parameter_interp.copy()
+    elif ipar==3:
+        MIP_POC_interp = parameter_interp.copy()
 
     ################################################################################################################
     ####### I plot
@@ -384,9 +389,6 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an18/IntegratedPOC_vs_time_an18.pdf' ,dpi=200)
 plt.close()
 
-#I calculate also the difference of the integrated POC 200—600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
-datetime.utcfromtimestamp(list_dates[27])
-(POC_200_600[0]-POC_200_600[27])*400
 
 
 # 0-200 m layer
@@ -444,4 +446,40 @@ plt.savefig('../Plots/an18/200_600m_MiP_MaP_bbpPOC_vs_time_an18.pdf' ,dpi=200)
 plt.close()
 
 
+#######################################################################
+# I save the MAP POC concentration values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+datetime.utcfromtimestamp(x_filtered[29])
+y_filtered[9]
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'Map_POC_2021AprMay'
+arg_value=np.mean(MAP_POC_interp[0:9,0:23])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+datetime.utcfromtimestamp(x_filtered[66])
+datetime.utcfromtimestamp(x_filtered[88])
+y_filtered[16]
+argument = 'Map_POC_2021Flux'
+arg_value=np.mean(MAP_POC_interp[0:16,66:89])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
+argument = 'Mip_POC_2021AprMay'
+arg_value=np.mean(MIP_POC_interp[0:9,0:23])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Mip_POC_2021Flux'
+arg_value=np.mean(MIP_POC_interp[0:16,66:89])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+#I calculate also the difference of the integrated POC 200—600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
+datetime.utcfromtimestamp(list_dates[27])
+argument = 'Integrated_POC_0620_0413difference'
+arg_value = (POC_200_600[0]-POC_200_600[27])*400
+write_latex_data(filename,argument,'%d' % arg_value)
+
+dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
+                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Integrated_POC_0620_0413difference": arg_value}
+a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
+pickle.dump(dictionary_data, a_file)
+a_file.close()
