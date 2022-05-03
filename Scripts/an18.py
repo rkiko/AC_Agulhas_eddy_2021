@@ -399,9 +399,7 @@ ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim
 # plt.plot(list_dates,POC_200_600*10,'b',label='200-600 m')
 # plt.scatter(list_dates,POC_200_600*10,c='b')
 plt.plot(x_filtered,POC_0_200_int,'r',linewidth=3,label='0-200 m')
-# plt.scatter(x_filtered,POC_0_200_int,c='r')
 plt.plot(x_filtered,POC_200_600_int*10,'b',linewidth=3,label='200-600 m')
-# plt.scatter(x_filtered,POC_200_600_int,c='b')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
