@@ -52,6 +52,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     ########################################################################################################################
     # dayf = day0+timedelta(days=ndays) # final date for the carbon budget calculation
     ndays = (dayf - day0).days  # number of days
+    layer_thickness = depthf - depth0
     delta_depth_flux = 15  # around of the depth which I consider when extracting the flux
     Oxy2C = 0.89  # to convert from mol of oxygen to mol of carbon
     mol2gC = 12.0107  # to convert from mol of carbon to grams of carbon
@@ -167,21 +168,46 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
         z=bbp_POC[i,:];y=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
         z[z>100] = 99999
         sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
+        sel3=z==0
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
+            z[sel3]=0
             bbp_filtered = np.concatenate((bbp_filtered, z))
             Date_Num_bbp_filtered = np.concatenate((Date_Num_bbp_filtered, np.tile(x,sum(sel2)) ))
             depth_bbp_filtered = np.concatenate((depth_bbp_filtered, y2))
 
     # I define the x and y arrays for the MiP+MaP+bbp interpolation
     x_filtered = np.linspace(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max(), ndays)
-    y_filtered = np.linspace(depth_bbp_filtered.min(), depth_bbp_filtered.max(), 100)
+    y_filtered = np.linspace(depth_bbp_filtered.min(), depth_MaP_filtered.max(), 100)
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     MiP_interp = griddata((Date_Num_MiP_filtered, depth_MiP_filtered), MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     MiP_extended_interp = griddata((Date_Num_MiP_extended_filtered, depth_MiP_extended_filtered), MiP_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     MaP_interp = griddata((Date_Num_MaP_filtered, depth_MaP_filtered), MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     bbp_interp = griddata((Date_Num_bbp_filtered, depth_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+
+    # set_ylim_lower, set_ylim_upper = depth_bbp_filtered.min(), 600
+    # fig = plt.figure(1, figsize=(12, 8))
+    # ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper),
+    #                   xlim=(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max()))
+    # parameter_plot = bbp_interp.copy()
+    # parameter_plot[parameter_plot < 0] = 0
+    # parameter_plot[parameter_plot > 40] = 40
+    # ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
+    # plt.gca().invert_yaxis()
+    # # I draw colorbar
+    # cbar = plt.colorbar(plot2)
+    # cbar.ax.get_yticklabels()
+    # plt.ylabel('Depth (m)', fontsize=18)
+    # # I set xticks
+    # nxticks = 10
+    # xticks = np.linspace(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max(), nxticks)
+    # xticklabels = []
+    # for i in xticks:
+    #     xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+    # ax.set_xticks(xticks)
+    # ax.set_xticklabels(xticklabels)
+    # plt.xticks(rotation=90, fontsize=12)
 
     ##############################################
     # Step 3, I calculate the mean MiP+MaP+bbp (and std) between depth0 and depthf between day0 and dayf

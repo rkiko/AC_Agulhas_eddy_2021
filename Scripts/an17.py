@@ -222,9 +222,11 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
     i=0
     for i in range(0,parameter.shape[0]):
-        sel=(parameter[i,:]!=99999) & (depth[i,:]!=99999) & (dens[i,:]!=99999)
+        z = parameter[i, :]
+        sel=(z!=99999) & (depth[i,:]!=99999) & (dens[i,:]!=99999)
+        if ipar == 4: sel = (sel) & (z <= 100)
         if sum(sel) > 0:
-            z=parameter[i,sel];x=np.ones(z.shape)*Date_Num[i];y1=depth[i,sel];y2=dens[i,sel];y3=pres[i,sel]
+            z=z[sel];x=np.ones(z.shape)*Date_Num[i];y1=depth[i,sel];y2=dens[i,sel];y3=pres[i,sel]
             z = savgol_filter(z, 5, 1)
             parameter_filtered = np.concatenate((parameter_filtered, z));Date_Num_parameter = np.concatenate((Date_Num_parameter, x))
             depth_parameter = np.concatenate((depth_parameter, y1));dens_parameter = np.concatenate((dens_parameter, y2));pressure_parameter = np.concatenate((pressure_parameter, y3))
