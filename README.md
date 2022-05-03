@@ -270,6 +270,8 @@ an33
 It is the same script as an18 (plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
 with the difference that I plot also these quantities calculated with (i) a 
 different eta and b value; (ii) a different eta and b value and the smallest size classes
+03-05-22: edited the script in order to include modifications done in an18
+(calculation of the POC budget by interpolating and not profile by profile)
 
 \
 an34
@@ -319,6 +321,8 @@ an38
 
 As in an33, I plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
 with the difference that I also add the euphotic depth layer calculated in an36
+03-05-22: edited the script in order to include modifications done in an18
+(calculation of the POC budget by interpolating and not profile by profile)
 
 \
 an39
