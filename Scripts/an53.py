@@ -646,7 +646,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
            Theoretical_Budget_extended,Theoretical_Budget_extended_std,\
            Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,\
            POC_resp_mgC_m2_list,POC_resp_mgC_m2_std_list,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,list_Respi_types,n_profiles, \
-           Delta_flux_eta_b, Delta_Integrated_POC
+           Delta_flux_eta_b, Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std
 
 ########################################################################################################################
 ########################################################################################################################
@@ -689,7 +689,7 @@ for ndays in ndays_list:
     depth0=depth0_list[0]
     for depth0 in depth0_list:
         depthf = depth0+layer_thickness
-        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC)=carbon_budget_calculation(depth0,depthf,day0,dayf1)
+        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std)=carbon_budget_calculation(depth0,depthf,day0,dayf1)
         Theoretical_Budget_list_w1=np.append(Theoretical_Budget_list_w1,Theoretical_Budget)
         Theoretical_Budget_eta_b_list_w1=np.append(Theoretical_Budget_eta_b_list_w1,Theoretical_Budget_eta_b)
         Theoretical_Budget_extended_list_w1=np.append(Theoretical_Budget_extended_list_w1,Theoretical_Budget_extended)
@@ -702,7 +702,7 @@ for ndays in ndays_list:
         POC_resp_mgC_m2_std_list_w1=np.append(POC_resp_mgC_m2_std_list_w1,POC_resp_mgC_m2_std,axis=0)
         O2_resp_mgC_m2_list_w1=np.append(O2_resp_mgC_m2_list_w1,O2_resp_mgC_m2)
         O2_resp_mgC_m2_ci_list_w1=np.append(O2_resp_mgC_m2_ci_list_w1,O2_resp_mgC_m2_ci,axis=0)
-        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles)=carbon_budget_calculation(depth0,depthf,dayf1,dayf)
+        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std)=carbon_budget_calculation(depth0,depthf,dayf1,dayf)
         Theoretical_Budget_list_w2=np.append(Theoretical_Budget_list_w2,Theoretical_Budget)
         Theoretical_Budget_eta_b_list_w2=np.append(Theoretical_Budget_eta_b_list_w2,Theoretical_Budget_eta_b)
         Theoretical_Budget_extended_list_w2=np.append(Theoretical_Budget_extended_list_w2,Theoretical_Budget_extended)
@@ -722,6 +722,19 @@ for ndays in ndays_list:
     O2_resp_mgC_m2_ci_list_w2=O2_resp_mgC_m2_ci_list_w2.reshape(depth0_list.size,2)
     POC_resp_mgC_m2_list_w2=POC_resp_mgC_m2_list_w2.reshape(depth0_list.size,len(RespirationTypes))
     POC_resp_mgC_m2_std_list_w2=POC_resp_mgC_m2_std_list_w2.reshape(depth0_list.size,len(RespirationTypes))
+
+    #######################################################################
+    # For the 13 April to the 20 June 2021 period, I save the min and max of the carbon budget for the latex document
+    #######################################################################
+    if ndays==ndays_list[0]:
+        from write_latex_data import write_latex_data
+        filename = '%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+        argument = 'Carbonbudget_0413to0620_min'
+        arg_value = np.round(Theoretical_Budget_eta_b_list_w1.min())
+        write_latex_data(filename, argument, '%d' % arg_value)
+        argument = 'Carbonbudget_0413to0620_max'
+        arg_value = np.round(Theoretical_Budget_eta_b_list_w1.max())
+        write_latex_data(filename, argument, '%d' % arg_value)
 
     ##################################################################
     # I plot
@@ -1112,5 +1125,45 @@ for ndays in ndays_list:
     plt.savefig('../Plots/an53/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0202extended_eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
+#######################################################################
+# I save the the difference of the flux, interated POC and carbon budget at 200 and 600 m
+# between the 13 April and the 20 June 2021 for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 
+depth0=200
+depthf=600
+day0=datetime(2021,4,13)
+dayf1=datetime(2021,6,20)
+(Theoretical_Budget, Theoretical_Budget_std, Theoretical_Budget_eta_b, Theoretical_Budget_eta_b_std,
+ Theoretical_Budget_extended, Theoretical_Budget_extended_std, Theoretical_Budget_extended_eta_b,
+ Theoretical_Budget_extended_eta_b_std, POC_resp_mgC_m2, POC_resp_mgC_m2_std, O2_resp_mgC_m2, O2_resp_mgC_m2_ci,
+ RespirationTypes, n_profiles, Delta_flux_eta_b, Delta_Integrated_POC, Delta_flux_eta_b_std,
+ Delta_Integrated_POC_std) = carbon_budget_calculation(depth0, depthf, day0, dayf1)
+
+argument = 'Flux200_600difference'
+arg_value = np.round(abs(Delta_flux_eta_b))
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Flux200_600difference_std'
+arg_value = np.round(abs(Delta_flux_eta_b_std))
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Integrated_POC_0620_0413difference'
+arg_value = np.round(abs(Delta_Integrated_POC))
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Integrated_POC_0620_0413difference_std'
+arg_value = np.round(abs(Delta_Integrated_POC_std))
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Carbonbudget200_600m_0413to0620'
+arg_value = np.round(abs(Theoretical_Budget_eta_b))
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Carbonbudget200_600m_0413to0620_std'
+arg_value = np.round(abs(Theoretical_Budget_eta_b_std))
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'PARR200_600m_0413to0620'
+arg_value = np.round(abs(POC_resp_mgC_m2[2]))
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'PARR200_600m_0413to0620_std'
+arg_value = np.round(abs(POC_resp_mgC_m2_std[2]))
+write_latex_data(filename,argument,'%d' % arg_value)
 

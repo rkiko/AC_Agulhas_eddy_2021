@@ -508,7 +508,7 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 datetime.utcfromtimestamp(x_filtered[41])
 argument = 'Integrated_POC_0620_0413difference'
 arg_value = (POC_200_600_int[0]-POC_200_600_int[41])*400
-write_latex_data(filename,argument,'%d' % arg_value)
+# write_latex_data(filename,argument,'%d' % arg_value) #I don't save it anymore cos I use an53
 
 a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
 data_an18 = pickle.load(a_file)
