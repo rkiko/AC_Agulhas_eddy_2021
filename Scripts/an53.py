@@ -645,7 +645,8 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     return Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,\
            Theoretical_Budget_extended,Theoretical_Budget_extended_std,\
            Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,\
-           POC_resp_mgC_m2_list,POC_resp_mgC_m2_std_list,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,list_Respi_types,n_profiles
+           POC_resp_mgC_m2_list,POC_resp_mgC_m2_std_list,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,list_Respi_types,n_profiles, \
+           Delta_flux_eta_b, Delta_Integrated_POC
 
 ########################################################################################################################
 ########################################################################################################################
@@ -688,7 +689,7 @@ for ndays in ndays_list:
     depth0=depth0_list[0]
     for depth0 in depth0_list:
         depthf = depth0+layer_thickness
-        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles)=carbon_budget_calculation(depth0,depthf,day0,dayf1)
+        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC)=carbon_budget_calculation(depth0,depthf,day0,dayf1)
         Theoretical_Budget_list_w1=np.append(Theoretical_Budget_list_w1,Theoretical_Budget)
         Theoretical_Budget_eta_b_list_w1=np.append(Theoretical_Budget_eta_b_list_w1,Theoretical_Budget_eta_b)
         Theoretical_Budget_extended_list_w1=np.append(Theoretical_Budget_extended_list_w1,Theoretical_Budget_extended)

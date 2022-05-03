@@ -93,6 +93,15 @@ for i in range(0,bbp700.shape[0]):
     sPOC_tmp[sPOC_tmp<0]=0
     bbp_POC[i,sel]=sPOC_tmp
 
+#######################################################################
+# I convert the bbp dates to float values (in seconds from 1970 1 1)
+#######################################################################
+Date_Num_bbp_calendar = Date_Num_bbp.copy()
+for i in range(0, Date_Num_bbp_calendar.size):
+    date_time_obj = datetime(Date_Vec[i, 0], Date_Vec[i, 1], Date_Vec[i, 2],
+                             Date_Vec[i, 3], Date_Vec[i, 4], Date_Vec[i, 5])
+    Date_Num_bbp_calendar[i] = calendar.timegm(date_time_obj.timetuple())
+    # datetime.utcfromtimestamp(Date_Num[i])
 
 #######################################################################
 #######################################################################
@@ -195,6 +204,7 @@ for i in range(0, list_dates.size):
 dist=np.arccos(np.sin(lat_float*np.pi/180)*np.sin(latEddy_4float*np.pi/180)+np.cos(lat_float*np.pi/180)*np.cos(latEddy_4float*np.pi/180)*np.cos((lonEddy_4float-lon_float)*np.pi/180))*180/np.pi
 dist_km=dist*111
 
+
 #######################################################################
 # I select the data only in the period when the BGC Argo float was inside the eddy
 # Before that, I save the bbpPOC and the depth so that it is easier to include it in other scripts
@@ -202,21 +212,12 @@ dist_km=dist*111
 sel_insideEddy = dist_km <= radius_Vmax_4float
 
 dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
-                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp}
+                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar" : Date_Num_bbp_calendar}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
 
-# I convert the bbp dates to float values (in seconds from 1970 1 1)
-Date_Num_bbp_calendar = Date_Num_bbp.copy()
-for i in range(0, Date_Num_bbp_calendar.size):
-    date_time_obj = datetime(Date_Vec[i, 0], Date_Vec[i, 1], Date_Vec[i, 2],
-                             Date_Vec[i, 3], Date_Vec[i, 4], Date_Vec[i, 5])
-    Date_Num_bbp_calendar[i] = calendar.timegm(date_time_obj.timetuple())
-    # datetime.utcfromtimestamp(Date_Num[i])
-
 list_dates=list_dates[sel_insideEddy]
-
 # lon=lon[sel_insideEddy]
 # lat=lat[sel_insideEddy]
 Date_Num_bbp=Date_Num_bbp[sel_insideEddy]
@@ -504,9 +505,9 @@ arg_value=np.mean(MIP_POC_interp[0:16,66:89])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 #I calculate also the difference of the integrated POC 200—600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
-datetime.utcfromtimestamp(list_dates[27])
+datetime.utcfromtimestamp(x_filtered[41])
 argument = 'Integrated_POC_0620_0413difference'
-arg_value = (POC_200_600[0]-POC_200_600[27])*400
+arg_value = (POC_200_600_int[0]-POC_200_600_int[41])*400
 write_latex_data(filename,argument,'%d' % arg_value)
 
 a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
@@ -515,11 +516,13 @@ bbp_POC = data_an18['bbp_POC']
 sel_insideEddy = data_an18['sel_insideEddy']
 Date_Num_bbp = data_an18['Date_Num_bbp']
 Date_Vec_bbp = data_an18['Date_Vec_bbp']
+Date_Num_bbp_calendar = data_an18['Date_Num_bbp_calendar']
 depth_bbp = data_an18['depth_bbp']
 a_file.close()
 
 dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
-                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Integrated_POC_0620_0413difference": arg_value}
+                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar": Date_Num_bbp_calendar,
+                   "Integrated_POC_0620_0413difference": arg_value}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()

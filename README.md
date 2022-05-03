@@ -131,7 +131,15 @@ an18
 
 It is the same script as an15 (plot of the times series of flux, Mip etc.+ integrated time series of sPOC and POC),
 with two main differences: (i) I exclude the profiles in which the BGC Argo float was outside the eddy; (ii) I do not
-plot the eddy radius and eddy-float distance as well
+plot the eddy radius and eddy-float distance as well\
+Update of 03 05 2022: 2 main changes: 1) I use the bbp from the high 
+resolution dataset and I remove the spikes larger than 100 mgC 2) I calculate
+the POC budget after having interpolated the Mip Map and bbp. Before, for each 
+profile, I was taking its mean value. However several profiles do not go deeper
+than 400 m. In this way, taking the mean of that profile would imply to take the mean of
+the 200-400 m, and not of the 200-600m. This makes the estimate biased, because
+close to the surface the concentrations are higher. Interpolating allows us to take
+into account this fact
 
 
 \
