@@ -245,6 +245,7 @@ max_parameter_list=np.array([32,65,0.6,2.15,0.30,40])
 MiP_POC_0_200=np.array([]);MiP_POC_200_600=np.array([])
 MaP_POC_0_200=np.array([]);MaP_POC_200_600=np.array([])
 bbp_POC_0_200=np.array([]);bbp_POC_200_600=np.array([])
+max_depth_bbp=np.array([]);max_depth=np.array([])
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=Flux.copy()
     elif ipar==1:   parameter=MiP_abund.copy()
@@ -253,11 +254,12 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     elif ipar == 4: parameter=MaP_POC.copy()
     elif ipar == 5: parameter=bbp_POC.copy()
 
-    parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([])
+    parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([]);max_depth_parameter=np.array([]);
     if ipar == 5:
         i=0
         for i in range(0, bbp_POC.shape[0]):
             z=parameter[i,:];y=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
+            max_depth = np.append(max_depth ,np.unique(np.sort(y))[-2]) #-2 to exclude 99999
             z[z>100] = 99999
             sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
             sel3 = z == 0
@@ -267,12 +269,13 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
                 parameter_filtered = np.concatenate((parameter_filtered, z))
                 Date_Num_filtered = np.concatenate((Date_Num_filtered, np.tile(x,sum(sel2)) ))
                 depth_filtered = np.concatenate((depth_filtered, y2))
+                max_depth_bbp = np.append(max_depth_bbp,y2.max())
                 # I define sel_200 and sel_200_600
                 sel_0_200 = np.abs(y2) < 200
                 sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
                 bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
     else:
-        # I filter the flux prophiles
+        # I filter the prophiles
         i=0
         for i in range(0,list_dates.size):
             sel=Date_Num==list_dates[i];x=Date_Num[sel];y=depth[sel]
@@ -283,6 +286,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
                 parameter_filtered = np.concatenate((parameter_filtered, z))
                 Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
                 depth_filtered = np.concatenate((depth_filtered, y2))
+                max_depth_parameter = np.append(max_depth_parameter, y2.max())
                 # sel_200 and sel_200_600 are used only for the POC integrated in time
                 sel_0_200 = np.abs(y2) < 200
                 sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
@@ -303,8 +307,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==4: MaP_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);MaP_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
     if ipar==5: bbp_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);bbp_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
 
-    if ipar==3: MIP_POC_interp = parameter_interp.copy()
-    if ipar==4: MAP_POC_interp = parameter_interp.copy()
+    if ipar==3: MIP_POC_interp = parameter_interp.copy();max_depth_MIP=max_depth_parameter
+    if ipar==4: MAP_POC_interp = parameter_interp.copy();max_depth_MAP=max_depth_parameter
     if ipar==5: bbp_POC_interp = parameter_interp.copy()
 
     ################################################################################################################
@@ -524,3 +528,103 @@ dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
+
+#I plot the maximum depth
+width, height = 0.8, 0.5
+set_ylim_lower, set_ylim_upper = 0,max_depth.max()
+fig = plt.figure(1, figsize=(13,4))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+plt.plot(list_dates,max_depth,'.b-',label='abs.')
+plt.plot(list_dates,max_depth_bbp,'.r-',label='bbp')
+plt.plot(list_dates,max_depth_MIP,'.m-',label='MiP')
+plt.plot(list_dates,max_depth_MAP,'.c-',label='MaP')
+# I set xticks
+nxticks = 10
+xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+plt.legend(fontsize=14)
+plt.ylabel('depth (m)', fontsize=15)
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an18/Max_depth_vs_profile_an18.pdf' ,dpi=200)
+plt.close()
+
+#I compare interpolated and not interpolated profiles one by one
+fs=10
+width, height = 0.76, 0.7
+nprofiles_to_plot=12 # I plot only the first 12 profiles
+ipar=5
+for ipar in range(3,parameter_ylabel_list.__len__()):
+    if ipar == 3: parameter=MiP_POC.copy()
+    elif ipar == 4: parameter=MaP_POC.copy()
+    elif ipar == 5: parameter=bbp_POC.copy()
+
+    if ipar == 5:
+        i=0
+        for i in range(0, nprofiles_to_plot):
+            z=parameter[i,:];y=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
+            max_depth = np.append(max_depth ,np.unique(np.sort(y))[-2]) #-2 to exclude 99999
+            z[z>100] = 99999
+            sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
+            sel3 = z == 0
+            if sum(sel2) > 0:
+                z = savgol_filter(z, 5, 1)
+                z[sel3] = 0
+                # The bbp is interpolated at dates which do not correspond with the exact dates of the profiles: for this
+                # reason, I take the interpolated profile whose date is the closest one to the real profile considered
+                # in the loop
+                idx=abs(x_filtered-x)
+                idx = np.where(idx==idx.min())[0][0]
+                datetmp = datetime.utcfromtimestamp(x)
+                fig = plt.figure(1, figsize=(3.5, 3.5))
+                ax = fig.add_axes([0.2, 0.15, width, height])
+                plt.plot(bbp_POC_interp[sel_200_600,idx],y_filtered[sel_200_600],'.b-',label='interp.')
+                plt.plot(z[seltmp],y2[seltmp],'.g-',label='raw')
+                plt.xlim([-0.2,10])
+                plt.ylim([195,600])
+                plt.gca().invert_yaxis()
+                plt.xlabel(parameter_ylabel_list[ipar], fontsize=fs)
+                plt.ylabel('Depth (m)', fontsize=fs)
+                plt.title('Profile %d, %s\n200-600m POC, raw:%0.2f int:%0.2f' % (int(i)+1,datetmp.__str__(),bbp_POC_200_600[i],bbp_POC_200_600_int[idx]))
+                plt.legend(fontsize=fs)
+                plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+                plt.savefig('../Plots/an18/Interpolated_vs_not/%s_profile%02d_an18.pdf' % (parameter_shortname_list[ipar],int(i)+1), dpi=200)
+                plt.close()
+
+
+
+    else:
+        if ipar==3: tmp = MIP_POC_interp.copy();tmp2=MiP_POC_200_600.copy();tmp3=MiP_POC_200_600_int.copy()
+        if ipar==4: tmp = MAP_POC_interp.copy();tmp2=MaP_POC_200_600.copy();tmp3=MaP_POC_200_600_int.copy();max_parameter_list[ipar]=0.8
+        # I filter the prophiles
+        i=0
+        for i in range(0,nprofiles_to_plot):
+            sel=Date_Num==list_dates[i];x=Date_Num[sel];y=depth[sel]
+            z=parameter[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+            if sum(sel2)>0:
+                z=savgol_filter(z,5,1)
+                # The Mip and Map are interpolated at dates which do not correspond with the exact dates of the profiles: for this
+                # reason, I take the interpolated profile whose date is the closest one to the real profile considered
+                # in the loop
+                idx=abs(x_filtered-list_dates[i])
+                idx = np.where(idx==idx.min())[0][0]
+                datetmp = datetime.utcfromtimestamp(list_dates[i])
+                fig = plt.figure(1, figsize=(3.5, 3.5))
+                ax = fig.add_axes([0.2, 0.15, width, height])
+                plt.plot(tmp[:,idx],y_filtered,'.b-',label='interp.')
+                plt.plot(z,y2,'.g-',label='raw.')
+                plt.xlim([0,max_parameter_list[ipar]])
+                plt.ylim([195,600])
+                plt.gca().invert_yaxis()
+                plt.xlabel(parameter_ylabel_list[ipar], fontsize=fs)
+                plt.ylabel('Depth (m)', fontsize=fs)
+                plt.title('Profile %d, %s\n200-600m POC, raw:%0.2f int:%0.2f' % (int(i)+1,datetmp.__str__(),tmp2[i],tmp3[idx]))
+                plt.legend(fontsize=fs)
+                plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+                plt.savefig('../Plots/an18/Interpolated_vs_not/%s_profile%02d_an18.pdf' % (parameter_shortname_list[ipar],int(i)+1), dpi=200)
+                plt.close()
+
