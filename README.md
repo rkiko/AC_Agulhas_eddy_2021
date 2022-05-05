@@ -436,3 +436,8 @@ an54
 I analyse the dissolved oxygen climatological data downloaded from MIMOC oxygen climatology
 (https://cloud.geomar.de/s/qp4ddYBFxpH2yCa)
 
+\
+an55
+
+I test the function to calculate the MiP and MaP flux separately
+

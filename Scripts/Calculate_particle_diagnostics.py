@@ -5,6 +5,7 @@ Download raw particle data from ecopart
 import pandas as pd
 from paruvpy import calculate_mip_and_map_abundance_w_header_from_df_func
 from paruvpy import calculate_flux_w_header_from_df_func
+from paruvpy import calculate_mip_and_map_flux_w_header_from_df_func
 from paruvpy import calculate_mip_and_map_poc_cont_w_header_from_df_func
 from paruvpy import calculate_respi_diffusion_limited_w_header_from_df_func
 
@@ -29,6 +30,13 @@ if __name__ == '__main__':
     df = calculate_flux_w_header_from_df_func(df,eta=0.62,b=66)
     df = calculate_flux_w_header_from_df_func(df,lower_limit=0.02539)
     df = calculate_flux_w_header_from_df_func(df,lower_limit=0.02539,eta=0.62,b=66)
+    ####################################################################################################################
+    # Here I calculate the MiP and MaP flux
+    ####################################################################################################################
+    df = calculate_mip_and_map_flux_w_header_from_df_func(df)
+    df = calculate_mip_and_map_flux_w_header_from_df_func(df, eta=0.62, b=66)
+    df = calculate_mip_and_map_flux_w_header_from_df_func(df, lower_limit_mip=0.02539)
+    df = calculate_mip_and_map_flux_w_header_from_df_func(df, lower_limit_mip=0.02539, eta=0.62, b=66)
     ####################################################################################################################
     # Here I calculate the MiP and MaP abundances and POC content
     ####################################################################################################################
