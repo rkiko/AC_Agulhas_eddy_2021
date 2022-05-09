@@ -430,14 +430,22 @@ I consider two time windows: the first goes from the
 The difference with an34 is that here I use the bbp from the BGC Argo float (Coriolis)
 and not from Ecopart, so that the bbp is in higher resolution
 
+
 \
 an54
 
 I analyse the dissolved oxygen climatological data downloaded from MIMOC oxygen climatology
 (https://cloud.geomar.de/s/qp4ddYBFxpH2yCa)
 
+
 \
 an55
 
 I test the function to calculate the MiP and MaP flux separately
+
+
+\
+an56
+
+I calculate the MiP and MaP flux at 200m separately
 
