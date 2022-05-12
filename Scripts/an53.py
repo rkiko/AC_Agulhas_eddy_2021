@@ -930,7 +930,81 @@ for ndays in ndays_list:
     plt.close()
 
     ##################################################################
-    # Fifth plot: budget calculated considering smallest size classes and with different eta and b values (based on the
+    # Fifth plot: budget calculated without considering smallest size classes and with old eta and b values, time window 1
+    fig = plt.figure(1, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.18, 0.15, width, height])
+    plt.plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
+    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    for iResp in range(2,3):
+        plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
+
+    plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list_w1[:,iResp]-POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5,
+                      POC_resp_mgC_m2_list_w1[:,iResp]+POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5, facecolor='b',
+                      color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
+    # plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list[:,3], POC_resp_mgC_m2_list[:,4], facecolor='b',
+    #                     color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher)')
+
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 0], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 3], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 4], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 5], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 6], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+    plt.plot(Theoretical_Budget_list_w1, depth0_list + layer_thickness / 2, c='red')
+    plt.scatter(Theoretical_Budget_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
+    plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_list_w1 - Theoretical_Budget_std_list_w1*0.5, Theoretical_Budget_list_w1 + Theoretical_Budget_std_list_w1*0.5,
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+
+    plt.xlim(-200,7500)
+    plt.ylabel('Depth (m)', fontsize=fs)
+    plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
+    plt.title('No small size classes, eta=0.62,b=132\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)
+    plt.legend(fontsize=7)
+    plt.gca().invert_yaxis()
+    ax.text(-0.05, 1.125, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0103_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.close()
+
+    ##################################################################
+    # Sixth plot: budget calculated without considering smallest size classes and with old eta and b values, time window 2
+    fig = plt.figure(1, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.18, 0.15, width, height])
+    plt.plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
+    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    for iResp in range(2,3):
+        plt.plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
+
+    plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list_w2[:,iResp]-POC_resp_mgC_m2_std_list_w2[:,iResp]*0.5,
+                      POC_resp_mgC_m2_list_w2[:,iResp]+POC_resp_mgC_m2_std_list_w2[:,iResp]*0.5, facecolor='b',
+                      color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
+    # plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list[:,3], POC_resp_mgC_m2_list[:,4], facecolor='b',
+    #                     color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher)')
+
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 0], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 3], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 4], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 5], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 6], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+    plt.plot(Theoretical_Budget_list_w2, depth0_list + layer_thickness / 2, c='red')
+    plt.scatter(Theoretical_Budget_list_w2, depth0_list + layer_thickness / 2, c='red', s=5)
+    plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_list_w2 - Theoretical_Budget_std_list_w2*0.5, Theoretical_Budget_list_w2 + Theoretical_Budget_std_list_w2*0.5,
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+
+    plt.xlim(-200,7500)
+    plt.ylabel('Depth (m)', fontsize=fs)
+    plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
+    plt.title('No small size classes, eta=0.62,b=132\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day), fontsize=9)
+    plt.legend(fontsize=7)
+    plt.gca().invert_yaxis()
+    ax.text(-0.05, 1.125, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0103_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.close()
+
+    ##################################################################
+    # Seventh plot: budget calculated considering smallest size classes and with different eta and b values (based on the
     # relationship between sinking speed and particle size), time window 1
     fs=10
     fig = plt.figure(1, figsize=(3.5, 3.5))
@@ -970,7 +1044,7 @@ for ndays in ndays_list:
     plt.close()
 
     ##################################################################
-    # Sixth plot: budget calculated considering smallest size classes and with different eta and b values (based on the
+    # Eighth plot: budget calculated considering smallest size classes and with different eta and b values (based on the
     # relationship between sinking speed and particle size), time window 2
     fs=10
     fig = plt.figure(1, figsize=(3.5, 3.5))
@@ -1010,7 +1084,7 @@ for ndays in ndays_list:
     plt.close()
 
     ##################################################################
-    # Seventh plot: budget calculated considering smallest size classes and with different eta and b values (based on the
+    # Ninth plot: budget calculated considering smallest size classes and with different eta and b values (based on the
     # relationship between sinking speed and particle size), time window 1
     # I plot also the significant of the difference between the PARR, oxygen, and theo POC respired
     iResp=9
@@ -1068,7 +1142,7 @@ for ndays in ndays_list:
     plt.close()
 
     ##################################################################
-    # Eighth plot: budget calculated considering smallest size classes and with different eta and b values (based on the
+    # Tenth plot: budget calculated considering smallest size classes and with different eta and b values (based on the
     # relationship between sinking speed and particle size), time window 2
     # I plot also the significant of the difference between the PARR, oxygen, and theo POC respired
     iResp=9
@@ -1124,6 +1198,85 @@ for ndays in ndays_list:
                ha='left')  # ,fontfamily='helvetica'
     plt.savefig('../Plots/an53/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0202extended_eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
+
+    ##################################################################
+    # Eleventh plot: budget calculated considering smallest size classes and with old eta and b values, time window 1
+    fs=10
+    fig = plt.figure(1, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.18, 0.15, width, height])
+    plt.plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
+    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    for iResp in range(9,10):
+        plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
+
+    plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list_w1[:,iResp]-POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5,
+                      POC_resp_mgC_m2_list_w1[:,iResp]+POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5, facecolor='b',
+                      color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
+    # plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list[:,10], POC_resp_mgC_m2_list[:,11], facecolor='b',
+    #                     color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher)')
+
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 7], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 10], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 11], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 12], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+    plt.plot(POC_resp_mgC_m2_list_w1[:, 13], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+    plt.plot(Theoretical_Budget_extended_list_w1, depth0_list + layer_thickness / 2, c='red')
+    plt.scatter(Theoretical_Budget_extended_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
+    plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_extended_list_w1 - Theoretical_Budget_extended_std_list_w1*0.5, Theoretical_Budget_extended_list_w1 + Theoretical_Budget_extended_std_list_w1*0.5,
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+
+
+    plt.xlim(-200,7500)
+    plt.ylabel('Depth (m)', fontsize=fs)
+    plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
+    plt.title('With small size classes, eta=0.62,b=132\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)
+    plt.legend(fontsize=7)
+    plt.gca().invert_yaxis()
+    ax.text(-0.05, 1.125, 'c', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0103extended_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.close()
+
+    ##################################################################
+    # Twelveth plot: budget calculated considering smallest size classes and with old eta and b values, time window 2
+    fs=10
+    fig = plt.figure(1, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.18, 0.15, width, height])
+    plt.plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
+    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    for iResp in range(9,10):
+        plt.plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
+
+    plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list_w2[:,iResp]-POC_resp_mgC_m2_std_list_w2[:,iResp]*0.5,
+                      POC_resp_mgC_m2_list_w2[:,iResp]+POC_resp_mgC_m2_std_list_w2[:,iResp]*0.5, facecolor='b',
+                      color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
+    # plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list[:,10], POC_resp_mgC_m2_list[:,11], facecolor='b',
+    #                     color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher)')
+
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 7], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 10], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 11], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 12], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+    plt.plot(POC_resp_mgC_m2_list_w2[:, 13], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+    plt.plot(Theoretical_Budget_extended_list_w2, depth0_list + layer_thickness / 2, c='red')
+    plt.scatter(Theoretical_Budget_extended_list_w2, depth0_list + layer_thickness / 2, c='red', s=5)
+    plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_extended_list_w2 - Theoretical_Budget_extended_std_list_w2*0.5, Theoretical_Budget_extended_list_w2 + Theoretical_Budget_extended_std_list_w2*0.5,
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+
+
+    plt.xlim(-200,7500)
+    plt.ylabel('Depth (m)', fontsize=fs)
+    plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
+    plt.title('With small size classes, eta=0.62,b=132\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day), fontsize=9)
+    plt.legend(fontsize=7)
+    plt.gca().invert_yaxis()
+    ax.text(-0.05, 1.125, 'd', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0103extended_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.close()
+
 
 #######################################################################
 # I save the the difference of the flux, interated POC and carbon budget at 200 and 600 m
