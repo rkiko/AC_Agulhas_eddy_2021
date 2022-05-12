@@ -765,7 +765,7 @@ for ndays in ndays_list:
     plt.plot(Theoretical_Budget_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red')
     plt.scatter(Theoretical_Budget_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
     plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_eta_b_list_w1 - Theoretical_Budget_eta_b_std_list_w1*0.5, Theoretical_Budget_eta_b_list_w1 + Theoretical_Budget_eta_b_std_list_w1*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
     plt.xlim(-200,7500)
     plt.ylabel('Depth (m)', fontsize=fs)
@@ -802,7 +802,7 @@ for ndays in ndays_list:
     plt.plot(Theoretical_Budget_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red')
     plt.scatter(Theoretical_Budget_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red', s=5)
     plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_eta_b_list_w2 - Theoretical_Budget_eta_b_std_list_w2*0.5, Theoretical_Budget_eta_b_list_w2 + Theoretical_Budget_eta_b_std_list_w2*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
     plt.xlim(-200,7500)
     plt.ylabel('Depth (m)', fontsize=fs)
@@ -851,7 +851,7 @@ for ndays in ndays_list:
     ax[0].plot(Theoretical_Budget_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red')
     ax[0].scatter(Theoretical_Budget_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
     ax[0].fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_eta_b_list_w1 - Theoretical_Budget_eta_b_std_list_w1*0.5, Theoretical_Budget_eta_b_list_w1 + Theoretical_Budget_eta_b_std_list_w1*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
     ax[0].set_xlim(-200,7500)
     ax[0].set_ylabel('Depth (m)', fontsize=fs)
     ax[0].set_xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
@@ -908,7 +908,7 @@ for ndays in ndays_list:
     ax[0].plot(Theoretical_Budget_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red')
     ax[0].scatter(Theoretical_Budget_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red', s=5)
     ax[0].fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_eta_b_list_w2 - Theoretical_Budget_eta_b_std_list_w2*0.5, Theoretical_Budget_eta_b_list_w2 + Theoretical_Budget_eta_b_std_list_w2*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
     ax[0].set_xlim(-200,7500)
     ax[0].set_ylabel('Depth (m)', fontsize=fs)
     ax[0].set_xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
@@ -955,7 +955,7 @@ for ndays in ndays_list:
     plt.plot(Theoretical_Budget_extended_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red')
     plt.scatter(Theoretical_Budget_extended_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
     plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_extended_eta_b_list_w1 - Theoretical_Budget_extended_eta_b_std_list_w1*0.5, Theoretical_Budget_extended_eta_b_list_w1 + Theoretical_Budget_extended_eta_b_std_list_w1*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
 
     plt.xlim(-200,7500)
@@ -995,7 +995,7 @@ for ndays in ndays_list:
     plt.plot(Theoretical_Budget_extended_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red')
     plt.scatter(Theoretical_Budget_extended_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red', s=5)
     plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_extended_eta_b_list_w2 - Theoretical_Budget_extended_eta_b_std_list_w2*0.5, Theoretical_Budget_extended_eta_b_list_w2 + Theoretical_Budget_extended_eta_b_std_list_w2*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
 
     plt.xlim(-200,7500)
@@ -1046,7 +1046,7 @@ for ndays in ndays_list:
     ax[0].plot(Theoretical_Budget_extended_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red')
     ax[0].scatter(Theoretical_Budget_extended_eta_b_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
     ax[0].fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_extended_eta_b_list_w1 - Theoretical_Budget_extended_eta_b_std_list_w1*0.5, Theoretical_Budget_extended_eta_b_list_w1 + Theoretical_Budget_extended_eta_b_std_list_w1*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
     ax[0].set_xlim(-200,7500)
     ax[0].set_ylabel('Depth (m)', fontsize=fs)
     ax[0].set_xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
@@ -1104,7 +1104,7 @@ for ndays in ndays_list:
     ax[0].plot(Theoretical_Budget_extended_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red')
     ax[0].scatter(Theoretical_Budget_extended_eta_b_list_w2, depth0_list + layer_thickness / 2, c='red', s=5)
     ax[0].fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_extended_eta_b_list_w2 - Theoretical_Budget_extended_eta_b_std_list_w2*0.5, Theoretical_Budget_extended_eta_b_list_w2 + Theoretical_Budget_extended_eta_b_std_list_w2*0.5,
-                      facecolor='r', color='r', alpha=0.5, label='Theoretical\nPOC\nrespired')
+                      facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
     ax[0].set_xlim(-200,7500)
     ax[0].set_ylabel('Depth (m)', fontsize=fs)
     ax[0].set_xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)

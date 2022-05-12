@@ -495,14 +495,14 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 datetime.utcfromtimestamp(x_filtered[66])
 datetime.utcfromtimestamp(x_filtered[88])
 y_filtered[16]
-argument = 'Map_POC_2021Flux'
+argument = 'Map_POC_2021FluxEvent'
 arg_value=np.mean(MAP_POC_interp[0:16,66:89])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 argument = 'Mip_POC_2021AprMay'
 arg_value=np.mean(MIP_POC_interp[0:9,0:23])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
-argument = 'Mip_POC_2021Flux'
+argument = 'Mip_POC_2021FluxEvent'
 arg_value=np.mean(MIP_POC_interp[0:16,66:89])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
 
