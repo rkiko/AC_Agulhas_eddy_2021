@@ -224,6 +224,7 @@ Date_Num_bbp=Date_Num_bbp[sel_insideEddy]
 Date_Num_bbp_calendar=Date_Num_bbp_calendar[sel_insideEddy]
 # Date_Time=Date_Time[sel_insideEddy]
 depth_bbp=depth_bbp[sel_insideEddy]
+temp=temp[sel_insideEddy]
 # pressure=pressure[sel_insideEddy]
 # Flux=Flux[sel_insideEddy]
 # MiP_abund=MiP_abund[sel_insideEddy]
@@ -231,6 +232,21 @@ depth_bbp=depth_bbp[sel_insideEddy]
 # MaP_abund=MaP_abund[sel_insideEddy]
 # MaP_POC=MaP_POC[sel_insideEddy]
 bbp_POC=bbp_POC[sel_insideEddy,:]
+
+#######################################################################
+# I calculate the mixed layer depth
+#######################################################################
+from paruvpy import mixed_layer_depth
+mld=np.array([])
+i=0
+for i in range(0,temp.shape[0]):
+    depth_tmp=depth_bbp[i,:]
+    temp_tmp=temp[i,:]
+    # I exclude nan values
+    sel_non_nan=(depth_tmp!=99999)&(temp_tmp!=99999)
+    temp_tmp=temp_tmp[sel_non_nan];depth_tmp=depth_tmp[sel_non_nan]
+    mld_tmp,_ = mixed_layer_depth(depth_tmp,temp_tmp,using_temperature='yes')
+    mld=np.append(mld,mld_tmp)
 
 #######################################################################
 # I start the loop on the different parameters I plot
@@ -481,14 +497,49 @@ plt.close()
 
 
 #######################################################################
-# I save the MAP POC concentration values for the latex document
+# I save the MIP, MAP, and POC concentration values for the latex document
 #######################################################################
 from write_latex_data import write_latex_data
-datetime.utcfromtimestamp(x_filtered[29])
-y_filtered[9]
 from matlab_datevec import matlab_datevec
 from matlab_datenum import matlab_datenum
+
+datetime.utcfromtimestamp(x_filtered[44])
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'POC_0_200m_0413to0625'
+arg_value=np.mean(POC_0_200_int[0:45])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'POC_0_200m_maximum'
+arg_value=POC_0_200_int.max()
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+arg_value=datetime.utcfromtimestamp( x_filtered[np.where(POC_0_200_int == POC_0_200_int.max())][0] )
+write_latex_data(filename,'POC_0_200m_maximum_date','%d August' %  arg_value.day  )
+peak_POC_0_200m_date=arg_value.day
+
+argument = 'POC_200_600m_0413'
+arg_value=POC_200_600_int[0]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+datetime.utcfromtimestamp(x_filtered[44])
+argument = 'POC_200_600m_0625'
+arg_value=POC_200_600_int[44]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+POC_200_600_int[66:74]
+arg_value = datetime.utcfromtimestamp(x_filtered[70]).day
+argument = 'POC_200_600m_before_peak'
+write_latex_data(filename,argument,'%d August' % arg_value)
+datetime.utcfromtimestamp(x_filtered[73])
+POC_200_600_int[71:78]
+peak_POC_200_600m_date=datetime.utcfromtimestamp(x_filtered[73]).day
+argument = 'POC_200_600m_08%02d' % peak_POC_200_600m_date
+arg_value=POC_200_600_int[73]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'POC_200_600m_08%02d_date' % peak_POC_200_600m_date
+write_latex_data(filename,argument,'%d August' % peak_POC_200_600m_date)
+argument = 'peak_0_200_200_600_mismatch'
+arg_value = peak_POC_200_600m_date - peak_POC_0_200m_date
+write_latex_data(filename,argument,'%d' % arg_value)
+
+y_filtered[9]
+datetime.utcfromtimestamp(x_filtered[22])
 argument = 'Map_POC_2021AprMay'
 arg_value=np.mean(MAP_POC_interp[0:9,0:23])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
@@ -505,6 +556,98 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 argument = 'Mip_POC_2021FluxEvent'
 arg_value=np.mean(MIP_POC_interp[0:16,66:89])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+y_filtered[16]
+argument = 'Mip_POC_0413_90to600m'
+arg_value=np.mean(MIP_POC_interp[9:60,0])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Mip_POC_2021FluxEvent_160to600m'
+arg_value=np.mean(MIP_POC_interp[16:60,66:89])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+#######################################################################
+# I calculate the bbp and MaP POC in and outside the mld, I plot and save it for the latex document
+#######################################################################
+mld_int = np.interp(x_filtered,Date_Num_bbp_calendar,mld)
+bbp_POC_mld=np.array([])
+bbp_POC_out_mld=np.array([])
+MaP_POC_mld=np.array([])
+MaP_POC_out_mld=np.array([])
+i=0
+for i in range(0,bbp_POC_interp.shape[1]):
+    sel_tmp = y_filtered<=mld_int[i]
+    bbp_POC_mld = np.append(bbp_POC_mld, np.mean( bbp_POC_interp[sel_tmp,i] ))
+    bbp_POC_out_mld = np.append(bbp_POC_out_mld, np.mean( bbp_POC_interp[~sel_tmp,i] ))
+    MaP_POC_mld = np.append(MaP_POC_mld, np.mean( MAP_POC_interp[sel_tmp,i] ))
+    MaP_POC_out_mld = np.append(MaP_POC_out_mld, np.mean( MAP_POC_interp[~sel_tmp,i] ))
+
+fig = plt.figure(1, figsize=(12, 4))
+ax = fig.add_axes([0.12, 0.4, width, height])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+plt.plot(x_filtered,bbp_POC_mld,label='$b_{bp}$ POC in ML')
+plt.plot(x_filtered,bbp_POC_out_mld*10,label='$b_{bp}$ POC out ML $\cdot$10')
+plt.ylabel('bbp POC (mgC/m$^3$)')
+# I set xticks
+nxticks = 10
+xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.legend()
+# I save
+plt.savefig('../Plots/an18/ZTimeSeries_bbp_ML_an18.pdf' ,dpi=200)
+plt.close()
+
+fig = plt.figure(1, figsize=(12, 4))
+ax = fig.add_axes([0.12, 0.4, width, height])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+plt.plot(x_filtered,MaP_POC_mld,label='MaP POC in ML')
+plt.plot(x_filtered,MaP_POC_out_mld,label='MaP POC out ML')
+plt.ylabel('MaP POC (mgC/m$^3$)')
+# I set xticks
+nxticks = 10
+xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.legend()
+# I save
+plt.savefig('../Plots/an18/ZTimeSeries_MaP_ML_an18.pdf' ,dpi=200)
+plt.close()
+
+argument = 'bbp_ML_0413'
+arg_value=bbp_POC_mld[0]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+datetime.utcfromtimestamp(x_filtered[44])
+argument = 'bbp_ML_0625'
+arg_value=np.mean(bbp_POC_mld[44])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+datetime.utcfromtimestamp(x_filtered[70])
+bbp_POC_mld[65:75]
+argument = 'bbp_ML_0807'
+arg_value=np.mean(bbp_POC_mld[70])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'bbp_outML_0413'
+arg_value=bbp_POC_out_mld[0]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+datetime.utcfromtimestamp(x_filtered[48])
+argument = 'bbp_outML_0701to0923'
+arg_value=np.mean(bbp_POC_out_mld[48:])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+
+argument = 'MaP_outML_0413to0923'
+arg_value=np.mean(MaP_POC_out_mld)
+write_latex_data(filename,argument,'%0.02f' % arg_value)
+argument = 'MaP_outML_0413to0923_std'
+arg_value=np.std(MaP_POC_out_mld)
+write_latex_data(filename,argument,'%0.02f' % arg_value)
 
 #I calculate also the difference of the integrated POC 200—600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
 datetime.utcfromtimestamp(x_filtered[41])
