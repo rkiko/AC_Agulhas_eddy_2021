@@ -236,7 +236,7 @@ parameter=temp
 parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
 parameter_panellabel_list=['b','a','c','d','f',' ']
 parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC','BrVais']
-ipar=5
+ipar=0
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
     elif ipar==1:   parameter=psal.copy()
@@ -317,7 +317,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     plt.close()
 
 
-    #Here, for the temperature, I analyse how much it changed in the top 200m
+    #Here, for the temperature and oxygen, I analyse how much they changed in the top 200 and in the 200-600 m layers
     if (ipar == 0)|(ipar == 3):
         x_parameter = np.linspace(Date_Num_parameter.min(), Date_Num_parameter.max(), 100)
         y1_parameter = np.linspace(depth_parameter.min(), depth_parameter.max(), 200)
@@ -375,6 +375,36 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         # I save
         plt.savefig('../Plots/an37/ZTimeSeries_%s_ML_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
         plt.close()
+
+        sel200_600=(y1_parameter>200)&(y1_parameter<=600)
+        tmp=parameter_interp_depth[sel200_600,:]
+        tmp=np.mean(tmp,axis=0)
+        if ipar==0:
+            temp200_600m = tmp.copy()
+        elif ipar==3:
+            doxy200_600m = tmp.copy()
+
+        # Parameter in the 200—600 m layer
+        fig = plt.figure(1, figsize=(12, 4))
+        ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+        plt.plot(x_parameter,tmp)
+        plt.ylabel(parameter_ylabel_list[ipar])
+        #I set xticks
+        nxticks=10
+        xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+        xticklabels=[]
+        for i in xticks:
+            date_time_obj = date_reference + datetime.timedelta(days=i)
+            xticklabels.append(date_time_obj.strftime('%d %B'))
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels)
+        plt.xticks(rotation=90,fontsize=12)
+        # I add the grid
+        plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+        # I save
+        plt.savefig('../Plots/an37/ZTimeSeries_%s_z200_600m_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
+        plt.close()
+
 
 
 
@@ -507,3 +537,16 @@ write_latex_data(filename,argument,'%0.1f' % arg_value)
 argument = 'AOU_ML_0625to0905'
 arg_value=np.mean(AOU_20m[44:89])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
+
+argument = 'temp200_600m_0413'
+arg_value=temp200_600m[0]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'temp200_600m_maximum'
+arg_value=temp200_600m.max()
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+arg_value=matlab_datevec( x_parameter[np.where(temp200_600m == temp200_600m.max())][0] + matlab_datenum(1950,1,1) )
+write_latex_data(filename,'temp200_600m_maximum_date','%d August' % np.floor( arg_value[2] ) )
+argument = 'temp200_600m_0923'
+arg_value=temp200_600m[-1]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+
