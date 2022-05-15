@@ -500,11 +500,11 @@ plt.close()
 # I save the MIP, MAP, and POC concentration values for the latex document
 #######################################################################
 from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 from matlab_datevec import matlab_datevec
 from matlab_datenum import matlab_datenum
 
 datetime.utcfromtimestamp(x_filtered[44])
-filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 argument = 'POC_0_200m_0413to0625'
 arg_value=np.mean(POC_0_200_int[0:45])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
@@ -563,6 +563,16 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 argument = 'Mip_POC_2021FluxEvent_160to600m'
 arg_value=np.mean(MIP_POC_interp[16:60,66:89])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+argument = 'Mip_POC_0413_200to600m'
+arg_value=np.mean(MiP_POC_200_600_int[0])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Mip_POC_200to600m_min'
+arg_value=MiP_POC_200_600_int.min()
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Mip_POC_200to600m_min_date'
+arg_value = datetime.utcfromtimestamp(x_filtered[ np.where(MiP_POC_200_600_int == MiP_POC_200_600_int.min() )[0][0] ]).day
+write_latex_data(filename,argument,'%d July' % arg_value)
 
 #######################################################################
 # I calculate the bbp and MaP POC in and outside the mld, I plot and save it for the latex document

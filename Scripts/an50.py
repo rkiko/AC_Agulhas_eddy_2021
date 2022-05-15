@@ -122,6 +122,12 @@ for ipar in range(0,4):
     if ipar==2: Flux_extended_filtered_depthf_200 = np.mean(Flux_filtered_tmp,axis=0)
     if ipar==3: Flux_extended_eta_b_filtered_depthf_200 = np.mean(Flux_filtered_tmp,axis=0)
 
+    # 200—600 m depth
+    sel_depthf_200_600 = (np.abs(y) > 200) & (np.abs(y) <= 600)
+    Flux_filtered_tmp = z[sel_depthf_200_600,:]
+    if ipar == 1: Flux_eta_b_filtered_depthf_200_600_m = np.mean(Flux_filtered_tmp, axis=0)
+
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -170,27 +176,6 @@ ax.set_xticklabels([])
 plt.xticks(rotation=90, fontsize=7)
 plt.savefig('../Plots/an50/02eta_b_POCFlux_200_600m_%d%02d%02dto%d%02d%02d_an50.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
-#######################################################################
-# I save the the difference of the flux at 200 and 600 m between the 13 April and the 20 June 2021 and the carbon budget for the latex document
-#I don't save it anymore cos I use an53
-#######################################################################
-# from write_latex_data import write_latex_data
-# datetime.utcfromtimestamp(x[41])
-# ndays=(x[41]-x[0])/86400
-# filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
-# argument = 'Flux200_600difference'
-# arg_value=abs(np.mean(Flux_eta_b_filtered_depthf_200[0:42])*ndays-np.mean(Flux_eta_b_filtered_depthf_600[0:42])*ndays)
-# np.mean(Flux_eta_b_filtered_depthf_200[0:42]-Flux_eta_b_filtered_depthf_600[0:42])*ndays
-# write_latex_data(filename,argument,'%d' % arg_value)
-# storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
-# a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
-# data_an18 = pickle.load(a_file)
-# Integrated_POC_0620_0413difference=data_an18['Integrated_POC_0620_0413difference']
-# a_file.close()
-# argument = 'Carbonbudget200_600m_0413to0620'
-# arg_value = np.round(Integrated_POC_0620_0413difference - arg_value)
-# write_latex_data(filename,argument,'%d' % arg_value)
-
 # Third plot: flux calculated considering smallest size classes but with old eta and b values
 fig = plt.figure(1, figsize=(5.5, 1.0))
 ax = fig.add_axes([0.12, 0.1, width, height])
@@ -232,5 +217,59 @@ plt.xticks(rotation=90, fontsize=7)
 plt.savefig('../Plots/an50/04extended_eta_b_200_600m_literature_%d%02d%02dto%d%02d%02d_an50.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
 
+
+########################################################################################################################
+########################################################################################################################
+# I plot flux BETWEEN 200—600 m
+########################################################################################################################
+########################################################################################################################
+fs=9
+width, height = 0.82, 0.8
+
+fig = plt.figure(1, figsize=(5.5, 1.0))
+ax = fig.add_axes([0.12, 0.1, width, height])
+plt.plot(x,Flux_eta_b_filtered_depthf_200_600_m,'r')
+plt.xlim(x.min(),x.max())
+ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.ylabel('Flux (mgC/$m^2$/d)',fontsize=7)
+# I set xticks
+nxticks = 10
+xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
+xticklabels = []
+ax.set_xticks(xticks)
+ax.set_xticklabels([])
+plt.xticks(rotation=90, fontsize=7)
+plt.savefig('../Plots/an50/05_eta_b_POCFlux_200to600m_%d%02d%02dto%d%02d%02d_an50.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+plt.close()
+
+#######################################################################
+# I save some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+datetime.utcfromtimestamp(x[58])
+Flux_eta_b_filtered_depthf_200[54:60]
+Flux_eta_b_filtered_depthf_600[54:60]
+argument = 'Flux200m_0413to0718'
+arg_value=np.mean(Flux_eta_b_filtered_depthf_200[0:59])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Flux600m_0413to0718'
+arg_value=np.mean(Flux_eta_b_filtered_depthf_600[0:59])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+argument = 'Flux200m_max'
+arg_value=Flux_eta_b_filtered_depthf_200.max()
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Flux200m_max_date'
+arg_value = datetime.utcfromtimestamp(x[ np.where(Flux_eta_b_filtered_depthf_200 == Flux_eta_b_filtered_depthf_200.max() )[0][0] ]).day
+write_latex_data(filename,argument,'%d August' % arg_value)
+
+argument = 'Flux200to600m_0413'
+arg_value=Flux_eta_b_filtered_depthf_200_600_m[0]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Flux200to600m_min_date'
+arg_value = datetime.utcfromtimestamp(x[ np.where(Flux_eta_b_filtered_depthf_200_600_m == Flux_eta_b_filtered_depthf_200_600_m.min() )[0][0] ]).day
+write_latex_data(filename,argument,'%d July' % arg_value)
 
 
