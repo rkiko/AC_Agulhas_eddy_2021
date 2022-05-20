@@ -82,7 +82,7 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.gca().invert_yaxis()
 fig = plt.figure(2, figsize=(3.5, 3.5))
-ax = fig.add_axes([0.18, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+ax2 = fig.add_axes([0.18, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.gca().invert_yaxis()
 
 i=0
@@ -120,7 +120,7 @@ plt.ylabel('Depth (m)', fontsize=fs)
 cbar = plt.colorbar(plot1)
 cbar.ax.get_yticklabels()
 cbar.ax.set_ylabel('Temp. (°C)', fontsize=fs)
-plt.savefig('../Plots/an58/01Temp_profiles_vs_distance_from center_an58.pdf' ,dpi=200)
+plt.savefig('../Plots/an58/01Temp_profiles_vs_distance_from_center_an58.pdf' ,dpi=200)
 plt.close()
 plt.figure(2)
 plt.xlabel('Distance from center (km)', fontsize=fs)
@@ -128,17 +128,8 @@ plt.ylabel('Depth (m)', fontsize=fs)
 cbar = plt.colorbar(plot2)
 cbar.ax.get_yticklabels()
 cbar.ax.set_ylabel('Doxy ($\mu$mol/kg)', fontsize=fs)
-plt.savefig('../Plots/an58/02Doxy_profiles_vs_distance_from center_an58.pdf' ,dpi=200)
+plt.savefig('../Plots/an58/02Doxy_profiles_vs_distance_from_center_an58.pdf' ,dpi=200)
 plt.close()
-
-########################################################################################################################
-#
-########################################################################################################################
-
-
-########################################################################################################################
-#
-########################################################################################################################
 
 
 

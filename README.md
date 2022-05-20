@@ -461,3 +461,10 @@ an58
 
 I plot the temperature profiles vs the float distance from the eddy center
 
+
+\
+an59
+
+I plot the temperature profiles vs the float distance from the eddy center as
+in an58, this time for two different time windows.
+
