@@ -466,5 +466,20 @@ I plot the temperature profiles vs the float distance from the eddy center
 an59
 
 I plot the temperature profiles vs the float distance from the eddy center as
-in an58, this time for two different time windows.
+
+
+\
+an60
+
+For different depth layers, I plot the temperature vs distance from the eddy 
+center, with each dot colored proportionally to the date in which it was 
+measured
+
+
+
+\
+an61
+
+I plot the TS diagram for the profiles inside the cyclone, coloring them differently
+according to the date in which they were carried
 
