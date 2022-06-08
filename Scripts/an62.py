@@ -166,7 +166,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.figure(1)
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Temp. (°C)', fontsize=fs)
-    plt.title('%d±%d m [%0.1f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
     cbar = plt.colorbar(plot1)
     nxticks = 10
     xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
@@ -181,7 +181,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.figure(2)
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Doxy ($\mu$mol/kg)', fontsize=fs)
-    plt.title('%d±%d m [%0.1f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
     cbar = plt.colorbar(plot2)
     nxticks = 10
     xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
@@ -196,7 +196,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.figure(3)
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Cons. temp. (°C)', fontsize=fs)
-    plt.title('%d±%d m [%0.1f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
     cbar = plt.colorbar(plot1)
     nxticks = 10
     xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
