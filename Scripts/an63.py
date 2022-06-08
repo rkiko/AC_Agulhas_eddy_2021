@@ -53,13 +53,15 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     # dayf = day0+timedelta(days=ndays) # final date for the carbon budget calculation
     ndays = (dayf - day0).days  # number of days
     layer_thickness = depthf - depth0
-    delta_depth_flux = 15  # around of the depth which I consider when extracting the flux
+    # delta_depth_flux = 15  # around of the depth which I consider when extracting the flux
     Oxy2C = 0.89  # to convert from mol of oxygen to mol of carbon
     mol2gC = 12.0107  # to convert from mol of carbon to grams of carbon
     day0_float = calendar.timegm(day0.timetuple())
     dayf_float = calendar.timegm(dayf.timetuple())
     day0_datenum = matlab_datenum(day0.year,day0.month,day0.day,day0.hour,day0.minute,day0.second)
     dayf_datenum = matlab_datenum(dayf.year,dayf.month,dayf.day,dayf.hour,dayf.minute,dayf.second)
+    delta_rho=0.025  # around of the isopycnal
+    reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
 
     ########################################################################################################################
     # I load and process data
@@ -83,6 +85,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     # I extract the data
     Date_Time=np.array(data['Date_Time'][sel_filename])
     depth=np.array(data['Depth [m]'][sel_filename])
+    dens=np.array(data['Potential density [kg/m3]'][sel_filename])
     Flux=np.array(data['Flux_mgC_m2'][sel_filename])
     Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
     Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
@@ -389,8 +392,6 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     #############################################
     ############### Loop on the different isopycnal values chosen for the study of the oxygen profile
-    delta_rho=0.05
-    reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
     Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+ndays]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
     depth_isopycnal = np.array([])
     slopes_list_doxy = np.array([])

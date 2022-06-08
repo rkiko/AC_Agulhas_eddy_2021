@@ -175,7 +175,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an62/01Temp_profiles_vs_distance_from_center_%0.1fkgm3_an62.pdf' % (depth_isopycnal_tmp.mean()) ,dpi=200)
+    plt.savefig('../Plots/an62/01Temp_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (reference_isopycnal) ,dpi=200)
     plt.close()
 
     plt.figure(2)
@@ -190,7 +190,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an62/02Doxy_profiles_vs_distance_from_center_%0.1fkgm3_an62.pdf' % (depth_isopycnal_tmp.mean()) ,dpi=200)
+    plt.savefig('../Plots/an62/02Doxy_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (reference_isopycnal) ,dpi=200)
     plt.close()
 
     plt.figure(3)
@@ -205,7 +205,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an62/03ConsTemp_profiles_vs_distance_from_center_%0.1fkgm3_an62.pdf' % (depth_isopycnal_tmp.mean()) ,dpi=200)
+    plt.savefig('../Plots/an62/03ConsTemp_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (reference_isopycnal) ,dpi=200)
     plt.close()
 
 
