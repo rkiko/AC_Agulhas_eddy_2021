@@ -95,9 +95,13 @@ lon_tmp=lon_tmp[mask_dens]
 pres_tmp=pres[mask_dens]
 psal_tmp=psal[mask_dens]
 temp_tmp=temp[mask_dens]
-abs_psal_tmp=gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp) # I compute absolute salinity
-cons_tmp=gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
-dens_tmp=gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
+dens_tmp = gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+abs_psal=np.ones(temp.shape)*99999
+abs_psal[mask_dens]=abs_psal_tmp
+cons_temp=np.ones(temp.shape)*99999
+cons_temp[mask_dens]=cons_tmp
 dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
@@ -199,6 +203,8 @@ depth=depth[sel_insideEddy,:]
 dens=dens[sel_insideEddy,:]
 temp=temp[sel_insideEddy,:]
 psal=psal[sel_insideEddy,:]
+cons_temp=cons_temp[sel_insideEddy,:]
+abs_psal=abs_psal[sel_insideEddy,:]
 chla=chla[sel_insideEddy,:]
 doxy=doxy[sel_insideEddy,:]
 sPOC=sPOC[sel_insideEddy,:]
@@ -233,17 +239,19 @@ for i in range(0,chla.shape[0]):
 # I define the parameters list and I start the loop on each of them
 #######################################################################
 parameter=temp
-parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
-parameter_panellabel_list=['b','a','c','d','f',' ']
-parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC','BrVais']
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Temperature ($^{\circ}$C)','Pratical salinity (psu)','Absolute salinity (g/kg)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
+parameter_panellabel_list=['b','b','a','a','c','d','f',' ']
+parameter_shortname_list=['temp','cons_temp','psal','abs_psal','chla','doxy','bbpPOC','BrVais']
 ipar=0
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
-    elif ipar==1:   parameter=psal.copy()
-    elif ipar == 2: parameter=chla.copy()
-    elif ipar == 3: parameter=doxy.copy()
-    elif ipar == 4: parameter=sPOC.copy()
-    elif ipar == 5: parameter=bvf.copy()
+    elif ipar==1:   parameter=cons_temp.copy()
+    elif ipar==2:   parameter=psal.copy()
+    elif ipar==3:   parameter=abs_psal.copy()
+    elif ipar == 4: parameter=chla.copy()
+    elif ipar == 5: parameter=doxy.copy()
+    elif ipar == 6: parameter=sPOC.copy()
+    elif ipar == 7: parameter=bvf.copy()
 
     #I filter the profiles
     parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
@@ -269,18 +277,20 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
 
     if ipar==0: temp_interp = parameter_interp_depth.copy()
-    elif ipar==1:   psal_interp = parameter_interp_depth.copy()
-    elif ipar == 2: chla_interp = parameter_interp_depth.copy()
-    elif ipar == 3: doxy_interp = parameter_interp_depth.copy()
-    elif ipar == 4: sPOC_interp = parameter_interp_depth.copy()
-    elif ipar == 5: bvf_interp = parameter_interp_depth.copy()
+    elif ipar==1:   cons_temp_interp = parameter_interp_depth.copy()
+    elif ipar==2:   psal_interp = parameter_interp_depth.copy()
+    elif ipar==3:   abs_psal_interp = parameter_interp_depth.copy()
+    elif ipar == 4: chla_interp = parameter_interp_depth.copy()
+    elif ipar == 5: doxy_interp = parameter_interp_depth.copy()
+    elif ipar == 6: sPOC_interp = parameter_interp_depth.copy()
+    elif ipar == 7: bvf_interp = parameter_interp_depth.copy()
 
     ########################################################
     ####### I plot: versus depth
     ########################################################
-    if ipar==4:
+    if ipar==6:
         parameter_interp_depth[parameter_interp_depth > 40] = 40
-    elif ipar==5:
+    elif ipar==7:
         parameter_interp_depth[parameter_interp_depth > 3*10**-5] = 3*10**-5
 
     width, height = 0.8, 0.7
@@ -288,9 +298,9 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     fig = plt.figure(1, figsize=(12,8))
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
-    if ipar==0:
+    if (ipar==0)|(ipar==1):
         plt.plot(Date_Num,mld,'w')
-    elif ipar==2:
+    elif ipar==4:
         plt.plot(zeu_datenum,zeu_float,'w')
     plt.gca().invert_yaxis()
     # draw colorbar
@@ -318,7 +328,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 
 
     #Here, for the temperature and oxygen, I analyse how much they changed in the top 200 and in the 200-600 m layers
-    if (ipar == 0)|(ipar == 3):
+    if (ipar == 0)|(ipar == 5):
         x_parameter = np.linspace(Date_Num_parameter.min(), Date_Num_parameter.max(), 100)
         y1_parameter = np.linspace(depth_parameter.min(), depth_parameter.max(), 200)
         # I interpolate
@@ -354,7 +364,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         # Parameter in the mixed layer: I approximate the temperature at 50m as representative of the ML, but should be improved in future
         if ipar==0:
             temp50m = parameter_interp_depth[10,:]
-        elif ipar==3:
+        elif ipar==5:
             doxy50m = parameter_interp_depth[10,:]
         fig = plt.figure(1, figsize=(12, 4))
         ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
@@ -381,7 +391,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         tmp=np.mean(tmp,axis=0)
         if ipar==0:
             temp200_600m = tmp.copy()
-        elif ipar==3:
+        elif ipar==5:
             doxy200_600m = tmp.copy()
 
         # Parameter in the 200—600 m layer

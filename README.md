@@ -483,3 +483,22 @@ an61
 I plot the TS diagram for the profiles inside the cyclone, coloring them differently
 according to the date in which they were carried
 
+\
+an62
+
+As in an60, I plot the temperature vs distance from the eddy 
+center, with each dot colored proportionally to the date in which it was 
+measured. The difference is that, rather than doing it for different depth 
+layers, I do it for different isopycnals
+
+\
+an63
+
+As in an 53, I calculate all the metrics necessary to estimate the carbon budget (
+the Flux vs depth and time, the integrated POC, the PARR vs depth).
+The difference with an53 is that here I calculate the flux along the isopycnals 
+rather than a fixed depth.
+
+
+
+

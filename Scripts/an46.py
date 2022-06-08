@@ -89,9 +89,13 @@ lon_tmp=lon_tmp[mask_dens]
 pres_tmp=pres[mask_dens]
 psal_tmp=psal[mask_dens]
 temp_tmp=temp[mask_dens]
-abs_psal_tmp=gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp) # I compute absolute salinity
-cons_tmp=gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
-dens_tmp=gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
+dens_tmp = gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+abs_psal=np.ones(temp.shape)*99999
+abs_psal[mask_dens]=abs_psal_tmp
+cons_temp=np.ones(temp.shape)*99999
+cons_temp[mask_dens]=cons_tmp
 dens=np.ones(temp.shape)*99999
 dens[mask_dens]=dens_tmp+1000
 
@@ -193,6 +197,8 @@ depth=depth[sel_insideEddy,:]
 dens=dens[sel_insideEddy,:]
 temp=temp[sel_insideEddy,:]
 psal=psal[sel_insideEddy,:]
+cons_temp=cons_temp[sel_insideEddy,:]
+abs_psal=abs_psal[sel_insideEddy,:]
 chla=chla[sel_insideEddy,:]
 doxy=doxy[sel_insideEddy,:]
 sPOC=sPOC[sel_insideEddy,:]
@@ -243,17 +249,19 @@ critical_depth_2 = critical_depth_2[~np.isnan(critical_depth_2)]
 # I define the parameters list and I start the loop on each of them
 #######################################################################
 parameter=temp
-parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
-parameter_panellabel_list=['b','a','d','c','f',' ']
-parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC','BrVais']
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Temperature ($^{\circ}$C)','Pratical salinity (psu)','Absolute salinity (g/kg)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
+parameter_panellabel_list=['b','b','a','a','d','c','f',' ']
+parameter_shortname_list=['temp','cons_temp','psal','abs_psal','chla','doxy','bbpPOC','BrVais']
 ipar=3
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
-    elif ipar==1:   parameter=psal.copy()
-    elif ipar == 2: parameter=chla.copy()
-    elif ipar == 3: parameter=doxy.copy()
-    elif ipar == 4: parameter=sPOC.copy()
-    elif ipar == 5: parameter=bvf.copy()
+    elif ipar==1:   parameter=cons_temp.copy()
+    elif ipar==2:   parameter=psal.copy()
+    elif ipar==3:   parameter=abs_psal.copy()
+    elif ipar == 4: parameter=chla.copy()
+    elif ipar == 5: parameter=doxy.copy()
+    elif ipar == 6: parameter=sPOC.copy()
+    elif ipar == 7: parameter=bvf.copy()
 
     #I filter the profiles
     parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
@@ -282,9 +290,9 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ########################################################
     ####### I plot: versus depth
     ########################################################
-    if ipar==4:
+    if ipar==6:
         parameter_interp_depth[parameter_interp_depth > 40] = 40
-    elif ipar==5:
+    elif ipar==7:
         parameter_interp_depth[parameter_interp_depth > 3*10**-5] = 3*10**-5
 
     width, height = 0.8, 0.7

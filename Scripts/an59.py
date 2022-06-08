@@ -6,6 +6,7 @@ import seawater as sw
 import calendar
 import pandas as pd
 from datetime import datetime
+import gsw
 import matplotlib.pyplot as plt
 from pathlib import Path
 home = str(Path.home())
@@ -64,6 +65,24 @@ depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
 depth=np.ones(pres.shape)*99999
 depth[mask_depth]=depth_tmp
 
+#######################################################################
+#I compute the conservative temperature
+#######################################################################
+mask_dens = np.logical_and(pres != 99999, temp != 99999, psal != 99999)  # I exclude the points with value = 99999
+lat_tmp = np.tile(lat, [pres.shape[1], 1]).T
+lon_tmp = np.tile(lon, [pres.shape[1], 1]).T
+lat_tmp = lat_tmp[mask_dens]
+lon_tmp = lon_tmp[mask_dens]
+pres_tmp = pres[mask_dens]
+psal_tmp = psal[mask_dens]
+temp_tmp = temp[mask_dens]
+abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)  # I compute conservative temperature
+abs_psal=np.ones(temp.shape)*99999
+abs_psal[mask_dens]=abs_psal_tmp
+cons_temp=np.ones(temp.shape)*99999
+cons_temp[mask_dens]=cons_tmp
+
 ########################################################################################################################
 # I load the eddy radiuses and the eddy-float distance
 ########################################################################################################################
@@ -100,6 +119,9 @@ for iTW in [0,1]:
     fig = plt.figure(2, figsize=(3.5, 3.5))
     ax2 = fig.add_axes([0.18, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(set_xlim_lower, set_xlim_upper))
     plt.gca().invert_yaxis()
+    fig = plt.figure(3, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.18, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(set_xlim_lower, set_xlim_upper))
+    plt.gca().invert_yaxis()
 
     i=0
     for i in range (0,temp.shape[0]):
@@ -111,16 +133,20 @@ for iTW in [0,1]:
             continue
 
         temp_tmp=temp[i,:]
+        cons_temp_tmp=cons_temp[i,:]
         doxy_tmp=doxy[i,:]
         depth_tmp=depth[i,:]
-        sel = (depth_tmp != 99999) & (temp_tmp != 99999) & (doxy_tmp != 99999)
+        sel = (depth_tmp != 99999) & (temp_tmp != 99999) & (cons_temp_tmp != 99999) & (doxy_tmp != 99999)
         depth_tmp = depth_tmp[sel]
         temp_tmp = temp_tmp[sel]
+        cons_temp_tmp = cons_temp_tmp[sel]
         doxy_tmp = doxy_tmp[sel]
 
         dist_float_eddy_km_tmp=np.tile(dist_float_eddy_km_tmp,temp_tmp.size)
         temp_tmp[temp_tmp<temp0]=temp0
         temp_tmp[temp_tmp>temp1]=temp1
+        cons_temp_tmp[cons_temp_tmp<temp0]=temp0
+        cons_temp_tmp[cons_temp_tmp>temp1]=temp1
         doxy_tmp[doxy_tmp<doxy0]=doxy0
         doxy_tmp[doxy_tmp>doxy1]=doxy1
         ####################################################################################################################
@@ -130,6 +156,8 @@ for iTW in [0,1]:
         plot1 = plt.scatter(dist_float_eddy_km_tmp, depth_tmp, c=temp_tmp,s=5,vmin=temp0,vmax=temp1)
         plt.figure(2)
         plot2 = plt.scatter(dist_float_eddy_km_tmp, depth_tmp, c=doxy_tmp,s=5,vmin=doxy0,vmax=doxy1)
+        plt.figure(3)
+        plot2 = plt.scatter(dist_float_eddy_km_tmp, depth_tmp, c=cons_temp_tmp,s=5,vmin=temp0,vmax=temp1)
 
 
     # I add last details
@@ -152,6 +180,16 @@ for iTW in [0,1]:
     cbar.ax.get_yticklabels()
     cbar.ax.set_ylabel('Doxy ($\mu$mol/kg)', fontsize=fs)
     plt.savefig('../Plots/an59/02Doxy_profiles_vs_distance_from_center_TW%02d_an59.pdf' % int(iTW+1),dpi=200)
+    plt.close()
+    plt.figure(3)
+    plt.xlabel('Distance from center (km)', fontsize=fs)
+    plt.ylabel('Depth (m)', fontsize=fs)
+    plt.title('Only profiles between\n%02d-%02d-%d and %02d-%02d-%d' % (start_time_datevec[2],start_time_datevec[1],start_time_datevec[0],
+               end_time_datevec[2],end_time_datevec[1],end_time_datevec[0]), fontsize=fs)
+    cbar = plt.colorbar(plot1)
+    cbar.ax.get_yticklabels()
+    cbar.ax.set_ylabel('Cons Temp. (°C)', fontsize=fs)
+    plt.savefig('../Plots/an59/03ConsTemp_profiles_vs_distance_from_center_TW%02d_an59.pdf' % int(iTW+1),dpi=200)
     plt.close()
 
 

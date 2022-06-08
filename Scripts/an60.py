@@ -3,6 +3,7 @@ import os
 import netCDF4 as nc
 import pickle
 import seawater as sw
+import gsw
 import calendar
 import pandas as pd
 from datetime import datetime
@@ -58,6 +59,24 @@ depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
 depth=np.ones(pres.shape)*99999
 depth[mask_depth]=depth_tmp
 
+#######################################################################
+#I compute the conservative temperature
+#######################################################################
+mask_dens = np.logical_and(pres != 99999, temp != 99999, psal != 99999)  # I exclude the points with value = 99999
+lat_tmp = np.tile(lat, [pres.shape[1], 1]).T
+lon_tmp = np.tile(lon, [pres.shape[1], 1]).T
+lat_tmp = lat_tmp[mask_dens]
+lon_tmp = lon_tmp[mask_dens]
+pres_tmp = pres[mask_dens]
+psal_tmp = psal[mask_dens]
+temp_tmp = temp[mask_dens]
+abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)  # I compute conservative temperature
+abs_psal=np.ones(temp.shape)*99999
+abs_psal[mask_dens]=abs_psal_tmp
+cons_temp=np.ones(temp.shape)*99999
+cons_temp[mask_dens]=cons_tmp
+
 ########################################################################################################################
 # I load the eddy radiuses and the eddy-float distance
 ########################################################################################################################
@@ -91,6 +110,8 @@ for idepth in range(0,depth_tmp0_list.size):
     ax = fig.add_axes([0.18, 0.15, width, height], ylim=(temp0, temp1),xlim=(set_xlim_lower, set_xlim_upper))
     fig = plt.figure(2, figsize=(3.5, 3.5))
     ax2 = fig.add_axes([0.18, 0.15, width, height], ylim=(doxy0, doxy1),xlim=(set_xlim_lower, set_xlim_upper))
+    fig = plt.figure(3, figsize=(3.5, 3.5))
+    ax3 = fig.add_axes([0.18, 0.15, width, height], ylim=(temp0, temp1),xlim=(set_xlim_lower, set_xlim_upper))
 
     i=0
     for i in range (0,temp.shape[0]):
@@ -99,16 +120,19 @@ for idepth in range(0,depth_tmp0_list.size):
         if dist_float_eddy_km_tmp>radius_Vmax_floatDays_tmp:    continue
 
         temp_tmp=temp[i,:]
+        cons_temp_tmp=cons_temp[i,:]
         doxy_tmp=doxy[i,:]
         depth_tmp=depth[i,:]
-        sel = (depth_tmp != 99999) & (temp_tmp != 99999) & (doxy_tmp != 99999)
+        sel = (depth_tmp != 99999) & (temp_tmp != 99999) & (cons_temp_tmp != 99999) & (doxy_tmp != 99999)
         depth_tmp = depth_tmp[sel]
         temp_tmp = temp_tmp[sel]
+        cons_temp_tmp = cons_temp_tmp[sel]
         doxy_tmp = doxy_tmp[sel]
 
         sel_depth = (depth_tmp >=(depth_tmp0 - delta_depth))&(depth_tmp <(depth_tmp0 + delta_depth))
         if sum(sel_depth)==0: continue
         temp_tmp = np.mean(temp_tmp[sel_depth])
+        cons_temp_tmp = np.mean(cons_temp_tmp[sel_depth])
         doxy_tmp = np.mean(doxy_tmp[sel_depth])
 
         Date_Num_float_tmp=Date_Num_float[i]
@@ -119,6 +143,8 @@ for idepth in range(0,depth_tmp0_list.size):
         plot1 = plt.scatter(dist_float_eddy_km_tmp, temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
         plt.figure(2)
         plot2 = plt.scatter(dist_float_eddy_km_tmp, doxy_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        plt.figure(3)
+        plot3 = plt.scatter(dist_float_eddy_km_tmp, cons_temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
 
 
     # I add last details
@@ -150,6 +176,21 @@ for idepth in range(0,depth_tmp0_list.size):
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
     plt.savefig('../Plots/an60/02Doxy_profiles_vs_distance_from_center_%dm_an60.pdf' % (depth_tmp0) ,dpi=200)
+    plt.close()
+
+    plt.figure(3)
+    plt.xlabel('Distance from center (km)', fontsize=fs)
+    plt.ylabel('Cons. temp. (°C)', fontsize=fs)
+    plt.title('%d m [%d—%d]' % (depth_tmp0,depth_tmp0-delta_depth,depth_tmp0+delta_depth), fontsize=fs)
+    cbar = plt.colorbar(plot1)
+    nxticks = 10
+    xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
+    xticklabels = []
+    for i in xticks:
+        xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
+    cbar.set_ticks(xticks)
+    cbar.set_ticklabels(xticklabels)
+    plt.savefig('../Plots/an60/03ConsTemp_profiles_vs_distance_from_center_%dm_an60.pdf' % (depth_tmp0) ,dpi=200)
     plt.close()
 
 
