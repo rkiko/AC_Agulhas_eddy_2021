@@ -114,6 +114,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     Date_Num_bbp = data_an18['Date_Num_bbp']
     Date_Vec_bbp = data_an18['Date_Vec_bbp']
     depth_bbp = data_an18['depth_bbp']
+    dens_bbp = data_an18['dens_bbp']
     a_file.close()
 
     sel_dates = (Date_Num_bbp>=day0_datenum)&(Date_Num_bbp<=dayf_datenum)
@@ -132,43 +133,44 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     ########################################################################################################################
     # Here I calculate the integrated POC (i.e., MiP+MaP+bbp). To do so, (i) I filter it with a savgol function, then (ii) I
-    # interpolate it over a regular grid in time and space. This step is necessary to have MiP+MaP+bbp at 600 m, because some
-    # profiles only reach 400 m. Finally, (iii) I extract the mean MiP+MaP+bbp values between depth0 and depthf and between
-    # day0 and dayf (I obtain a time series)
+    # interpolate it over a regular grid versus time and density. This step is necessary to have MiP+MaP+bbp at 600 m, because
+    # some profiles only reach 400 m; (iii) for each density value of the density grid, I calculate the corresponding depth.
+    # Finally, (iv) I extract the mean MiP+MaP+bbp values between depth0 and depthf and between day0 and dayf (I obtain a
+    # time series)
     ########################################################################################################################
 
     ##############################################
     # Step 1 and 2, filter and interpolation
-    MiP_filtered=np.array([]);depth_MiP_filtered=np.array([]);Date_Num_MiP_filtered=np.array([])
-    MiP_extended_filtered=np.array([]);depth_MiP_extended_filtered=np.array([]);Date_Num_MiP_extended_filtered=np.array([])
-    MaP_filtered=np.array([]);depth_MaP_filtered=np.array([]);Date_Num_MaP_filtered=np.array([])
-    bbp_filtered=np.array([]);depth_bbp_filtered=np.array([]);Date_Num_bbp_filtered=np.array([])
+    MiP_filtered=np.array([]);dens_MiP_filtered=np.array([]);Date_Num_MiP_filtered=np.array([])
+    MiP_extended_filtered=np.array([]);dens_MiP_extended_filtered=np.array([]);Date_Num_MiP_extended_filtered=np.array([])
+    MaP_filtered=np.array([]);dens_MaP_filtered=np.array([]);Date_Num_MaP_filtered=np.array([])
+    bbp_filtered=np.array([]);dens_bbp_filtered=np.array([]);Date_Num_bbp_filtered=np.array([])
 
     i=0
     for i in range(0,list_dates.size):
         sel=Date_Num==list_dates[i]
-        z=MiP_POC[sel];x=Date_Num[sel];y=depth[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        z=MiP_POC[sel];x=Date_Num[sel];y=dens[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
             MiP_filtered = np.concatenate((MiP_filtered, z))
             Date_Num_MiP_filtered = np.concatenate((Date_Num_MiP_filtered, x2))
-            depth_MiP_filtered = np.concatenate((depth_MiP_filtered, y2))
-        z=MiP_POC_extended[sel];x=Date_Num[sel];y=depth[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+            dens_MiP_filtered = np.concatenate((dens_MiP_filtered, y2))
+        z=MiP_POC_extended[sel];x=Date_Num[sel];y=dens[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
             MiP_extended_filtered = np.concatenate((MiP_extended_filtered, z))
             Date_Num_MiP_extended_filtered = np.concatenate((Date_Num_MiP_extended_filtered, x2))
-            depth_MiP_extended_filtered = np.concatenate((depth_MiP_extended_filtered, y2))
-        z=MaP_POC[sel];x=Date_Num[sel];y=depth[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+            dens_MiP_extended_filtered = np.concatenate((dens_MiP_extended_filtered, y2))
+        z=MaP_POC[sel];x=Date_Num[sel];y=dens[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
             MaP_filtered = np.concatenate((MaP_filtered, z))
             Date_Num_MaP_filtered = np.concatenate((Date_Num_MaP_filtered, x2))
-            depth_MaP_filtered = np.concatenate((depth_MaP_filtered, y2))
+            dens_MaP_filtered = np.concatenate((dens_MaP_filtered, y2))
 
     i=0
     for i in range(0, bbp_POC.shape[0]):
-        z=bbp_POC[i,:];y=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
+        z=bbp_POC[i,:];y=dens_bbp[i,:];x = Date_Num_bbp_calendar[i]
         z[z>100] = 99999
         sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
         sel3=z==0
@@ -177,53 +179,80 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
             z[sel3]=0
             bbp_filtered = np.concatenate((bbp_filtered, z))
             Date_Num_bbp_filtered = np.concatenate((Date_Num_bbp_filtered, np.tile(x,sum(sel2)) ))
-            depth_bbp_filtered = np.concatenate((depth_bbp_filtered, y2))
+            dens_bbp_filtered = np.concatenate((dens_bbp_filtered, y2))
 
     # I define the x and y arrays for the MiP+MaP+bbp interpolation
     x_filtered = np.linspace(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max(), ndays)
-    y_filtered = np.linspace(depth_bbp_filtered.min(), depth_MaP_filtered.max(), 100)
+    y_filtered = np.linspace(dens_bbp_filtered.min(), dens_MaP_filtered.max(), 100)
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
-    MiP_interp = griddata((Date_Num_MiP_filtered, depth_MiP_filtered), MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    MiP_extended_interp = griddata((Date_Num_MiP_extended_filtered, depth_MiP_extended_filtered), MiP_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    MaP_interp = griddata((Date_Num_MaP_filtered, depth_MaP_filtered), MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    bbp_interp = griddata((Date_Num_bbp_filtered, depth_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-
-    # set_ylim_lower, set_ylim_upper = depth_bbp_filtered.min(), 600
-    # fig = plt.figure(1, figsize=(12, 8))
-    # ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper),
-    #                   xlim=(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max()))
-    # parameter_plot = bbp_interp.copy()
-    # parameter_plot[parameter_plot < 0] = 0
-    # parameter_plot[parameter_plot > 40] = 40
-    # ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
-    # plt.gca().invert_yaxis()
-    # # I draw colorbar
-    # cbar = plt.colorbar(plot2)
-    # cbar.ax.get_yticklabels()
-    # plt.ylabel('Depth (m)', fontsize=18)
-    # # I set xticks
-    # nxticks = 10
-    # xticks = np.linspace(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max(), nxticks)
-    # xticklabels = []
-    # for i in xticks:
-    #     xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
-    # ax.set_xticks(xticks)
-    # ax.set_xticklabels(xticklabels)
-    # plt.xticks(rotation=90, fontsize=12)
+    MiP_interp = griddata((Date_Num_MiP_filtered, dens_MiP_filtered), MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    MiP_extended_interp = griddata((Date_Num_MiP_extended_filtered, dens_MiP_extended_filtered), MiP_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    MaP_interp = griddata((Date_Num_MaP_filtered, dens_MaP_filtered), MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    bbp_interp = griddata((Date_Num_bbp_filtered, dens_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
     ##############################################
-    # Step 3, I calculate the mean MiP+MaP+bbp (and std) between depth0 and depthf between day0 and dayf
-    sel_depth0_depthf = (np.abs(y_filtered) >= depth0) & (np.abs(y_filtered) < depthf)
+    # Step 3
+    depth_bbp_filtered=np.array([]);depth_MiP_filtered=np.array([])
+    i=0
+    for i in range(0,y_filtered.size):
+        if i==0:    dens0=y_filtered[i]
+        else:       dens0=abs( y_filtered[i]+y_filtered[i-1] )*0.5
+        if i==(y_filtered.size-1):  dens1=y_filtered[i]
+        else:                       dens1=abs( y_filtered[i]+y_filtered[i+1] )*0.5
+        #Depth calculation for MiP and MaP
+        depth_MiP_filtered_tmp = np.array([])
+        j=0
+        for j in range(0,list_dates.size):
+            sel=Date_Num==list_dates[j]
+            dens_tmp=dens[sel];depth_tmp=depth[sel];sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp));dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
+            if sum(sel2) > 0:
+                sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
+                if sum(sel_dens) > 0:
+                    depth_MiP_filtered_tmp = np.append(depth_MiP_filtered_tmp, np.mean(depth_tmp[sel_dens]) )
+                else:
+                    depth_MiP_filtered_tmp = np.append( depth_MiP_filtered_tmp, np.array([np.nan]) )
+            else:
+                depth_MiP_filtered_tmp = np.append( depth_MiP_filtered_tmp, np.array([np.nan]) )
+
+        if sum(~np.isnan(depth_MiP_filtered_tmp))==0:
+            depth_MiP_filtered = np.append(depth_MiP_filtered, np.array([np.nan]) )
+        else:
+            depth_MiP_filtered = np.append(depth_MiP_filtered, np.nanmean(depth_MiP_filtered_tmp))
+
+        # Depth calculation for bbp
+        depth_bbp_filtered_tmp = np.array([])
+        j=0
+        for j in range(0, bbp_POC.shape[0]):
+            dens_tmp=dens_bbp[j,:];depth_tmp=depth_bbp[j,:];sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp));dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
+            if sum(sel2) > 0:
+                sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
+                if sum(sel_dens) > 0:
+                    depth_bbp_filtered_tmp = np.append(depth_bbp_filtered_tmp, np.mean(depth_tmp[sel_dens]))
+                else:
+                    depth_bbp_filtered_tmp = np.append(depth_bbp_filtered_tmp, np.array([np.nan]))
+            else:
+                depth_bbp_filtered_tmp = np.append(depth_bbp_filtered_tmp, np.array([np.nan]))
+
+
+        if sum(~np.isnan(depth_bbp_filtered_tmp))==0:
+            depth_bbp_filtered = np.append(depth_bbp_filtered, np.array([np.nan]) )
+        else:
+            depth_bbp_filtered = np.append(depth_bbp_filtered, np.nanmean(depth_bbp_filtered_tmp))
+
+    ##############################################
+    # Step 4, I calculate the mean MiP+MaP+bbp (and std) between depth0 and depthf between day0 and dayf
+    sel_depth0_depthf = (np.abs(depth_MiP_filtered) >= depth0) & (np.abs(depth_MiP_filtered) < depthf)
+    sel_depth0_depthf_bbp = (np.abs(depth_bbp_filtered) >= depth0) & (np.abs(depth_bbp_filtered) < depthf)
     MiP_POC_depth0_depthf=np.mean(MiP_interp[sel_depth0_depthf,:],0)
     MiP_POC_extended_depth0_depthf=np.mean(MiP_extended_interp[sel_depth0_depthf,:],0)
     MaP_POC_depth0_depthf=np.mean(MaP_interp[sel_depth0_depthf,:],0)
-    bbp_POC_depth0_depthf=np.mean(bbp_interp[sel_depth0_depthf,:],0)
+    bbp_POC_depth0_depthf=np.mean(bbp_interp[sel_depth0_depthf_bbp,:],0)
 
     MiP_POC_depth0_depthf_std = np.std(MiP_interp[sel_depth0_depthf, :], 0)
     MiP_POC_extended_depth0_depthf_std = np.std(MiP_extended_interp[sel_depth0_depthf, :], 0)
     MaP_POC_depth0_depthf_std = np.std(MaP_interp[sel_depth0_depthf, :], 0)
-    bbp_POC_depth0_depthf_std = np.std(bbp_interp[sel_depth0_depthf, :], 0)
+    bbp_POC_depth0_depthf_std = np.std(bbp_interp[sel_depth0_depthf_bbp, :], 0)
 
     Integrated_POC_mgC_m3 = MiP_POC_depth0_depthf + MaP_POC_depth0_depthf + bbp_POC_depth0_depthf
     Integrated_POC_extended_mgC_m3 = MiP_POC_extended_depth0_depthf + MaP_POC_depth0_depthf + bbp_POC_depth0_depthf
