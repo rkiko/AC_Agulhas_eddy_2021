@@ -47,6 +47,7 @@ Date_Vec=Date_Vec.astype(int)
 #Standard variables
 pres=np.array(ds.variables['PRES_ADJUSTED'])
 temp=np.array(ds.variables['TEMP_ADJUSTED'])
+psal=np.array(ds.variables['PSAL_ADJUSTED'])
 
 #BGC Variables
 bbp700=np.array(ds.variables['BBP700_ADJUSTED'])
@@ -61,6 +62,10 @@ if np.sum(pres==99999)==pres.size:
 if np.sum(bbp700==99999)==bbp700.size:
     print('Taking non adjusted bbp700')
     bbp700 = np.array(ds.variables['BBP700'])
+if np.sum(psal==99999)==psal.size:
+    print('Taking non adjusted salinity')
+    psal = np.array(ds.variables['PSAL'])
+    psal_qc = np.array(ds.variables['PSAL_QC'])
 
 #######################################################################
 #I tranform the pressure to depth
@@ -72,6 +77,23 @@ pres_tmp=pres[mask_depth]
 depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
 depth_bbp=np.ones(pres.shape)*99999
 depth_bbp[mask_depth]=depth_tmp
+
+#######################################################################
+#I compute the conservative temperature, the absolute salinity, and the density
+#######################################################################
+mask_dens = np.logical_and(pres != 99999, temp != 99999, psal != 99999)  # I exclude the points with value = 99999
+lat_tmp = np.tile(lat, [pres.shape[1], 1]).T
+lon_tmp = np.tile(lon, [pres.shape[1], 1]).T
+lat_tmp = lat_tmp[mask_dens]
+lon_tmp = lon_tmp[mask_dens]
+pres_tmp = pres[mask_dens]
+psal_tmp = psal[mask_dens]
+temp_tmp = temp[mask_dens]
+abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)  # I compute conservative temperature
+dens_tmp = gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+dens_bbp = np.ones(temp.shape) * 99999
+dens_bbp[mask_dens] = dens_tmp + 1000
 
 #######################################################################
 # I transform the bbp700 to small POC (sPOC)
@@ -677,7 +699,7 @@ a_file.close()
 
 dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
                    "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar": Date_Num_bbp_calendar,
-                   "Integrated_POC_0620_0413difference": arg_value}
+                   "Integrated_POC_0620_0413difference": arg_value, "dens_bbp": dens_bbp}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
@@ -781,3 +803,21 @@ for ipar in range(3,parameter_ylabel_list.__len__()):
                 plt.savefig('../Plots/an18/Interpolated_vs_not/%s_profile%02d_an18.pdf' % (parameter_shortname_list[ipar],int(i)+1), dpi=200)
                 plt.close()
 
+
+
+# a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
+# data_an18 = pickle.load(a_file)
+# bbp_POC = data_an18['bbp_POC']
+# sel_insideEddy = data_an18['sel_insideEddy']
+# Date_Num_bbp = data_an18['Date_Num_bbp']
+# Date_Vec_bbp = data_an18['Date_Vec_bbp']
+# depth_bbp = data_an18['depth_bbp']
+# Date_Num_bbp_calendar = data_an18['Date_Num_bbp_calendar']
+# a_file.close()
+#
+# dictionary_data = {"bbp_POC": bbp_POC,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
+#                    "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar": Date_Num_bbp_calendar,
+#                     "dens_bbp": dens_bbp}
+# a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
+# pickle.dump(dictionary_data, a_file)
+# a_file.close()
