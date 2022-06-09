@@ -53,7 +53,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     # dayf = day0+timedelta(days=ndays) # final date for the carbon budget calculation
     ndays = (dayf - day0).days  # number of days
     layer_thickness = depthf - depth0
-    # delta_depth_flux = 15  # around of the depth which I consider when extracting the flux
+    delta_depth_flux = 15  # around of the depth which I consider when extracting the flux
     Oxy2C = 0.89  # to convert from mol of oxygen to mol of carbon
     mol2gC = 12.0107  # to convert from mol of carbon to grams of carbon
     day0_float = calendar.timegm(day0.timetuple())
@@ -192,7 +192,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     bbp_interp = griddata((Date_Num_bbp_filtered, dens_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
     ##############################################
-    # Step 3
+    # Step 3: for each density layer I calculate the corresponding mean depth
     depth_bbp_filtered=np.array([]);depth_MiP_filtered=np.array([])
     i=0
     for i in range(0,y_filtered.size):
@@ -259,91 +259,117 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     Integrated_POC_mgC_m3_std = np.sqrt( MiP_POC_depth0_depthf_std**2 + MaP_POC_depth0_depthf_std**2 + bbp_POC_depth0_depthf_std**2 )
     Integrated_POC_extended_mgC_m3_std = np.sqrt( MiP_POC_extended_depth0_depthf_std**2 + MaP_POC_depth0_depthf_std**2 + bbp_POC_depth0_depthf_std**2 )
     list_dates_Integrated_POC = x_filtered.copy()
+    
     ########################################################################################################################
     # Here I extract the flux values at depth0 and depthf. To do so, (i) I filter it with a savgol function, then (ii) I
-    # interpolate it over a regular grid in time and space. This step is necessary to have the flux at 600 m, because some
-    # profiles only reach 400 m. Finally, (iii) I extract the flux values at depth0 and depthf
+    # interpolate it over a regular grid in time and density. This step is necessary to have the flux at 600 m, because some
+    # profiles only reach 400 m; (iii) for each density value of the density grid, I calculate the corresponding depth.
+    # Finally, (iv) I extract the flux values at depth0 and depthf
     ########################################################################################################################
 
     ##############################################
     # Step 1 and 2, filter and interpolation
-    Flux_filtered=np.array([]);depth_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([])
-    Flux_eta_b_filtered=np.array([]);depth_Flux_eta_b_filtered=np.array([]);Date_Num_Flux_eta_b_filtered=np.array([])
-    Flux_extended_filtered=np.array([]);depth_Flux_extended_filtered=np.array([]);Date_Num_Flux_extended_filtered=np.array([])
-    Flux_extended_filtered_eta_b=np.array([]);depth_Flux_extended_filtered_eta_b=np.array([]);Date_Num_Flux_extended_filtered_eta_b=np.array([])
+    Flux_filtered=np.array([]);dens_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([])
+    Flux_eta_b_filtered=np.array([]);dens_Flux_eta_b_filtered=np.array([]);Date_Num_Flux_eta_b_filtered=np.array([])
+    Flux_extended_filtered=np.array([]);dens_Flux_extended_filtered=np.array([]);Date_Num_Flux_extended_filtered=np.array([])
+    Flux_extended_filtered_eta_b=np.array([]);dens_Flux_extended_filtered_eta_b=np.array([]);Date_Num_Flux_extended_filtered_eta_b=np.array([])
     i=0
     for i in range(0,list_dates.size):
         sel=Date_Num==list_dates[i]
-        z=Flux[sel];x=Date_Num[sel];y=depth[sel]
+        z=Flux[sel];x=Date_Num[sel];y=dens[sel]
         sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
             Flux_filtered = np.concatenate((Flux_filtered, z))
             Date_Num_Flux_filtered = np.concatenate((Date_Num_Flux_filtered, x2))
-            depth_Flux_filtered = np.concatenate((depth_Flux_filtered, y2))
-        z=Flux_eta_b[sel];x=Date_Num[sel];y=depth[sel]
+            dens_Flux_filtered = np.concatenate((dens_Flux_filtered, y2))
+        z=Flux_eta_b[sel];x=Date_Num[sel];y=dens[sel]
         sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
             Flux_eta_b_filtered = np.concatenate((Flux_eta_b_filtered, z))
             Date_Num_Flux_eta_b_filtered = np.concatenate((Date_Num_Flux_eta_b_filtered, x2))
-            depth_Flux_eta_b_filtered = np.concatenate((depth_Flux_eta_b_filtered, y2))
-        z=Flux_extended[sel];x=Date_Num[sel];y=depth[sel]
+            dens_Flux_eta_b_filtered = np.concatenate((dens_Flux_eta_b_filtered, y2))
+        z=Flux_extended[sel];x=Date_Num[sel];y=dens[sel]
         sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
             Flux_extended_filtered = np.concatenate((Flux_extended_filtered, z))
             Date_Num_Flux_extended_filtered = np.concatenate((Date_Num_Flux_extended_filtered, x2))
-            depth_Flux_extended_filtered = np.concatenate((depth_Flux_extended_filtered, y2))
-        z=Flux_extended_eta_b[sel];x=Date_Num[sel];y=depth[sel]
+            dens_Flux_extended_filtered = np.concatenate((dens_Flux_extended_filtered, y2))
+        z=Flux_extended_eta_b[sel];x=Date_Num[sel];y=dens[sel]
         sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
             z = savgol_filter(z, 5, 1)
             Flux_extended_filtered_eta_b = np.concatenate((Flux_extended_filtered_eta_b, z))
             Date_Num_Flux_extended_filtered_eta_b = np.concatenate((Date_Num_Flux_extended_filtered_eta_b, x2))
-            depth_Flux_extended_filtered_eta_b = np.concatenate((depth_Flux_extended_filtered_eta_b, y2))
+            dens_Flux_extended_filtered_eta_b = np.concatenate((dens_Flux_extended_filtered_eta_b, y2))
 
     # I define the x and y arrays for the Flux interpolation
     x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
-    y_filtered = np.linspace(depth_Flux_filtered.min(), depth_Flux_filtered.max(), 99)
+    y_filtered = np.linspace(dens_Flux_filtered.min(), dens_Flux_filtered.max(), 99)
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
-    Flux_interp = griddata((Date_Num_Flux_filtered, depth_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    Flux_eta_b_interp = griddata((Date_Num_Flux_eta_b_filtered, depth_Flux_eta_b_filtered), Flux_eta_b_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    Flux_extended_interp = griddata((Date_Num_Flux_extended_filtered, depth_Flux_extended_filtered), Flux_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    Flux_extended_eta_b_interp = griddata((Date_Num_Flux_extended_filtered_eta_b, depth_Flux_extended_filtered_eta_b), Flux_extended_filtered_eta_b,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_eta_b_interp = griddata((Date_Num_Flux_eta_b_filtered, dens_Flux_eta_b_filtered), Flux_eta_b_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_extended_interp = griddata((Date_Num_Flux_extended_filtered, dens_Flux_extended_filtered), Flux_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_extended_eta_b_interp = griddata((Date_Num_Flux_extended_filtered_eta_b, dens_Flux_extended_filtered_eta_b), Flux_extended_filtered_eta_b,(x_filtered_g, y_filtered_g), method="nearest")
 
     ##############################################
-    # Step 3, flux extraction at depth0 and depthf
+    # Step 3: for each density layer I calculate the corresponding mean depth
+    depth_Flux_filtered=np.array([])
+    i=0
+    for i in range(0,y_filtered.size):
+        if i==0:    dens0=y_filtered[i]
+        else:       dens0=abs( y_filtered[i]+y_filtered[i-1] )*0.5
+        if i==(y_filtered.size-1):  dens1=y_filtered[i]
+        else:                       dens1=abs( y_filtered[i]+y_filtered[i+1] )*0.5
+        #Depth calculation
+        depth_Flux_filtered_tmp = np.array([])
+        j=0
+        for j in range(0,list_dates.size):
+            sel=Date_Num==list_dates[j]
+            dens_tmp=dens[sel];depth_tmp=depth[sel];sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp));dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
+            if sum(sel2) > 0:
+                sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
+                if sum(sel_dens) > 0:
+                    depth_Flux_filtered_tmp = np.append(depth_Flux_filtered_tmp, np.mean(depth_tmp[sel_dens]) )
+                else:
+                    depth_Flux_filtered_tmp = np.append( depth_Flux_filtered_tmp, np.array([np.nan]) )
+            else:
+                depth_Flux_filtered_tmp = np.append( depth_Flux_filtered_tmp, np.array([np.nan]) )
+
+        if sum(~np.isnan(depth_Flux_filtered_tmp))==0:
+            depth_Flux_filtered = np.append(depth_Flux_filtered, np.array([np.nan]) )
+        else:
+            depth_Flux_filtered = np.append(depth_Flux_filtered, np.nanmean(depth_Flux_filtered_tmp))
+
+    ##############################################
+    # Step 4, flux extraction at depth0 and depthf
     Flux_depth0 = np.array([]);Flux_depthf = np.array([])
     Flux_eta_b_depth0 = np.array([]);Flux_eta_b_depthf = np.array([])
     Flux_extended_depth0 = np.array([]);Flux_extended_depthf = np.array([])
     Flux_extended_eta_b_depth0 = np.array([]);Flux_extended_eta_b_depthf = np.array([])
 
-    for i in range(0,Flux_interp.shape[1]):
-        z=Flux_interp[:,i]
-        sel_layer = (np.abs(y_filtered) >= depth0-delta_depth_flux) & (np.abs(y_filtered) < depth0+delta_depth_flux)
-        Flux_depth0 = np.append(Flux_depth0, np.mean(z[sel_layer]))
-        sel_layer = (np.abs(y_filtered) >= depthf - delta_depth_flux) & (np.abs(y_filtered) < depthf + delta_depth_flux)
-        Flux_depthf = np.append(Flux_depthf, np.mean(z[sel_layer]))
+    sel_layer = (np.abs(depth_Flux_filtered) >= depth0-delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0+delta_depth_flux)
+    Flux_depth0 = np.mean(Flux_interp[sel_layer,:],axis=0)
+    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
+    Flux_depthf = np.mean(Flux_interp[sel_layer,:],axis=0)
 
-        z=Flux_eta_b_interp[:,i]
-        sel_layer = (np.abs(y_filtered) >= depth0-delta_depth_flux) & (np.abs(y_filtered) < depth0+delta_depth_flux)
-        Flux_eta_b_depth0 = np.append(Flux_eta_b_depth0, np.mean(z[sel_layer]))
-        sel_layer = (np.abs(y_filtered) >= depthf - delta_depth_flux) & (np.abs(y_filtered) < depthf + delta_depth_flux)
-        Flux_eta_b_depthf = np.append(Flux_eta_b_depthf, np.mean(z[sel_layer]))
+    sel_layer = (np.abs(depth_Flux_filtered) >= depth0-delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0+delta_depth_flux)
+    Flux_eta_b_depth0 = np.mean(Flux_eta_b_interp[sel_layer,:],axis=0)
+    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
+    Flux_eta_b_depthf = np.mean(Flux_eta_b_interp[sel_layer,:],axis=0)
 
-        z=Flux_extended_interp[:,i]
-        sel_layer = (np.abs(y_filtered) >= depth0 - delta_depth_flux) & (np.abs(y_filtered) < depth0 + delta_depth_flux)
-        Flux_extended_depth0 = np.append(Flux_extended_depth0, np.mean(z[sel_layer]))
-        sel_layer = (np.abs(y_filtered) >= depthf - delta_depth_flux) & (np.abs(y_filtered) < depthf + delta_depth_flux)
-        Flux_extended_depthf = np.append(Flux_extended_depthf, np.mean(z[sel_layer]))
+    sel_layer = (np.abs(depth_Flux_filtered) >= depth0 - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0 + delta_depth_flux)
+    Flux_extended_depth0 = np.mean(Flux_extended_interp[sel_layer,:],axis=0)
+    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
+    Flux_extended_depthf = np.mean(Flux_extended_interp[sel_layer,:],axis=0)
 
-        z=Flux_extended_eta_b_interp[:,i]
-        sel_layer = (np.abs(y_filtered) >= depth0 - delta_depth_flux) & (np.abs(y_filtered) < depth0 + delta_depth_flux)
-        Flux_extended_eta_b_depth0 = np.append(Flux_extended_eta_b_depth0, np.mean(z[sel_layer]))
-        sel_layer = (np.abs(y_filtered) >= depthf - delta_depth_flux) & (np.abs(y_filtered) < depthf + delta_depth_flux)
-        Flux_extended_eta_b_depthf = np.append(Flux_extended_eta_b_depthf, np.mean(z[sel_layer]))
+    sel_layer = (np.abs(depth_Flux_filtered) >= depth0 - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0 + delta_depth_flux)
+    Flux_extended_eta_b_depth0 = np.mean(Flux_extended_eta_b_interp[sel_layer,:],axis=0)
+    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
+    Flux_extended_eta_b_depthf = np.mean(Flux_extended_eta_b_interp[sel_layer,:],axis=0)
 
 
     ########################################################################################################################
