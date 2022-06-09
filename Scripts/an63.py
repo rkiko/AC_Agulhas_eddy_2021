@@ -34,7 +34,7 @@ delta_days=5                    # every how many days I put the intermediate dat
 depth00=200                     # starting depth
 layer_thickness=100             # thickness of the layer considered
 delta_depth=25                  # every time I do a loop, how much I do increase depth0
-depthff=600                     # final maximal depth investigated
+depthff=650                     # final maximal depth investigated
 
 depth0_list=np.r_[depth00:depthff-layer_thickness+0.1:delta_depth]
 
@@ -121,6 +121,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     Date_Num_bbp = Date_Num_bbp[sel_dates]
     Date_Vec_bbp = Date_Vec_bbp[sel_dates,:]
     depth_bbp = depth_bbp[sel_dates,:]
+    dens_bbp = dens_bbp[sel_dates,:]
     bbp_POC = bbp_POC[sel_dates, :]
 
     # I convert the dates to float values (in seconds from 1970 1 1)
@@ -183,7 +184,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     # I define the x and y arrays for the MiP+MaP+bbp interpolation
     x_filtered = np.linspace(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max(), ndays)
-    y_filtered = np.linspace(dens_bbp_filtered.min(), dens_MaP_filtered.max(), 100)
+    y_filtered = np.linspace(dens_bbp_filtered.min(), dens_MaP_filtered.max(), 200)
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     MiP_interp = griddata((Date_Num_MiP_filtered, dens_MiP_filtered), MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
@@ -193,6 +194,14 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     ##############################################
     # Step 3: for each density layer I calculate the corresponding mean depth
+    sel = (Date_Num <= list_dates.max())&(Date_Num > list_dates.min())
+    dens_tmp=dens[sel];depth_tmp=depth[sel]
+    sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp))&(dens_tmp!=99999)&(depth_tmp!=99999)
+    dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
+
+    sel_bbp=(~np.isnan(dens_bbp))&(~np.isnan(depth_bbp))&(dens_bbp!=99999)&(depth_bbp!=99999)
+    dens_tmp_bbp=dens_bbp[sel_bbp];depth_tmp_bbp=depth_bbp[sel_bbp]
+
     depth_bbp_filtered=np.array([]);depth_MiP_filtered=np.array([])
     i=0
     for i in range(0,y_filtered.size):
@@ -201,44 +210,20 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
         if i==(y_filtered.size-1):  dens1=y_filtered[i]
         else:                       dens1=abs( y_filtered[i]+y_filtered[i+1] )*0.5
         #Depth calculation for MiP and MaP
-        depth_MiP_filtered_tmp = np.array([])
-        j=0
-        for j in range(0,list_dates.size):
-            sel=Date_Num==list_dates[j]
-            dens_tmp=dens[sel];depth_tmp=depth[sel];sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp));dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
-            if sum(sel2) > 0:
-                sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
-                if sum(sel_dens) > 0:
-                    depth_MiP_filtered_tmp = np.append(depth_MiP_filtered_tmp, np.mean(depth_tmp[sel_dens]) )
-                else:
-                    depth_MiP_filtered_tmp = np.append( depth_MiP_filtered_tmp, np.array([np.nan]) )
-            else:
-                depth_MiP_filtered_tmp = np.append( depth_MiP_filtered_tmp, np.array([np.nan]) )
-
-        if sum(~np.isnan(depth_MiP_filtered_tmp))==0:
-            depth_MiP_filtered = np.append(depth_MiP_filtered, np.array([np.nan]) )
+        sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
+        if sum(sel_dens) > 0:
+            depth_MiP_filtered = np.append(depth_MiP_filtered, np.nanmean(depth_tmp[sel_dens]))
         else:
-            depth_MiP_filtered = np.append(depth_MiP_filtered, np.nanmean(depth_MiP_filtered_tmp))
+            depth_MiP_filtered = np.append(depth_MiP_filtered, np.array([np.nan]))
 
         # Depth calculation for bbp
-        depth_bbp_filtered_tmp = np.array([])
-        j=0
-        for j in range(0, bbp_POC.shape[0]):
-            dens_tmp=dens_bbp[j,:];depth_tmp=depth_bbp[j,:];sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp));dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
-            if sum(sel2) > 0:
-                sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
-                if sum(sel_dens) > 0:
-                    depth_bbp_filtered_tmp = np.append(depth_bbp_filtered_tmp, np.mean(depth_tmp[sel_dens]))
-                else:
-                    depth_bbp_filtered_tmp = np.append(depth_bbp_filtered_tmp, np.array([np.nan]))
-            else:
-                depth_bbp_filtered_tmp = np.append(depth_bbp_filtered_tmp, np.array([np.nan]))
-
-
-        if sum(~np.isnan(depth_bbp_filtered_tmp))==0:
-            depth_bbp_filtered = np.append(depth_bbp_filtered, np.array([np.nan]) )
+        sel_dens = (dens_tmp_bbp >= dens0) & (dens_tmp_bbp < dens1)
+        if sum(sel_dens) > 0:
+            depth_bbp_filtered = np.append(depth_bbp_filtered, np.nanmean(depth_tmp_bbp[sel_dens]))
         else:
-            depth_bbp_filtered = np.append(depth_bbp_filtered, np.nanmean(depth_bbp_filtered_tmp))
+            depth_bbp_filtered = np.append(depth_bbp_filtered, np.array([np.nan]))
+
+
 
     ##############################################
     # Step 4, I calculate the mean MiP+MaP+bbp (and std) between depth0 and depthf between day0 and dayf
@@ -259,7 +244,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     Integrated_POC_mgC_m3_std = np.sqrt( MiP_POC_depth0_depthf_std**2 + MaP_POC_depth0_depthf_std**2 + bbp_POC_depth0_depthf_std**2 )
     Integrated_POC_extended_mgC_m3_std = np.sqrt( MiP_POC_extended_depth0_depthf_std**2 + MaP_POC_depth0_depthf_std**2 + bbp_POC_depth0_depthf_std**2 )
     list_dates_Integrated_POC = x_filtered.copy()
-    
+
     ########################################################################################################################
     # Here I extract the flux values at depth0 and depthf. To do so, (i) I filter it with a savgol function, then (ii) I
     # interpolate it over a regular grid in time and density. This step is necessary to have the flux at 600 m, because some
@@ -307,7 +292,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     # I define the x and y arrays for the Flux interpolation
     x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
-    y_filtered = np.linspace(dens_Flux_filtered.min(), dens_Flux_filtered.max(), 99)
+    y_filtered = np.linspace(dens_Flux_filtered.min(), dens_Flux_filtered.max(), 200)
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     Flux_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
@@ -346,10 +331,6 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     ##############################################
     # Step 4, flux extraction at depth0 and depthf
-    Flux_depth0 = np.array([]);Flux_depthf = np.array([])
-    Flux_eta_b_depth0 = np.array([]);Flux_eta_b_depthf = np.array([])
-    Flux_extended_depth0 = np.array([]);Flux_extended_depthf = np.array([])
-    Flux_extended_eta_b_depth0 = np.array([]);Flux_extended_eta_b_depthf = np.array([])
 
     sel_layer = (np.abs(depth_Flux_filtered) >= depth0-delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0+delta_depth_flux)
     Flux_depth0 = np.mean(Flux_interp[sel_layer,:],axis=0)
@@ -696,12 +677,13 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     idxf = np.where(np.abs(tmp) == (np.abs(tmp)).min())[0][0]
     O2_resp_mgC_m2=np.mean(O2_resp_mgC_m2_vs_depth[idx0:idxf])*-1
     O2_resp_mgC_m2_ci=np.mean(O2_resp_mgC_m2_vs_depth_ci[idx0:idxf,:],0)*-1
+    O2_depth=np.mean(depth_02_resp[idx0:idxf])
 
     ############### I return the data
     return Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,\
            Theoretical_Budget_extended,Theoretical_Budget_extended_std,\
            Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,\
-           POC_resp_mgC_m2_list,POC_resp_mgC_m2_std_list,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,list_Respi_types,n_profiles, \
+           POC_resp_mgC_m2_list,POC_resp_mgC_m2_std_list,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,O2_depth,list_Respi_types,n_profiles, \
            Delta_flux_eta_b, Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std
 
 ########################################################################################################################
@@ -730,6 +712,7 @@ for ndays in ndays_list:
     POC_resp_mgC_m2_std_list_w1 = np.array([])
     O2_resp_mgC_m2_list_w1 = np.array([])
     O2_resp_mgC_m2_ci_list_w1 = np.array([])
+    O2_depth_list_w1 = np.array([])
     Theoretical_Budget_list_w2 = np.array([])
     Theoretical_Budget_eta_b_list_w2 = np.array([])
     Theoretical_Budget_extended_list_w2 = np.array([])
@@ -742,10 +725,11 @@ for ndays in ndays_list:
     POC_resp_mgC_m2_std_list_w2 = np.array([])
     O2_resp_mgC_m2_list_w2 = np.array([])
     O2_resp_mgC_m2_ci_list_w2 = np.array([])
+    O2_depth_list_w2 = np.array([])
     depth0=depth0_list[0]
     for depth0 in depth0_list:
         depthf = depth0+layer_thickness
-        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std)=carbon_budget_calculation(depth0,depthf,day0,dayf1)
+        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,O2_depth,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std)=carbon_budget_calculation(depth0,depthf,day0,dayf1)
         Theoretical_Budget_list_w1=np.append(Theoretical_Budget_list_w1,Theoretical_Budget)
         Theoretical_Budget_eta_b_list_w1=np.append(Theoretical_Budget_eta_b_list_w1,Theoretical_Budget_eta_b)
         Theoretical_Budget_extended_list_w1=np.append(Theoretical_Budget_extended_list_w1,Theoretical_Budget_extended)
@@ -758,7 +742,8 @@ for ndays in ndays_list:
         POC_resp_mgC_m2_std_list_w1=np.append(POC_resp_mgC_m2_std_list_w1,POC_resp_mgC_m2_std,axis=0)
         O2_resp_mgC_m2_list_w1=np.append(O2_resp_mgC_m2_list_w1,O2_resp_mgC_m2)
         O2_resp_mgC_m2_ci_list_w1=np.append(O2_resp_mgC_m2_ci_list_w1,O2_resp_mgC_m2_ci,axis=0)
-        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std)=carbon_budget_calculation(depth0,depthf,dayf1,dayf)
+        O2_depth_list_w1=np.append(O2_depth_list_w1,O2_depth)
+        (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m2,POC_resp_mgC_m2_std,O2_resp_mgC_m2,O2_resp_mgC_m2_ci,O2_depth,RespirationTypes,n_profiles,Delta_flux_eta_b,Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std)=carbon_budget_calculation(depth0,depthf,dayf1,dayf)
         Theoretical_Budget_list_w2=np.append(Theoretical_Budget_list_w2,Theoretical_Budget)
         Theoretical_Budget_eta_b_list_w2=np.append(Theoretical_Budget_eta_b_list_w2,Theoretical_Budget_eta_b)
         Theoretical_Budget_extended_list_w2=np.append(Theoretical_Budget_extended_list_w2,Theoretical_Budget_extended)
@@ -771,6 +756,7 @@ for ndays in ndays_list:
         POC_resp_mgC_m2_std_list_w2=np.append(POC_resp_mgC_m2_std_list_w2,POC_resp_mgC_m2_std,axis=0)
         O2_resp_mgC_m2_list_w2=np.append(O2_resp_mgC_m2_list_w2,O2_resp_mgC_m2)
         O2_resp_mgC_m2_ci_list_w2=np.append(O2_resp_mgC_m2_ci_list_w2,O2_resp_mgC_m2_ci,axis=0)
+        O2_depth_list_w2 = np.append(O2_depth_list_w2, O2_depth)
 
     O2_resp_mgC_m2_ci_list_w1=O2_resp_mgC_m2_ci_list_w1.reshape(depth0_list.size,2)
     POC_resp_mgC_m2_list_w1=POC_resp_mgC_m2_list_w1.reshape(depth0_list.size,len(RespirationTypes))
@@ -801,9 +787,9 @@ for ndays in ndays_list:
     # First plot: budget calculated without considering smallest size classes and with new eta and b values, time window 1
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(2,3):
         plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -831,16 +817,16 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0101eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0101eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
     # Second plot: budget calculated without considering smallest size classes and with new eta and b values, time window 2
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(2,3):
         plt.plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -868,7 +854,7 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0101eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0101eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -888,9 +874,9 @@ for ndays in ndays_list:
     plt.subplots_adjust(wspace=0.05)
     ax[0].set_position([0.18, 0.15, width2, height])
     ax[1].set_position([0.18+width2+0.05, 0.15, 1-(0.18+width2+0.1), height])
-    ax[0].plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
-    ax[0].scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
-    ax[0].fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    ax[0].plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
+    ax[0].scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
+    ax[0].fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(2,3):
         ax[0].plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -925,7 +911,7 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an53/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0201eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an63/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0201eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -945,9 +931,9 @@ for ndays in ndays_list:
     plt.subplots_adjust(wspace=0.05)
     ax[0].set_position([0.18, 0.15, width2, height])
     ax[1].set_position([0.18+width2+0.05, 0.15, 1-(0.18+width2+0.1), height])
-    ax[0].plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
-    ax[0].scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
-    ax[0].fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    ax[0].plot(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, 'k')
+    ax[0].scatter(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, c='black',s=5)
+    ax[0].fill_betweenx(O2_depth_list_w2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(2,3):
         ax[0].plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -982,16 +968,16 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an53/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0201eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an63/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0201eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
     ##################################################################
     # Fifth plot: budget calculated without considering smallest size classes and with old eta and b values, time window 1
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(2,3):
         plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1019,16 +1005,16 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0103_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0103_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
     # Sixth plot: budget calculated without considering smallest size classes and with old eta and b values, time window 2
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(2,3):
         plt.plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1056,7 +1042,7 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0103_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0103_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -1065,9 +1051,9 @@ for ndays in ndays_list:
     fs=10
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(9,10):
         plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1096,7 +1082,7 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'c', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0102extended_eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0102extended_eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -1105,9 +1091,9 @@ for ndays in ndays_list:
     fs=10
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(9,10):
         plt.plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1136,7 +1122,7 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'd', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0102extended_eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0102extended_eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -1157,9 +1143,9 @@ for ndays in ndays_list:
     plt.subplots_adjust(wspace=0.05)
     ax[0].set_position([0.18, 0.15, width2, height])
     ax[1].set_position([0.18+width2+0.05, 0.15, 1-(0.18+width2+0.1), height])
-    ax[0].plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
-    ax[0].scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
-    ax[0].fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    ax[0].plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
+    ax[0].scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
+    ax[0].fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(9,10):
         ax[0].plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1194,7 +1180,7 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an53/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0202extended_eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an63/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0202extended_eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -1215,9 +1201,9 @@ for ndays in ndays_list:
     plt.subplots_adjust(wspace=0.05)
     ax[0].set_position([0.18, 0.15, width2, height])
     ax[1].set_position([0.18+width2+0.05, 0.15, 1-(0.18+width2+0.1), height])
-    ax[0].plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
-    ax[0].scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
-    ax[0].fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    ax[0].plot(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, 'k')
+    ax[0].scatter(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, c='black',s=5)
+    ax[0].fill_betweenx(O2_depth_list_w2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(9,10):
         ax[0].plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1252,7 +1238,7 @@ for ndays in ndays_list:
     ax[1].grid(color='k', linestyle='dashed', linewidth=0.5, which='both')
     ax[1].text(-0.2, -0.040, 'Statistical\ndifference', transform=ax[1].transAxes, fontsize=9, va='top',
                ha='left')  # ,fontfamily='helvetica'
-    plt.savefig('../Plots/an53/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0202extended_eta_b_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an63/WithStatisticalDifference/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0202extended_eta_b_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -1260,9 +1246,9 @@ for ndays in ndays_list:
     fs=10
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w1,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(9,10):
         plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1291,7 +1277,7 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'c', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0103extended_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW1_from%d%02d%02d_0103extended_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,day0.year,day0.month,day0.day) ,dpi=200)
     plt.close()
 
     ##################################################################
@@ -1299,9 +1285,9 @@ for ndays in ndays_list:
     fs=10
     fig = plt.figure(1, figsize=(3.5, 3.5))
     ax = fig.add_axes([0.18, 0.15, width, height])
-    plt.plot(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, 'k')
-    plt.scatter(O2_resp_mgC_m2_list_w2,depth0_list+layer_thickness/2, c='black',s=5)
-    plt.fill_betweenx(depth0_list+layer_thickness/2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+    plt.plot(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, 'k')
+    plt.scatter(O2_resp_mgC_m2_list_w2,O2_depth_list_w2, c='black',s=5)
+    plt.fill_betweenx(O2_depth_list_w2, O2_resp_mgC_m2_ci_list_w2[:, 1], O2_resp_mgC_m2_ci_list_w2[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
     for iResp in range(9,10):
         plt.plot(POC_resp_mgC_m2_list_w2[:,iResp], depth0_list + layer_thickness / 2, c='b')
 
@@ -1330,7 +1316,7 @@ for ndays in ndays_list:
     plt.gca().invert_yaxis()
     ax.text(-0.05, 1.125, 'd', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/an53/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0103extended_an53.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
+    plt.savefig('../Plots/an63/CarbonBudget_vs_depth_IMday%d%02d%02d_TW2_to%d%02d%02d_0103extended_an63.pdf' % (dayf1.year,dayf1.month,dayf1.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
     plt.close()
 
 
