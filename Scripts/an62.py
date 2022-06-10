@@ -105,7 +105,7 @@ delta_depth = 15 #how many meters I consider around each layer
 fs=10
 width, height = 0.73, 0.75
 set_xlim_lower, set_xlim_upper = 0, 50
-temp0, temp1 = 3,16
+temp0, temp1 = 3,8
 doxy0, doxy1 = 180,245
 
 i_isop=0

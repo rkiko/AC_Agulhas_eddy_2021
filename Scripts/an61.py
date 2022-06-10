@@ -68,9 +68,9 @@ width, height = 0.65, 0.65
 
 for distance_limit in list_distances:
     fig = plt.figure(1, figsize=(3, 3))
-    ax = fig.add_axes([0.25, 0.2, width, height], ylim=(0, 23), xlim=(34, 36))
+    ax = fig.add_axes([0.25, 0.2, width, height], ylim=(3, 8), xlim=(34.3, 35))
     fig = plt.figure(2, figsize=(3, 3))
-    ax = fig.add_axes([0.25, 0.2, width, height], ylim=(0, 23), xlim=(34, 36))
+    ax = fig.add_axes([0.25, 0.2, width, height], ylim=(3, 8), xlim=(34.3, 35))
 
     i=0
     for i in range(0, pres.shape[0]):
@@ -129,9 +129,9 @@ for distance_limit in list_distances:
     random.shuffle(a)
 
     fig = plt.figure(1, figsize=(3, 3))
-    ax = fig.add_axes([0.25, 0.2, width, height], ylim=(0, 23), xlim=(34, 36))
+    ax = fig.add_axes([0.25, 0.2, width, height], ylim=(3, 8), xlim=(34.3, 35))
     fig = plt.figure(2, figsize=(3, 3))
-    ax2 = fig.add_axes([0.25, 0.2, width, height], ylim=(0, 23), xlim=(34, 36))
+    ax2 = fig.add_axes([0.25, 0.2, width, height], ylim=(3, 8), xlim=(34.3, 35))
     i=0
     for i in a:
         dist_float_eddy_km_tmp = dist_float_eddy_km[i]
