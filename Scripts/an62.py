@@ -123,6 +123,9 @@ for i_isop in range(0,reference_isopycnal_list.size):
     fig = plt.figure(3, figsize=(3.5, 3.5))
     ax3 = fig.add_axes([0.18, 0.15, width, height], ylim=(temp0, temp1),xlim=(set_xlim_lower, set_xlim_upper))
 
+    max_temp=-99999;min_temp=99999
+    max_cons_temp=-99999;min_cons_temp=99999
+    max_doxy=-99999;min_doxy=99999
     depth_isopycnal_tmp = np.array([])
     i=0
     for i in range (0,temp.shape[0]):
@@ -150,6 +153,10 @@ for i_isop in range(0,reference_isopycnal_list.size):
         depth_tmp = np.mean(depth_tmp[sel_layer])
         depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, depth_tmp)
 
+        max_temp=np.max( np.array( [max_temp,temp_tmp] ) );min_temp=np.min( np.array( [min_temp,temp_tmp] ) )
+        max_cons_temp=np.max( np.array( [max_cons_temp,cons_temp_tmp] ) );min_cons_temp=np.min( np.array( [min_cons_temp,cons_temp_tmp] ) )
+        max_doxy=np.max( np.array( [max_doxy,doxy_tmp] ) );min_doxy=np.min( np.array( [min_doxy,doxy_tmp] ) )
+
         Date_Num_float_tmp=Date_Num_float[i]
         ####################################################################################################################
         # Plot part
@@ -167,6 +174,8 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Temp. (°C)', fontsize=fs)
     plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    tmp=(max_temp-min_temp)/10
+    plt.ylim(min_temp-tmp,max_temp+tmp)
     cbar = plt.colorbar(plot1)
     nxticks = 10
     xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
@@ -182,6 +191,8 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Doxy ($\mu$mol/kg)', fontsize=fs)
     plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    tmp=(max_doxy-min_doxy)/10
+    plt.ylim(min_doxy-tmp,max_doxy+tmp)
     cbar = plt.colorbar(plot2)
     nxticks = 10
     xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
@@ -197,6 +208,8 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Cons. temp. (°C)', fontsize=fs)
     plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    tmp=(max_cons_temp-min_cons_temp)/10
+    plt.ylim(min_cons_temp-tmp,max_cons_temp+tmp)
     cbar = plt.colorbar(plot1)
     nxticks = 10
     xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
