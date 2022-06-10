@@ -1333,7 +1333,7 @@ day0=datetime(2021,4,13)
 dayf1=datetime(2021,6,20)
 (Theoretical_Budget, Theoretical_Budget_std, Theoretical_Budget_eta_b, Theoretical_Budget_eta_b_std,
  Theoretical_Budget_extended, Theoretical_Budget_extended_std, Theoretical_Budget_extended_eta_b,
- Theoretical_Budget_extended_eta_b_std, POC_resp_mgC_m2, POC_resp_mgC_m2_std, O2_resp_mgC_m2, O2_resp_mgC_m2_ci,
+ Theoretical_Budget_extended_eta_b_std, POC_resp_mgC_m2, POC_resp_mgC_m2_std, O2_resp_mgC_m2, O2_resp_mgC_m2_ci,O2_depth,
  RespirationTypes, n_profiles, Delta_flux_eta_b, Delta_Integrated_POC, Delta_flux_eta_b_std,
  Delta_Integrated_POC_std) = carbon_budget_calculation(depth0, depthf, day0, dayf1)
 
