@@ -12,6 +12,9 @@ import pickle
 from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from matlab_datenum import matlab_datenum
+from matlab_datevec import matlab_datevec
 
 filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_diagnostics_data_356.tsv' % home
 data=pd.read_csv(filename_ecopart, sep='\t', header=0)
@@ -146,6 +149,10 @@ MiP_POC_0_200=np.array([]);MiP_POC_200_600=np.array([])
 MiP_POC_extended_0_200=np.array([]);MiP_POC_extended_200_600=np.array([])
 MaP_POC_0_200=np.array([]);MaP_POC_200_600=np.array([])
 bbp_POC_0_200=np.array([]);bbp_POC_200_600=np.array([])
+day_start_eddy_merging = datetime(2021,8,1)
+day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+day_end_eddy_merging = datetime(2021,8,11)
+day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=Flux.copy()
     if ipar==1: parameter=Flux_eta_b.copy()
@@ -228,6 +235,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
     ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
     plt.gca().invert_yaxis()
+    plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w')
+    plt.vlines(day_end_eddy_merging,ymin=0,ymax=600,color='w')
     # I draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.get_yticklabels()

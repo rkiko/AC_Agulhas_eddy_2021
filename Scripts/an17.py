@@ -15,12 +15,15 @@ home = str(Path.home())
 #globals().clear()
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from matlab_datenum import matlab_datenum
+from matlab_datevec import matlab_datevec
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
 # filename='6903095_BRtraj.nc'
 # filename='6903095_Rtraj.nc'
 # filename='BR6903095_001.nc'
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_all.nc'
 
 #######################################################################
 # I load the data
@@ -215,6 +218,10 @@ parameter=temp
 parameter_ylabel_list=['Temperature ($^{\circ}$C)','Temperature ($^{\circ}$C)','Pratical salinity (psu)','Absolute salinity (g/kg)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
 parameter_panellabel_list=['b','b','a','a','d','c','f','a']
 parameter_shortname_list=['temp','cons_temp','psal','abs_psal','chla','doxy','bbpPOC','BrVais']
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
 ipar=4
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
@@ -270,6 +277,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
     plt.gca().invert_yaxis()
+    plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w')
+    plt.vlines(day_end_eddy_merging,ymin=0,ymax=600,color='w')
     # draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
@@ -309,6 +318,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y2_parameter, parameter_interp_dens)
     plt.gca().invert_yaxis()
+    plt.vlines(day_start_eddy_merging,ymin=0,ymax=6000,color='w')
+    plt.vlines(day_end_eddy_merging,ymin=0,ymax=6000,color='w')
     # draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)

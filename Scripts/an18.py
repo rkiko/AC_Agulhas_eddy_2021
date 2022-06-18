@@ -284,6 +284,10 @@ MiP_POC_0_200=np.array([]);MiP_POC_200_600=np.array([])
 MaP_POC_0_200=np.array([]);MaP_POC_200_600=np.array([])
 bbp_POC_0_200=np.array([]);bbp_POC_200_600=np.array([])
 max_depth_bbp=np.array([]);max_depth=np.array([])
+day_start_eddy_merging = datetime(2021,8,1)
+day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+day_end_eddy_merging = datetime(2021,8,11)
+day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=Flux.copy()
     elif ipar==1:   parameter=MiP_abund.copy()
@@ -364,6 +368,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
     ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
     plt.gca().invert_yaxis()
+    plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w')
+    plt.vlines(day_end_eddy_merging,ymin=0,ymax=600,color='w')
     # I draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.get_yticklabels()
@@ -394,6 +400,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
     ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
     plt.gca().invert_yaxis()
+    plt.vlines(day_start_eddy_merging,ymin=0,ymax=6000,color='w')
+    plt.vlines(day_end_eddy_merging,ymin=0,ymax=6000,color='w')
     # I draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.get_yticklabels()
@@ -442,6 +450,8 @@ ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim
 # plt.scatter(list_dates,POC_200_600*10,c='b')
 plt.plot(x_filtered,POC_0_200_int,'r',linewidth=3,label='0-200 m')
 plt.plot(x_filtered,POC_200_600_int*10,'b',linewidth=3,label='200-600 m')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k')
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
@@ -469,6 +479,8 @@ plt.plot(list_dates,MiP_POC_0_200,'c',label='MiP')
 plt.scatter(list_dates,MiP_POC_0_200,c='c')
 plt.plot(list_dates,MaP_POC_0_200,'g',label='MaP')
 plt.scatter(list_dates,MaP_POC_0_200,c='g')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k')
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
@@ -501,6 +513,8 @@ ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim
 plt.plot(x_filtered,bbp_POC_200_600_int,'y',linewidth=2,label='bbpPOC')
 plt.plot(x_filtered,MiP_POC_200_600_int,'c',linewidth=2,label='MiP')
 plt.plot(x_filtered,MaP_POC_200_600_int,'g',linewidth=2,label='MaP')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k')
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
@@ -617,6 +631,8 @@ ax = fig.add_axes([0.12, 0.4, width, height])# ylim=(set_ylim_lower, set_ylim_up
 plt.plot(x_filtered,bbp_POC_mld,label='$b_{bp}$ POC in ML')
 plt.plot(x_filtered,bbp_POC_out_mld*10,label='$b_{bp}$ POC out ML $\cdot$10')
 plt.ylabel('bbp POC (mgC/m$^3$)')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k')
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
@@ -638,6 +654,8 @@ ax = fig.add_axes([0.12, 0.4, width, height])# ylim=(set_ylim_lower, set_ylim_up
 plt.plot(x_filtered,MaP_POC_mld,label='MaP POC in ML')
 plt.plot(x_filtered,MaP_POC_out_mld,label='MaP POC out ML')
 plt.ylabel('MaP POC (mgC/m$^3$)')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k')
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
@@ -713,6 +731,8 @@ plt.plot(list_dates,max_depth,'.b-',label='abs.')
 plt.plot(list_dates,max_depth_bbp,'.r-',label='bbp')
 plt.plot(list_dates,max_depth_MIP,'.m-',label='MiP')
 plt.plot(list_dates,max_depth_MAP,'.c-',label='MaP')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=6000, color='k')
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=6000, color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
