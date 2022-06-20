@@ -75,7 +75,10 @@ list_dates=list_dates[(list_dates>=day0_float)&(list_dates<=dayf_float)]
 
 ##############################################
 # I filter the Flux
-
+day_start_eddy_merging = datetime(2021,8,1)
+day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+day_end_eddy_merging = datetime(2021,8,11)
+day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 ipar=0
 for ipar in range(0,4):
     if ipar==0: parameter=Flux.copy()
@@ -143,6 +146,9 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
+plt.ylim(ax.get_ylim()[0],ymax=ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
@@ -163,6 +169,9 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_eta_b_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_eta_b_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
+plt.ylim(ax.get_ylim()[0],ymax=ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
@@ -182,6 +191,9 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_extended_eta_b_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_extended_eta_b_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
+plt.ylim(ax.get_ylim()[0],ymax=ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
@@ -203,6 +215,9 @@ ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x,Flux_filtered_depthf_200,'r',label='Flux at 200 m')
 plt.plot(x,Flux_filtered_depthf_600,'b',label='Flux at 600 m')
 plt.xlim(x.min(),x.max())
+plt.ylim(ax.get_ylim()[0],ymax=ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux(mgC/$m^2$/d)',fontsize=7)
@@ -233,6 +248,9 @@ plt.xlim(x.min(),x.max())
 ax.text(-0.115, 1.05, 'a', transform=ax.transAxes,fontsize=14, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.ylabel('Flux (mgC/$m^2$/d)',fontsize=7)
+plt.ylim(ax.get_ylim()[0],ymax=ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)

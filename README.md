@@ -514,5 +514,12 @@ I remake figure 1 including two novel eddy trajectories (the two eddies which
 merge with the main one). The first eddy is done by hand for the moment
 
 
+\
+an66
+
+As in an18, I plot the UVP quantities (i.e. flux, Mip POC etc) vs depth 
+and time. The difference is that I use the new data for the bbp plots.
+
+
 
 

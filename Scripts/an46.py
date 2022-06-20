@@ -16,8 +16,11 @@ home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from matlab_datenum import matlab_datenum
+from matlab_datevec import matlab_datevec
 
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_all.nc'
 
 #######################################################################
 # I load the data
@@ -252,6 +255,10 @@ parameter=temp
 parameter_ylabel_list=['Temperature ($^{\circ}$C)','Temperature ($^{\circ}$C)','Pratical salinity (psu)','Absolute salinity (g/kg)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
 parameter_panellabel_list=['b','b','a','a','d','c','f',' ']
 parameter_shortname_list=['temp','cons_temp','psal','abs_psal','chla','doxy','bbpPOC','BrVais']
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
 ipar=3
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
@@ -303,6 +310,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     plt.plot(critical_depth_datenum,critical_depth,'w');plt.plot(critical_depth_datenum,critical_depth,'w.')
     # plt.plot(critical_depth_datenum_1,critical_depth_1,'w--')#;plt.plot(critical_depth_datenum_1,critical_depth_1,'w.')
     # plt.plot(critical_depth_datenum_2,critical_depth_2,'w--')#;plt.plot(critical_depth_datenum_2,critical_depth_2,'w.')
+    plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
+    plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
     plt.gca().invert_yaxis()
     # draw colorbar
     cbar = plt.colorbar(plot2)
