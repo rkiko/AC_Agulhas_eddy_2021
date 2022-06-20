@@ -521,5 +521,14 @@ As in an18, I plot the UVP quantities (i.e. flux, Mip POC etc) vs depth
 and time. The difference is that I use the new data for the bbp plots.
 
 
+\
+an67
+
+As in an63, I calculate all the metrics necessary to estimate the carbon budget (
+the Flux vs depth and time, the integrated POC, the PARR vs depth).
+The difference with an63 is that here I exclude the second time window cos 
+it is useless, and I change the panel label
+
+
 
 
