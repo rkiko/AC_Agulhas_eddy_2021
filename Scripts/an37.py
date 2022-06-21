@@ -350,6 +350,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
         plt.plot(x_parameter,tmp)
         plt.ylabel(parameter_ylabel_list[ipar])
+        plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
         plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
         plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
         #I set xticks
@@ -377,6 +378,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
         plt.plot(x_parameter,parameter_interp_depth[10,:])
         plt.ylabel(parameter_ylabel_list[ipar])
+        plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
         plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
         plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
         #I set xticks
@@ -408,8 +410,9 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
         plt.plot(x_parameter,tmp)
         plt.ylabel(parameter_ylabel_list[ipar])
-        plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
-        plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+        plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
+        plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+        plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
         #I set xticks
         nxticks=10
         xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
@@ -441,8 +444,9 @@ fig = plt.figure(1, figsize=(12,8))
 ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
 ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
 plt.gca().invert_yaxis()
-plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
-plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
+plt.ylim(ax.get_ylim()[1],ax.get_ylim()[0])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
 # draw colorbar
 cbar = plt.colorbar(plot2)
 cbar.ax.set_ylabel('AOU ($\mu$mol/kg)', fontsize=18)
@@ -472,8 +476,9 @@ fig = plt.figure(1, figsize=(12, 4))
 ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
 plt.plot(x_parameter,AOU_interp[1,:])
 plt.ylabel('AOU ($\mu$mol/kg)')
-plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
-plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
+plt.ylim(ax.get_ylim()[0],ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 #I set xticks
 nxticks=10
 xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)

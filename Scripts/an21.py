@@ -5,12 +5,12 @@ import pandas as pd
 from datetime import date,datetime
 from time import gmtime
 import matplotlib.pyplot as plt
-from scipy.interpolate import griddata
-from scipy.signal import savgol_filter
-import seawater as sw
 from pathlib import Path
 home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from matlab_datenum import matlab_datenum
+from matlab_datevec import matlab_datevec
 
 filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_diagnostics_data_356.tsv' % home
 data=pd.read_csv(filename_ecopart, sep='\t', header=0)
@@ -124,11 +124,18 @@ write_latex_data(filename,'max_radius_Vmax_date','%d August' % arg_value[0][0][2
 #######################################################################
 # I plot
 #######################################################################
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)
 
 width, height = 0.8, 0.5
 set_ylim_lower, set_ylim_upper = 0,150
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_Eddy_4float[0], Date_Num_Eddy_4float.max()))
+plt.ylim(ax.get_ylim()[0],ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 plt.plot(Date_Num_Eddy,radius_Vmax,'b',label='Mean Chl')
 plt.plot(Date_Num_Eddy,radius_Out,'r--',label='Chl Anomaly')
 plt.scatter(Date_Num_Eddy_4float,dist_km,c='k',label='Chl Anomaly',marker='*')

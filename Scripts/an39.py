@@ -17,11 +17,11 @@ home = str(Path.home())
 os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts' % home) #changes directory
 actualdir=os.getcwd()
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+from matlab_datenum import matlab_datenum
+from matlab_datevec import matlab_datevec
 
-filename='6903095_BRtraj.nc'
-filename='6903095_Rtraj.nc'
-filename='BR6903095_001.nc'
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_all.nc'
 
 #######################################################################
 # I load the data
@@ -234,6 +234,10 @@ parameter=temp
 parameter_ylabel_list=['Temperature ($^{\circ}$C)','Pratical salinity (psu)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$N^2$ (s$^{-2}$)']
 parameter_panellabel_list=[' ',' ',' ',' ',' ',' ']
 parameter_shortname_list=['temp','psal','chla','doxy','bbpPOC','BrVais']
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
 ipar=3
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
@@ -283,17 +287,21 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
     fig = plt.figure(1, figsize=(12,8))
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
-    ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
-    plot3 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.r_[1026.0:1027.2:0.1],colors='black',linestyles='solid',linewidths=1)#,cmap='Blues_r')
-    plot4 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.r_[1027.05:1027.2:0.1],colors='black',linestyles='dashed',linewidths=1)#,cmap='Blues_r')
+    ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth,zorder=1)
+    plot3 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.r_[1026.0:1027.2:0.1],colors='black',linestyles='solid',linewidths=1,zorder=10)#,cmap='Blues_r')
+    plot4 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.r_[1027.05:1027.2:0.1],colors='black',linestyles='dashed',linewidths=1,zorder=11)#,cmap='Blues_r')
     ax.clabel(plot3, inline=1, fontsize=10)
     ax.clabel(plot4, inline=1, fontsize=10)
 
     if ipar==0:
-        plt.plot(Date_Num,mld,'w')
+        plt.plot(Date_Num,mld,'w',zorder=15)
     elif ipar==2:
-        plt.plot(zeu_datenum,zeu_float,'w')
+        plt.plot(zeu_datenum,zeu_float,'w',zorder=15)
     plt.gca().invert_yaxis()
+    plt.ylim(ax.get_ylim()[0], ymax=ax.get_ylim()[1])
+    plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='w',zorder=5)
+    plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='w',zorder=5)
+
     # draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
