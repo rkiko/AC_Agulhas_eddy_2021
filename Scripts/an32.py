@@ -227,9 +227,9 @@ width, height = 0.78, 0.75
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_filtered_depthf,Flux_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,60)
+plt.ylim(0,70)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
-plt.title('Argo Flux old way,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
+plt.title('Argo Flux , eta=0.62,b=132\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=8)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 plt.savefig('../Plots/an32/01oldway_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
@@ -238,9 +238,9 @@ plt.close()
 fig = plt.figure(2, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_eta_b_filtered_depthf,Flux_eta_b_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,60)
+plt.ylim(0,70)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
-plt.title('Argo Flux no small size classes, eta=0.62,b=66\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
+plt.title('Argo Flux no small size classes, eta=0.62,b=66\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=8)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 ax.text(-0.15, 1.125, 'a', transform=ax.transAxes, fontsize=12, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.savefig('../Plots/an32/02eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
@@ -250,9 +250,9 @@ plt.close()
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_extended_filtered_depthf,Flux_extended_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,60)
+plt.ylim(0,70)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
-plt.title('Argo Flux with small size classes, old eta and b,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
+plt.title('Argo Flux with small size classes, eta=0.62,b=132\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=8)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 plt.savefig('../Plots/an32/03extended_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
 plt.close()
@@ -262,9 +262,9 @@ plt.close()
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.18, 0.15, width, height])
 plt.boxplot([Flux_extended_eta_b_filtered_depthf,Flux_extended_eta_b_filtered_depthf_231,POC_in_domain])
-plt.ylim(0,60)
+plt.ylim(0,70)
 plt.ylabel('POC Flux (mgC/m$^2/d$)', fontsize=fs)
-plt.title('Argo Flux with small size classes, eta=0.62,b=66,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=9)
+plt.title('Argo Flux with small size classes, eta=0.62,b=66,\n between %d-%02d-%02d and %d-%02d-%02d' % (day0.year, day0.month, day0.day, dayf.year, dayf.month, dayf.day), fontsize=8)
 plt.xticks([1,2,3],['BGC Argo\n6903095 ','Transect\nMSM60','Sediment traps\n(Mouw et al.)'], fontsize=fs)
 ax.text(-0.15, 1.125, 'b', transform=ax.transAxes, fontsize=12, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.savefig('../Plots/an32/04extended_eta_b_POCFlux_Argo_vs_literature_%d%02d%02dto%d%02d%02d_an32.pdf' % (day0.year,day0.month,day0.day,dayf.year,dayf.month,dayf.day) ,dpi=200)
@@ -273,16 +273,26 @@ plt.close()
 
 from scipy.stats import ttest_ind, mannwhitneyu,shapiro
 
-mannwhitneyu(POC_in_domain, Flux_eta_b_filtered_depthf)
-mannwhitneyu(POC_in_domain, Flux_extended_eta_b_filtered_depthf)
-mannwhitneyu(POC_in_domain, Flux_extended_eta_b_filtered_depthf_231)
-mannwhitneyu(POC_in_domain, Flux_eta_b_filtered_depthf_231)
-mannwhitneyu(Flux_eta_b_filtered_depthf, Flux_eta_b_filtered_depthf_231)
-mannwhitneyu(Flux_extended_eta_b_filtered_depthf, Flux_extended_eta_b_filtered_depthf_231)
+mannwhitneyu(POC_in_domain, Flux_filtered_depthf)
+mannwhitneyu(POC_in_domain, Flux_extended_filtered_depthf)
+mannwhitneyu(POC_in_domain, Flux_extended_filtered_depthf_231)
+mannwhitneyu(POC_in_domain, Flux_filtered_depthf_231)
+mannwhitneyu(Flux_filtered_depthf, Flux_filtered_depthf_231)
+mannwhitneyu(Flux_extended_filtered_depthf, Flux_extended_filtered_depthf_231)
 
 # two-sample t-test
 # null hypothesis: the two groups have the same mean
 # this test assumes the two groups have the same variance and that they are gaussianly distributed
-ttest_ind(POC_in_domain, Flux_eta_b_filtered_depthf)
+ttest_ind(POC_in_domain, Flux_filtered_depthf)
+ttest_ind(POC_in_domain, Flux_filtered_depthf)
+ttest_ind(POC_in_domain, Flux_extended_filtered_depthf)
+ttest_ind(POC_in_domain, Flux_extended_filtered_depthf_231)
+ttest_ind(POC_in_domain, Flux_filtered_depthf_231)
+ttest_ind(Flux_filtered_depthf, Flux_filtered_depthf_231)
+ttest_ind(Flux_extended_filtered_depthf, Flux_extended_filtered_depthf_231)
 # To test if the distribution is guassian
 shapiro(POC_in_domain) #not gaussian
+shapiro(Flux_filtered_depthf) #not gaussian
+shapiro(Flux_filtered_depthf_231) #not gaussian
+shapiro(Flux_extended_filtered_depthf) #gaussian
+shapiro(Flux_extended_filtered_depthf_231) #not gaussian

@@ -116,6 +116,10 @@ plt.savefig('../Plots/an20/EddyChl_vs_time_an20.pdf' ,dpi=200)
 plt.close()
 
 
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
 date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
 # I exclude the 46 element cos it is the profile outside the eddy
 sel = [True for i in range(chla_float_integrated.size)]
@@ -126,6 +130,9 @@ x=Date_Num_float[sel]
 fig = plt.figure(1, figsize=(7,3.5))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, y.max()*1.1), xlim=(x.min(), x.max()-27))
 plt.plot(x,y,'green')
+plt.ylim(ax.get_ylim()[0],ymax=ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
 # I set xticks
 nxticks = 10
 xticks = np.linspace(x.min(), x.max()-27, nxticks)

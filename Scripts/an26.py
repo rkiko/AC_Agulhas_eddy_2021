@@ -19,7 +19,7 @@ dayf=datetime(2021,9,24)        # final date
 day0_float = calendar.timegm(day0.timetuple())
 dayf_float = calendar.timegm(dayf.timetuple())
 ndays = (dayf - day0).days  # number of days
-delta_bin=20 #thickness (in meters) of the bin I used to interpolate the psd slope
+delta_bin=50 #thickness (in meters) of the bin I used to interpolate the psd slope
 
 ########################################################################################################################
 #I process the data
@@ -84,6 +84,10 @@ diffPSD_slop_interp = griddata((Date_Num_filtered, depth_filtered), diffPSD_slop
 ########################################################################################################################
 #I plot the filtered data
 ########################################################################################################################
+day_start_eddy_merging = datetime(2021,8,1)
+day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+day_end_eddy_merging = datetime(2021,8,11)
+day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 
 width, height = 0.8, 0.68
 set_ylim_lower, set_ylim_upper = depth_filtered.min(),600
@@ -94,6 +98,8 @@ parameter_plot=diffPSD_slop_interp.copy()
 # parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
 ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
 plt.gca().invert_yaxis()
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
 # I draw colorbar
 cbar = plt.colorbar(plot2)
 cbar.ax.get_yticklabels()
@@ -163,6 +169,8 @@ parameter_plot=diffPSD_slop_interp.copy()
 # parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
 ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
 plt.gca().invert_yaxis()
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
 # I draw colorbar
 cbar = plt.colorbar(plot2)
 cbar.ax.get_yticklabels()
