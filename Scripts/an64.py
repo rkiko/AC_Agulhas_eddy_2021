@@ -15,7 +15,7 @@ from matlab_datenum import matlab_datenum
 #I load the matlab data
 ########################################################################################################################
 
-filename1=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius.csv" % home).expanduser()
+filename1=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_partialFile_an64m.csv" % home).expanduser()
 # I read the data
 data=pd.read_csv(filename1, sep=',', header=0)
 
@@ -53,7 +53,7 @@ for i in range(0,data.shape[1]):
 ########################################################################################################################
 #I save
 ########################################################################################################################
-filename_save=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/data_an64py.csv" % home).expanduser()
+filename_save=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
 
 data_new.to_csv(filename_save,index=False)
 
