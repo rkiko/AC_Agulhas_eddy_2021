@@ -532,7 +532,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/Fig_Main_v01/Fig2%s_v01.pdf' % (parameter_panellabel_list[ipar]),dpi=200)
+    plt.savefig('../Plots/Fig_Main_v01/Fig02%s_v01.pdf' % (parameter_panellabel_list[ipar]),dpi=200)
     plt.close()
 
 
