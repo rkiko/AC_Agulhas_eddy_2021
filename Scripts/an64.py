@@ -12,7 +12,7 @@ from matlab_datenum import matlab_datenum
 
 
 ########################################################################################################################
-#I load the matlab data
+#I load the data created with matlab script
 ########################################################################################################################
 
 filename1=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_partialFile_an64m.csv" % home).expanduser()
@@ -24,10 +24,6 @@ column_labels = []
 for i in range(0,data.shape[1]):
     column_labels.append(data.columns[i])
 
-column_labels.append('Datenum')
-
-data_new = np.zeros((data.shape[0],data.shape[1]+1 ))
-data_new = pd.DataFrame(data=data_new, columns =column_labels)
 
 ########################################################################################################################
 #I load the nc file to extract the dates
@@ -38,11 +34,14 @@ storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 ds = nc.Dataset('%s/%s' % (storedir,filename2))
 
 Date_Num=np.array(ds.variables['JULD'])+matlab_datenum(1950,1,1)
-Date_Num=Date_Num[0:data.shape[0]]
-
+# Date_Num=np.append(Date_Num,[743737])
 ########################################################################################################################
 #I append the values
 ########################################################################################################################
+column_labels.append('Datenum')
+
+data_new = np.zeros((Date_Num.size,data.shape[1]+1 ))
+data_new = pd.DataFrame(data=data_new, columns =column_labels)
 
 index_column = column_labels.index('Datenum')
 data_new.values[:, index_column] = Date_Num
@@ -50,6 +49,12 @@ data_new.values[:, index_column] = Date_Num
 for i in range(0,data.shape[1]):
     data_new[column_labels[i]] = data[column_labels[i]]
 
+# In case I have more Argo profiles than colocalisation between float and eddy position, I add 0 at the end
+data_new.values[data.shape[0]:Date_Num.size,0:data.shape[1]] = 0
+# I manually set the position of the 56th profile as outside the eddy because, even if the float is located inside the
+# eddy, the temperature and the bbp present an outlier there. Also, before the recalculation of the eddy centroid and
+# eddy-float distances by Remi, this profile was located outside the eddy
+data_new['sel_insideEddy'][55]=0
 ########################################################################################################################
 #I save
 ########################################################################################################################
