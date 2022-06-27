@@ -15,7 +15,7 @@ from matlab_datenum import matlab_datenum
 from matlab_datevec import matlab_datevec
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_all.nc'
 
 #######################################################################
 # I load the data
@@ -73,7 +73,7 @@ for distance_limit in list_distances:
     ax = fig.add_axes([0.25, 0.2, width, height], ylim=(3, 8), xlim=(34.3, 35))
 
     i=0
-    for i in range(0, pres.shape[0]):
+    for i in range(0, dist_float_eddy_km.size):
         dist_float_eddy_km_tmp = dist_float_eddy_km[i]
         if dist_float_eddy_km_tmp > distance_limit:    continue
 
@@ -125,7 +125,7 @@ for distance_limit in list_distances:
     plt.close()
 
     #Profiles in random order
-    a=np.array(range(0, pres.shape[0]))
+    a=np.array(range(0, dist_float_eddy_km.size))
     random.shuffle(a)
 
     fig = plt.figure(1, figsize=(3, 3))

@@ -18,7 +18,7 @@ from matlab_datevec import matlab_datevec
 ########################################################################################################################
 # I load the BGC Argo temperature, chl etc. profiles
 ########################################################################################################################
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_all.nc'
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 ds = nc.Dataset('%s/%s' % (storedir,filename))
 
@@ -128,7 +128,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     max_doxy=-99999;min_doxy=99999
     depth_isopycnal_tmp = np.array([])
     i=0
-    for i in range (0,temp.shape[0]):
+    for i in range (0,dist_float_eddy_km.size):
         dist_float_eddy_km_tmp = dist_float_eddy_km[i]
         radius_Vmax_floatDays_tmp = radius_Vmax_floatDays[i]
         if dist_float_eddy_km_tmp>radius_Vmax_floatDays_tmp:    continue

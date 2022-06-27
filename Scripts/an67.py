@@ -358,7 +358,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     ########################################################################################################################
 
     ############### I load Coriolis data with the oxygen information
-    filename='6903095_Sprof.nc'
+    filename='6903095_Sprof_all.nc'
     ds = nc.Dataset('%s/%s' % (storedir,filename))
 
     lon=np.array(ds.variables['LONGITUDE'])
@@ -524,7 +524,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
             if reference_isopycnal_up > reference_isopycnal_list[-1]:  reference_isopycnal_up = reference_isopycnal_list[-1]
             PARR_isopycnal=np.array([]);depth_PARR_tmp=np.array([]);dens_PARR_tmp=np.array([])
             i=0
-            for i in range(0,doxy.shape[0]):
+            for i in range(0,list_dates_PARR.size):
                 # Here, for the i-th profile, I select the PARR, density and depth profiles of Ecopart data, excluding the nan values. I do the same for the bbp
                 sel_PARR=Date_Num_PARR==list_dates_PARR[i]
                 z_PARR=PARR_micromol_kg_day[sel_PARR];y_PARR=dens_PARR[sel_PARR];d_PARR=depth_PARR[sel_PARR]
