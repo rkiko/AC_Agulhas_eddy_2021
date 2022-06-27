@@ -7,7 +7,7 @@ import seawater as sw
 import gsw
 import pandas as pd
 import pickle
-from paruvpy import mixed_layer_depth
+from oceanpy import mixed_layer_depth
 from CallCppy import Chl_download
 from CallCppy import ellipsoid
 from scipy.interpolate import griddata

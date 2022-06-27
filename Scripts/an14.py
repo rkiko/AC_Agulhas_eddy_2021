@@ -133,7 +133,7 @@ dens[mask_dens]=dens_tmp+1000
 #######################################################################
 # I transform the bbp700 to small POC (sPOC)
 #######################################################################
-from paruvpy import bbp700toPOC
+from oceanpy import bbp700toPOC
 sPOC=bbp700.copy()*0+99999
 i=0
 for i in range(0,bbp700.shape[0]):

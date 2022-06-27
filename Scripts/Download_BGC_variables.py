@@ -1,7 +1,7 @@
 '''
 Download the BGC variables from the Coriolis data center via ftp
 '''
-from paruvpy import download_Coriolis_data
+from arguvpy import download_Coriolis_data
 
 
 if __name__ == '__main__':

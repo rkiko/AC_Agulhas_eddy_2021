@@ -1,4 +1,4 @@
-from paruvpy import include_CTD_data
+from oceanpy import include_CTD_data
 
 
 if __name__ == '__main__':

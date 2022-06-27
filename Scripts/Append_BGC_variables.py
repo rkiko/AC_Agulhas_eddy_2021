@@ -3,7 +3,7 @@ Include the BGC variables downloaded from the Coriolis data center via ftp
 '''
 
 import pandas as pd
-from paruvpy import include_Coriolis_data
+from arguvpy import include_Coriolis_data
 from paruvpy import calculate_diffPSD_slope_func
 
 

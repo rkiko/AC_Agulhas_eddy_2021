@@ -121,7 +121,7 @@ for i in range(0,bbp700.shape[0]):
 #######################################################################
 # I transform the bbp700 to small POC (sPOC)
 #######################################################################
-from paruvpy import bbp700toPOC
+from oceanpy import bbp700toPOC
 sPOC=bbp700.copy()*0+99999
 i=0
 for i in range(0,bbp700.shape[0]):
@@ -215,7 +215,7 @@ zeu_float = zeu_float[~np.isnan(zeu_float)]
 #######################################################################
 # I calculate the mixed layer depth
 #######################################################################
-from paruvpy import mixed_layer_depth
+from oceanpy import mixed_layer_depth
 mld=np.array([])
 i=0
 for i in range(0,chla.shape[0]):
