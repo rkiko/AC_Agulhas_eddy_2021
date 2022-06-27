@@ -432,34 +432,32 @@ depth_bbp=depth_bbp[sel_insideEddy]
 temp=temp[sel_insideEddy]
 bbp_POC=bbp_POC[sel_insideEddy,:]
 
-ipar=5
-parameter_shortname_list=['Flux','MiP_abund','MaP_abund','MiP_POC','MaP_POC','bbpPOC']
-parameter_panellabel_list=['b','g','h','g','h','f']
-parameter_ylabel_list=['Flux (mgC $m^{-2}$ $d^{-1}$)','MiP abundance (# L$^{-1}$)','MaP abundance (# L$^{-1}$)'
-    ,'MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)','$b_{bp}$POC (mgC $m^{-3}$)']
-max_parameter_list=np.array([32,65,0.6,2.15,0.30,40])
+#######################################################################
+# I plot
+#######################################################################
+day_start_eddy_merging = datetime.datetime(2021,8,1)
+day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+day_end_eddy_merging = datetime.datetime(2021,8,11)
+day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
+
+ipar=0
+parameter_shortname_list=['MiP_POC','MaP_POC','bbpPOC']
+parameter_panellabel_list=['g','h','f']
+parameter_ylabel_list=['MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)','$b_{bp}$POC (mgC $m^{-3}$)']
+max_parameter_list=np.array([2.15,0.30,40])
 MiP_POC_0_200=np.array([]);MiP_POC_200_600=np.array([])
 MaP_POC_0_200=np.array([]);MaP_POC_200_600=np.array([])
 bbp_POC_0_200=np.array([]);bbp_POC_200_600=np.array([])
-max_depth_bbp=np.array([]);max_depth=np.array([])
-day_start_eddy_merging = datetime(2021,8,1)
-day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
-day_end_eddy_merging = datetime(2021,8,11)
-day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 for ipar in range(0,parameter_ylabel_list.__len__()):
-    if ipar==0: parameter=Flux.copy()
-    elif ipar==1:   parameter=MiP_abund.copy()
-    elif ipar == 2: parameter=MaP_abund.copy()
-    elif ipar == 3: parameter=MiP_POC.copy()
-    elif ipar == 4: parameter=MaP_POC.copy()
-    elif ipar == 5: parameter=bbp_POC.copy()
+    if ipar == 0: parameter=MiP_POC.copy()
+    elif ipar == 1: parameter=MaP_POC.copy()
+    elif ipar == 2: parameter=bbp_POC.copy()
 
-    parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([]);max_depth_parameter=np.array([]);
-    if ipar == 5:
+    parameter_filtered=np.array([]);depth_filtered=np.array([]);Date_Num_filtered=np.array([])
+    if ipar == 2:
         i=0
         for i in range(0, bbp_POC.shape[0]):
             z=parameter[i,:];y=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
-            max_depth = np.append(max_depth ,np.unique(np.sort(y))[-2]) #-2 to exclude 99999
             z[z>100] = 99999
             sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
             sel3 = z == 0
@@ -469,7 +467,6 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
                 parameter_filtered = np.concatenate((parameter_filtered, z))
                 Date_Num_filtered = np.concatenate((Date_Num_filtered, np.tile(x,sum(sel2)) ))
                 depth_filtered = np.concatenate((depth_filtered, y2))
-                max_depth_bbp = np.append(max_depth_bbp,y2.max())
                 # I define sel_200 and sel_200_600
                 sel_0_200 = np.abs(y2) < 200
                 sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
@@ -481,18 +478,15 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
             sel=Date_Num==list_dates[i];x=Date_Num[sel];y=depth[sel]
             z=parameter[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
             if sum(sel2)>0:
-                # if (ipar==5)&(i==36):   z[-1]=0 #With this line, I exclude a spike measured in one bbpPOC profile at 600 m which was making the bbpPOC integrated time series odd (in the sense that it had a anamalous spike corresponding to that profile)
                 z=savgol_filter(z,5,1)
                 parameter_filtered = np.concatenate((parameter_filtered, z))
                 Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
                 depth_filtered = np.concatenate((depth_filtered, y2))
-                max_depth_parameter = np.append(max_depth_parameter, y2.max())
                 # sel_200 and sel_200_600 are used only for the POC integrated in time
                 sel_0_200 = np.abs(y2) < 200
                 sel_200_600 = (np.abs(y2) >= 200) & (np.abs(y2) <600)
-                if ipar==3: MiP_POC_0_200=np.append(MiP_POC_0_200,np.mean(z[sel_0_200]));MiP_POC_200_600=np.append(MiP_POC_200_600,np.mean(z[sel_200_600]))
-                if ipar==4: MaP_POC_0_200=np.append(MaP_POC_0_200,np.mean(z[sel_0_200]));MaP_POC_200_600=np.append(MaP_POC_200_600,np.mean(z[sel_200_600]))
-                # if ipar==5: bbp_POC_0_200=np.append(bbp_POC_0_200,np.mean(z[sel_0_200]));bbp_POC_200_600=np.append(bbp_POC_200_600,np.mean(z[sel_200_600]))
+                if ipar==0: MiP_POC_0_200=np.append(MiP_POC_0_200,np.mean(z[sel_0_200]));MiP_POC_200_600=np.append(MiP_POC_200_600,np.mean(z[sel_200_600]))
+                if ipar==1: MaP_POC_0_200=np.append(MaP_POC_0_200,np.mean(z[sel_0_200]));MaP_POC_200_600=np.append(MaP_POC_200_600,np.mean(z[sel_200_600]))
 
     # I define the x and y arrays for the contourf plot
     x_filtered = np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),100)
@@ -503,9 +497,43 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 
     sel_0_200 = (np.abs(y_filtered) >= 0) & (np.abs(y_filtered) < 200)
     sel_200_600 = (np.abs(y_filtered) >= 200) & (np.abs(y_filtered) < 600)
-    if ipar==3: MiP_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);MiP_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
-    if ipar==4: MaP_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);MaP_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
-    if ipar==5: bbp_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);bbp_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
+    if ipar==0: MiP_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);MiP_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
+    if ipar==1: MaP_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);MaP_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
+    if ipar==2: bbp_POC_0_200_int = np.mean(parameter_interp[sel_0_200, :], 0);bbp_POC_200_600_int = np.mean(parameter_interp[sel_200_600, :], 0)
+
+    if ipar == 2: continue
+
+    width, height = 0.8, 0.7
+    set_ylim_lower, set_ylim_upper = depth_filtered.min(),600
+    fig = plt.figure(1, figsize=(12,8))
+    ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_filtered.min(), Date_Num_filtered.max()))
+    parameter_plot=parameter_interp
+    parameter_plot[parameter_plot<0]=0
+    parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
+    ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
+    plt.gca().invert_yaxis()
+    plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w',linestyles='dashed')
+    plt.vlines(day_end_eddy_merging,ymin=0,ymax=600,color='w',linestyles='dashed')
+    # I draw colorbar
+    cbar = plt.colorbar(plot2)
+    cbar.ax.get_yticklabels()
+    cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
+    plt.ylabel('Depth (m)', fontsize=18)
+    #I set xticks
+    nxticks=10
+    xticks=np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),nxticks)
+    xticklabels=[]
+    for i in xticks:
+        xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    plt.xticks(rotation=90,fontsize=12)
+    # I add the panel label
+    ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+    # I add the grid
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/Fig_Main_v01/Fig2%s_v01.pdf' % (parameter_panellabel_list[ipar]),dpi=200)
+    plt.close()
 
 
 POC_0_200_int=MiP_POC_0_200_int+MaP_POC_0_200_int+bbp_POC_0_200_int
@@ -529,7 +557,7 @@ nxticks = 10
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
 xticklabels = []
 for i in xticks:
-    xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+    xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
@@ -537,7 +565,7 @@ plt.legend(fontsize=14)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
 ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/an66/IntegratedPOC_vs_time_an66.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v01/Fig2e_v01.pdf' ,dpi=200)
 plt.close()
 
 
