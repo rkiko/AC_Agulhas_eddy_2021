@@ -779,7 +779,7 @@ for ndays in ndays_list:
     # plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_eta_b_list_w1 - Theoretical_Budget_eta_b_std_list_w1*0.5, Theoretical_Budget_eta_b_list_w1 + Theoretical_Budget_eta_b_std_list_w1*0.5,
     #                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
     #
-    # plt.xlim(-200,7500)
+    # plt.xlim(-570,7500)
     # plt.ylabel('Depth (m)', fontsize=fs)
     # plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
     # plt.title('No small size classes, eta=0.62,b=66\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)
@@ -816,7 +816,7 @@ for ndays in ndays_list:
     plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_list_w1 - Theoretical_Budget_std_list_w1*0.5, Theoretical_Budget_list_w1 + Theoretical_Budget_std_list_w1*0.5,
                       facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
-    plt.xlim(-200,7500)
+    plt.xlim(-570,7500)
     plt.ylabel('Depth (m)', fontsize=fs)
     plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
     plt.title('No small size classes, eta=0.62,b=132\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)
@@ -914,7 +914,7 @@ for ndays in ndays_list:
     #                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
     #
     #
-    # plt.xlim(-200,7500)
+    # plt.xlim(-570,7500)
     # plt.ylabel('Depth (m)', fontsize=fs)
     # plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
     # plt.title('With small size classes, eta=0.62,b=66\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)
@@ -954,7 +954,7 @@ for ndays in ndays_list:
                       facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
 
-    plt.xlim(-200,7500)
+    plt.xlim(-570,7500)
     plt.ylabel('Depth (m)', fontsize=fs)
     plt.xlabel('Carbon Consumption Rate (mgC/m$^2$)', fontsize=fs)
     plt.title('With small size classes, eta=0.62,b=132\nStart date: %d-%02d-%02d; End date: %d-%02d-%02d' % (day0.year,day0.month,day0.day,dayf1.year,dayf1.month,dayf1.day), fontsize=9)

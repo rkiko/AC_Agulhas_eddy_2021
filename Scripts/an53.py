@@ -319,7 +319,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     ########################################################################################################################
 
     ############### I load Coriolis data with the oxygen information
-    filename='6903095_Sprof.nc'
+    filename='6903095_Sprof_old.nc'
     ds = nc.Dataset('%s/%s' % (storedir,filename))
 
     lon=np.array(ds.variables['LONGITUDE'])

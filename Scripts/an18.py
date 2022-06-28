@@ -26,7 +26,7 @@ from matlab_datevec import matlab_datevec
 #######################################################################
 #######################################################################
 #######################################################################
-filename='6903095_Sprof.nc'
+filename='6903095_Sprof_old.nc'
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 ds = nc.Dataset('%s/%s' % (storedir,filename))
 lon=np.array(ds.variables['LONGITUDE'])
