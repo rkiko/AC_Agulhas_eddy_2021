@@ -5,15 +5,31 @@ Project to conduct analysis of float data from WMO6903095, ensuse001b, SN P53337
 Scripts description:
 
 \
+Fig_Main_v01
+
+Script in which I plot all the graphics of the main text. There is still no
+Fig. 1 and Fig. 2a
+
+
+\
+Fig_Main_v02
+
+I change Fig 2e, 3a, and 4 because I use no more the depths but the isopycnals 
+to show the change in average POC, flux, and carbon budget
+
+
+\
 an01
 
 First script to load Ecopart_mip_map_flux_data.tsv and plot the flux in the whole water column over time
+
 
 \
 an02
 
 I do the scatterplot and the contourf of the flux interpolated. Before plotting, I filter the Flux values with a 
 savgol_filter function. I do also the contourf of the MiP
+
 
 \
 an03
