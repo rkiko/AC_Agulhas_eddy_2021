@@ -283,7 +283,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     # I save
-    plt.savefig('../Plots/Fig_Main_v01/Fig02%s_v01.pdf' % parameter_panellabel_list[ipar],dpi=200)
+    plt.savefig('../Plots/Fig_Main_v02/Fig02%s_v02.pdf' % parameter_panellabel_list[ipar],dpi=200)
     plt.close()
 # endregion
 
@@ -565,7 +565,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-    plt.savefig('../Plots/Fig_Main_v01/Fig02%s_v01.pdf' % (parameter_panellabel_list[ipar]),dpi=200)
+    plt.savefig('../Plots/Fig_Main_v02/Fig02%s_v02.pdf' % (parameter_panellabel_list[ipar]),dpi=200)
     plt.close()
 
 
@@ -598,7 +598,7 @@ plt.legend(fontsize=14)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
 ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v01/Fig02e_v01.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig02e_v02.pdf' ,dpi=200)
 plt.close()
 # endregion
 
@@ -635,6 +635,12 @@ day_start_timeseries=matlab_datenum(day_start_timeseries)
 day_end_timeseries=np.array([2021,9,24])
 day_end_timeseries=matlab_datenum(day_end_timeseries)
 ndays=int(day_end_timeseries-day_start_timeseries+1)
+
+#######################################################################
+# I load the mixed layer depth
+#######################################################################
+dictionary_data = {"mld": mld,"Date_Num": Date_Num,"lon": lon,"lat": lat}
+a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "rb")
 
 #######################################################################
 # I load and process MiP and MaP data
@@ -865,7 +871,7 @@ plt.legend(fontsize=14)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
 ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v01/Fig02e_v01B.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig02e_v01B.pdf' ,dpi=200)
 plt.close()
 
 
@@ -1014,7 +1020,7 @@ xticklabels = []
 ax.set_xticks(xticks)
 ax.set_xticklabels([])
 plt.xticks(rotation=90, fontsize=7)
-plt.savefig('../Plots/Fig_Main_v01/Fig03a_v01.pdf'  ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig03a_v02.pdf'  ,dpi=200)
 plt.close()
 
 
@@ -1052,7 +1058,7 @@ plt.xticks(rotation=90,fontsize=12)
 ax.text(-0.05, 1.05, 'b', transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v01/Fig03b_v01.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig03b_v02.pdf' ,dpi=200)
 plt.close()
 # endregion
 
@@ -1237,7 +1243,7 @@ xticklabels = []
 ax.set_xticks(xticks)
 ax.set_xticklabels([])
 plt.xticks(rotation=90, fontsize=7)
-plt.savefig('../Plots/Fig_Main_v01/Fig03a_v01B.pdf'  ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig03a_v01B.pdf'  ,dpi=200)
 plt.close()
 
 #endregion
@@ -2006,7 +2012,7 @@ plt.legend(fontsize=7)
 plt.gca().invert_yaxis()
 ax.text(-0.05, 1.045, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v01/Fig04a_v01.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig04a_v02.pdf' ,dpi=200)
 plt.close()
 
 
@@ -2042,7 +2048,7 @@ plt.legend(fontsize=7)
 plt.gca().invert_yaxis()
 ax.text(-0.05, 1.045, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v01/Fig04b_v01.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig04b_v02.pdf' ,dpi=200)
 plt.close()
 # endregion
 
