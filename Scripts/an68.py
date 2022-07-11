@@ -109,12 +109,45 @@ for i in range(0,temp.shape[0]):
     isopycnal_mld[i] = dens_tmp[idx] + (dens_tmp[idx+1] - dens_tmp[idx])*dist
 
 #######################################################################
-# I save the mixed layer depth
+# For a given series of isopycnals, I calculate the depth at which they are found
 #######################################################################
-dictionary_data = {"mld": mld,"isopycnal_mld": isopycnal_mld,"Date_Num": Date_Num,"lon": lon,"lat": lat}
-a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "wb")
-pickle.dump(dictionary_data, a_file)
-a_file.close()
+delta_isopycnal=0.05
+delta_isopycnal2=0.05
+list_isopycnals=np.r_[1026:1027+delta_isopycnal*0.5:delta_isopycnal]
+
+isopycnal_vs_depth=np.zeros((list_isopycnals.size,cons_temp.shape[0]))
+i=0
+for i in range(0,list_isopycnals.size):
+    isopycnal_tmp=list_isopycnals[i]
+    isopycnal_tmp0=list_isopycnals[i]-delta_isopycnal2*0.5
+    isopycnal_tmp1=list_isopycnals[i]+delta_isopycnal2*0.5
+    # if i==0:    isopycnal_tmp0=isopycnal_tmp
+    # if i==(list_isopycnals.size-1): isopycnal_tmp1=isopycnal_tmp
+    j=0
+    for j in range(0,cons_temp.shape[0]):
+        depth_tmp = depth[j, :]
+        dens_tmp = dens[j, :]
+        sel_isopycnal = (dens_tmp>=isopycnal_tmp0)&(dens_tmp<isopycnal_tmp1)
+        if sum(sel_isopycnal)==0:
+            index = -1
+            k=0
+            for k in range(0,cons_temp.shape[1]-1):
+                dens_0=dens_tmp[k]
+                dens_1=dens_tmp[k+1]
+                if (dens_0<isopycnal_tmp)&(dens_1>=isopycnal_tmp):
+                    index=k;break
+
+            if index==-1:
+                if isopycnal_tmp<dens_tmp.min():
+                    isopycnal_vs_depth[i, j] = 0
+                else:
+                    isopycnal_vs_depth[i, j] = depth_tmp.max()
+            else:
+                dist=(isopycnal_tmp-dens_0)/(dens_1-dens_0)
+                isopycnal_vs_depth[i, j] = depth_tmp[k]+(depth_tmp[k+1]-depth_tmp[k])*dist
+
+        else:
+            isopycnal_vs_depth[i,j] = np.mean(depth_tmp [sel_isopycnal])
 
 #######################################################################
 # Plot part: I select the data only in the period when the BGC Argo float was inside the eddy
@@ -134,12 +167,13 @@ Date_Num=Date_Num[sel_insideEddy]
 depth=depth[sel_insideEddy,:]
 dens=dens[sel_insideEddy,:]
 mld=mld[sel_insideEddy]
+isopycnal_vs_depth=isopycnal_vs_depth[:,sel_insideEddy]
 isopycnal_mld=isopycnal_mld[sel_insideEddy]
 
 isopycnal_mld_mean=np.mean(isopycnal_mld)
 
 #######################################################################
-# Plot part: I do plot
+# Plot part: I interopolate the conservative temperature
 #######################################################################
 date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
 
@@ -186,11 +220,14 @@ set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
 fig = plt.figure(1, figsize=(12,8))
 ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
 ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
-plt.plot(Date_Num,mld,'w')
-plot3 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.array([isopycnal_mld_mean,1026.3,1026.35]),colors='black',linestyles='solid',linewidths=1,zorder=10)#,cmap='Blues_r')
+plt.plot(Date_Num,mld,'w',label='MLD')
+i=0;plt.plot(Date_Num,isopycnal_vs_depth[i,:],label='%0.1f' % list_isopycnals[i])
+i=6;plt.plot(Date_Num,isopycnal_vs_depth[i,:],label='%0.1f' % list_isopycnals[i])
+i=7;plt.plot(Date_Num,isopycnal_vs_depth[i,:],label='%0.2f' % list_isopycnals[i])
+# plot3 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.array([isopycnal_mld_mean,1026.3,1026.35]),colors='black',linestyles='solid',linewidths=1,zorder=10)#,cmap='Blues_r')
 # plot3 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.r_[isopycnal_mld_mean:1026.4:(1026.4-isopycnal_mld_mean-0.000001)],colors='black',linestyles='solid',linewidths=1,zorder=10)#,cmap='Blues_r')
 # plot4 = ax.contour(x_parameter,y1_parameter, dens_interp_depth,levels=np.r_[1026.4],colors='black',linestyles='dashed',linewidths=1,zorder=11)#,cmap='Blues_r')
-ax.clabel(plot3, inline=1, fontsize=10)
+# ax.clabel(plot3, inline=1, fontsize=10)
 # ax.clabel(plot4, inline=1, fontsize=10)
 
 plt.gca().invert_yaxis()
@@ -213,6 +250,38 @@ plt.xticks(rotation=90,fontsize=12)
 ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.legend(fontsize=15)
 # I save
 plt.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an68/Temp_density_an68.pdf' % home,dpi=200)
 plt.close()
+
+
+fig = plt.figure(1, figsize=(12,8))
+ax = fig.add_axes([0.12, 0.2, width, height])#, ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
+plt.plot(Date_Num,isopycnal_mld,'.b-')
+#I set xticks
+nxticks=10
+xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+xticklabels=[]
+for i in xticks:
+    date_time_obj = date_reference + datetime.timedelta(days=i)
+    xticklabels.append(date_time_obj.strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90,fontsize=12)
+plt.ylabel('Density (kg/m3)')
+plt.title('Isopycnal at the mixed layer depth VS time')
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+# I save
+plt.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an68/Isopycnal_of_MLD_vs_time_an68.pdf' % home,dpi=200)
+plt.close()
+
+#######################################################################
+# I save: I manually assign the isopycnal of the mixed layer depth based on the first of the two plots above
+#######################################################################
+dictionary_data = {"mld": mld,"isopycnal_mld": 1026.35,"isopycnal_mld_vs_time": isopycnal_mld,"Date_Num": Date_Num,"lon": lon,"lat": lat}
+a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "wb")
+pickle.dump(dictionary_data, a_file)
+a_file.close()
+
