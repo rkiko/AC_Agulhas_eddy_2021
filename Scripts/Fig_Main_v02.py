@@ -1282,22 +1282,22 @@ from lin_fit import lin_fit
 #######################################################################
 # I define the function for the carbon budget calculation
 #######################################################################
-def carbon_budget_calculation(depth0,depthf,day0,dayf):
+def carbon_budget_calculation(dens0,densf,day0,dayf):
     ########################################################################################################################
     # Starting parameters
     ########################################################################################################################
     # dayf = day0+timedelta(days=ndays) # final date for the carbon budget calculation
     ndays = (dayf - day0).days  # number of days
-    layer_thickness = depthf - depth0
-    delta_depth_flux = 15  # around of the depth which I consider when extracting the flux
-    Oxy2C = 0.89  # to convert from mol of oxygen to mol of carbon
-    mol2gC = 12.0107  # to convert from mol of carbon to grams of carbon
+    layer_thickness = densf - dens0
+    delta_dens_flux = 0.015     # around of the density which I consider when extracting the flux
+    Oxy2C = 0.89                # to convert from mol of oxygen to mol of carbon
+    mol2gC = 12.0107            # to convert from mol of carbon to grams of carbon
     day0_float = calendar.timegm(day0.timetuple())
     dayf_float = calendar.timegm(dayf.timetuple())
     day0_datenum = matlab_datenum(day0.year,day0.month,day0.day,day0.hour,day0.minute,day0.second)
     dayf_datenum = matlab_datenum(dayf.year,dayf.month,dayf.day,dayf.hour,dayf.minute,dayf.second)
     delta_rho=0.025  # around of the isopycnal
-    reference_isopycnal_list=np.r_[1026.8:1027.50001:delta_rho]
+    reference_isopycnal_list=np.r_[1026.3:1027.50001:delta_rho]
 
     ########################################################################################################################
     # I load and process data
@@ -1371,9 +1371,8 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     ########################################################################################################################
     # Here I calculate the integrated POC (i.e., MiP+MaP+bbp). To do so, (i) I filter it with a savgol function, then (ii) I
     # interpolate it over a regular grid versus time and density. This step is necessary to have MiP+MaP+bbp at 600 m, because
-    # some profiles only reach 400 m; (iii) for each density value of the density grid, I calculate the corresponding depth.
-    # Finally, (iv) I extract the mean MiP+MaP+bbp values between depth0 and depthf and between day0 and dayf (I obtain a
-    # time series)
+    # some profiles only reach 400 m; (iii) I extract the mean MiP+MaP+bbp values between dens0 and densf and between day0 and
+    # dayf (I obtain a time series)
     ########################################################################################################################
 
     ##############################################
@@ -1420,7 +1419,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     # I define the x and y arrays for the MiP+MaP+bbp interpolation
     x_filtered = np.linspace(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max(), ndays)
-    y_filtered = np.linspace(dens_bbp_filtered.min(), dens_MaP_filtered.max(), 200)
+    y_filtered = np.linspace(dens_bbp_filtered.min(), dens_MaP_filtered.max(), 1000)
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     MiP_interp = griddata((Date_Num_MiP_filtered, dens_MiP_filtered), MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
@@ -1428,64 +1427,30 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     MaP_interp = griddata((Date_Num_MaP_filtered, dens_MaP_filtered), MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     bbp_interp = griddata((Date_Num_bbp_filtered, dens_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
-    ##############################################
-    # Step 3: for each density layer I calculate the corresponding mean depth
-    sel = (Date_Num <= list_dates.max())&(Date_Num > list_dates.min())
-    dens_tmp=dens[sel];depth_tmp=depth[sel]
-    sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp))&(dens_tmp!=99999)&(depth_tmp!=99999)
-    dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
-
-    sel_bbp=(~np.isnan(dens_bbp))&(~np.isnan(depth_bbp))&(dens_bbp!=99999)&(depth_bbp!=99999)
-    dens_tmp_bbp=dens_bbp[sel_bbp];depth_tmp_bbp=depth_bbp[sel_bbp]
-
-    depth_bbp_filtered=np.array([]);depth_MiP_filtered=np.array([])
-    i=0
-    for i in range(0,y_filtered.size):
-        if i==0:    dens0=y_filtered[i]
-        else:       dens0=abs( y_filtered[i]+y_filtered[i-1] )*0.5
-        if i==(y_filtered.size-1):  dens1=y_filtered[i]
-        else:                       dens1=abs( y_filtered[i]+y_filtered[i+1] )*0.5
-        #Depth calculation for MiP and MaP
-        sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
-        if sum(sel_dens) > 0:
-            depth_MiP_filtered = np.append(depth_MiP_filtered, np.nanmean(depth_tmp[sel_dens]))
-        else:
-            depth_MiP_filtered = np.append(depth_MiP_filtered, np.array([np.nan]))
-
-        # Depth calculation for bbp
-        sel_dens = (dens_tmp_bbp >= dens0) & (dens_tmp_bbp < dens1)
-        if sum(sel_dens) > 0:
-            depth_bbp_filtered = np.append(depth_bbp_filtered, np.nanmean(depth_tmp_bbp[sel_dens]))
-        else:
-            depth_bbp_filtered = np.append(depth_bbp_filtered, np.array([np.nan]))
-
-
 
     ##############################################
-    # Step 4, I calculate the mean MiP+MaP+bbp (and std) between depth0 and depthf between day0 and dayf
-    sel_depth0_depthf = (np.abs(depth_MiP_filtered) >= depth0) & (np.abs(depth_MiP_filtered) < depthf)
-    sel_depth0_depthf_bbp = (np.abs(depth_bbp_filtered) >= depth0) & (np.abs(depth_bbp_filtered) < depthf)
-    MiP_POC_depth0_depthf=np.mean(MiP_interp[sel_depth0_depthf,:],0)
-    MiP_POC_extended_depth0_depthf=np.mean(MiP_extended_interp[sel_depth0_depthf,:],0)
-    MaP_POC_depth0_depthf=np.mean(MaP_interp[sel_depth0_depthf,:],0)
-    bbp_POC_depth0_depthf=np.mean(bbp_interp[sel_depth0_depthf_bbp,:],0)
+    # Step 3, I calculate the mean MiP+MaP+bbp (and std) between dens0 and densf between day0 and dayf
+    sel_dens0_densf = (np.abs(y_filtered) >= dens0) & (np.abs(y_filtered) < densf)
+    MiP_POC_dens0_densf=np.mean(MiP_interp[sel_dens0_densf,:],0)
+    MiP_POC_extended_dens0_densf=np.mean(MiP_extended_interp[sel_dens0_densf,:],0)
+    MaP_POC_dens0_densf=np.mean(MaP_interp[sel_dens0_densf,:],0)
+    bbp_POC_dens0_densf=np.mean(bbp_interp[sel_dens0_densf,:],0)
 
-    MiP_POC_depth0_depthf_std = np.std(MiP_interp[sel_depth0_depthf, :], 0)
-    MiP_POC_extended_depth0_depthf_std = np.std(MiP_extended_interp[sel_depth0_depthf, :], 0)
-    MaP_POC_depth0_depthf_std = np.std(MaP_interp[sel_depth0_depthf, :], 0)
-    bbp_POC_depth0_depthf_std = np.std(bbp_interp[sel_depth0_depthf_bbp, :], 0)
+    MiP_POC_dens0_densf_std = np.std(MiP_interp[sel_dens0_densf, :], 0)
+    MiP_POC_extended_dens0_densf_std = np.std(MiP_extended_interp[sel_dens0_densf, :], 0)
+    MaP_POC_dens0_densf_std = np.std(MaP_interp[sel_dens0_densf, :], 0)
+    bbp_POC_dens0_densf_std = np.std(bbp_interp[sel_dens0_densf, :], 0)
 
-    Integrated_POC_mgC_m3 = MiP_POC_depth0_depthf + MaP_POC_depth0_depthf + bbp_POC_depth0_depthf
-    Integrated_POC_extended_mgC_m3 = MiP_POC_extended_depth0_depthf + MaP_POC_depth0_depthf + bbp_POC_depth0_depthf
-    Integrated_POC_mgC_m3_std = np.sqrt( MiP_POC_depth0_depthf_std**2 + MaP_POC_depth0_depthf_std**2 + bbp_POC_depth0_depthf_std**2 )
-    Integrated_POC_extended_mgC_m3_std = np.sqrt( MiP_POC_extended_depth0_depthf_std**2 + MaP_POC_depth0_depthf_std**2 + bbp_POC_depth0_depthf_std**2 )
+    Integrated_POC_mgC_m3 = MiP_POC_dens0_densf + MaP_POC_dens0_densf + bbp_POC_dens0_densf
+    Integrated_POC_extended_mgC_m3 = MiP_POC_extended_dens0_densf + MaP_POC_dens0_densf + bbp_POC_dens0_densf
+    Integrated_POC_mgC_m3_std = np.sqrt( MiP_POC_dens0_densf_std**2 + MaP_POC_dens0_densf_std**2 + bbp_POC_dens0_densf_std**2 )
+    Integrated_POC_extended_mgC_m3_std = np.sqrt( MiP_POC_extended_dens0_densf_std**2 + MaP_POC_dens0_densf_std**2 + bbp_POC_dens0_densf_std**2 )
     list_dates_Integrated_POC = x_filtered.copy()
 
     ########################################################################################################################
-    # Here I extract the flux values at depth0 and depthf. To do so, (i) I filter it with a savgol function, then (ii) I
+    # Here I extract the flux values at dens0 and densf. To do so, (i) I filter it with a savgol function, then (ii) I
     # interpolate it over a regular grid in time and density. This step is necessary to have the flux at 600 m, because some
-    # profiles only reach 400 m; (iii) for each density value of the density grid, I calculate the corresponding depth.
-    # Finally, (iv) I extract the flux values at depth0 and depthf
+    # profiles only reach 400 m; (iii) I extract the flux values at dens0 and densf
     ########################################################################################################################
 
     ##############################################
@@ -1528,7 +1493,7 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 
     # I define the x and y arrays for the Flux interpolation
     x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
-    y_filtered = np.linspace(dens_Flux_filtered.min(), dens_Flux_filtered.max(), 200)
+    y_filtered = np.linspace(dens_Flux_filtered.min(), dens_Flux_filtered.max(), 1000)
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     Flux_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
@@ -1536,57 +1501,21 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
     Flux_extended_interp = griddata((Date_Num_Flux_extended_filtered, dens_Flux_extended_filtered), Flux_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     Flux_extended_eta_b_interp = griddata((Date_Num_Flux_extended_filtered_eta_b, dens_Flux_extended_filtered_eta_b), Flux_extended_filtered_eta_b,(x_filtered_g, y_filtered_g), method="nearest")
 
-    ##############################################
-    # Step 3: for each density layer I calculate the corresponding mean depth
-    depth_Flux_filtered=np.array([])
-    i=0
-    for i in range(0,y_filtered.size):
-        if i==0:    dens0=y_filtered[i]
-        else:       dens0=abs( y_filtered[i]+y_filtered[i-1] )*0.5
-        if i==(y_filtered.size-1):  dens1=y_filtered[i]
-        else:                       dens1=abs( y_filtered[i]+y_filtered[i+1] )*0.5
-        #Depth calculation
-        depth_Flux_filtered_tmp = np.array([])
-        j=0
-        for j in range(0,list_dates.size):
-            sel=Date_Num==list_dates[j]
-            dens_tmp=dens[sel];depth_tmp=depth[sel];sel2=(~np.isnan(dens_tmp))&(~np.isnan(depth_tmp));dens_tmp=dens_tmp[sel2];depth_tmp=depth_tmp[sel2]
-            if sum(sel2) > 0:
-                sel_dens = (dens_tmp >= dens0) & (dens_tmp < dens1)
-                if sum(sel_dens) > 0:
-                    depth_Flux_filtered_tmp = np.append(depth_Flux_filtered_tmp, np.mean(depth_tmp[sel_dens]) )
-                else:
-                    depth_Flux_filtered_tmp = np.append( depth_Flux_filtered_tmp, np.array([np.nan]) )
-            else:
-                depth_Flux_filtered_tmp = np.append( depth_Flux_filtered_tmp, np.array([np.nan]) )
-
-        if sum(~np.isnan(depth_Flux_filtered_tmp))==0:
-            depth_Flux_filtered = np.append(depth_Flux_filtered, np.array([np.nan]) )
-        else:
-            depth_Flux_filtered = np.append(depth_Flux_filtered, np.nanmean(depth_Flux_filtered_tmp))
 
     ##############################################
-    # Step 4, flux extraction at depth0 and depthf
+    # Step 3, flux extraction at dens0 and densf
 
-    sel_layer = (np.abs(depth_Flux_filtered) >= depth0-delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0+delta_depth_flux)
-    Flux_depth0 = np.mean(Flux_interp[sel_layer,:],axis=0)
-    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
-    Flux_depthf = np.mean(Flux_interp[sel_layer,:],axis=0)
+    sel_layer = (np.abs(y_filtered) >= dens0-delta_dens_flux) & (np.abs(y_filtered) < dens0+delta_dens_flux)
+    Flux_dens0 = np.mean(Flux_interp[sel_layer,:],axis=0)
+    Flux_eta_b_dens0 = np.mean(Flux_eta_b_interp[sel_layer, :], axis=0)
+    Flux_extended_dens0 = np.mean(Flux_extended_interp[sel_layer, :], axis=0)
+    Flux_extended_eta_b_dens0 = np.mean(Flux_extended_eta_b_interp[sel_layer, :], axis=0)
 
-    sel_layer = (np.abs(depth_Flux_filtered) >= depth0-delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0+delta_depth_flux)
-    Flux_eta_b_depth0 = np.mean(Flux_eta_b_interp[sel_layer,:],axis=0)
-    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
-    Flux_eta_b_depthf = np.mean(Flux_eta_b_interp[sel_layer,:],axis=0)
-
-    sel_layer = (np.abs(depth_Flux_filtered) >= depth0 - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0 + delta_depth_flux)
-    Flux_extended_depth0 = np.mean(Flux_extended_interp[sel_layer,:],axis=0)
-    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
-    Flux_extended_depthf = np.mean(Flux_extended_interp[sel_layer,:],axis=0)
-
-    sel_layer = (np.abs(depth_Flux_filtered) >= depth0 - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0 + delta_depth_flux)
-    Flux_extended_eta_b_depth0 = np.mean(Flux_extended_eta_b_interp[sel_layer,:],axis=0)
-    sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
-    Flux_extended_eta_b_depthf = np.mean(Flux_extended_eta_b_interp[sel_layer,:],axis=0)
+    sel_layer = (np.abs(y_filtered) >= densf - delta_dens_flux) & (np.abs(y_filtered) < densf + delta_dens_flux)
+    Flux_densf = np.mean(Flux_interp[sel_layer,:],axis=0)
+    Flux_eta_b_densf = np.mean(Flux_eta_b_interp[sel_layer,:],axis=0)
+    Flux_extended_densf = np.mean(Flux_extended_interp[sel_layer,:],axis=0)
+    Flux_extended_eta_b_densf = np.mean(Flux_extended_eta_b_interp[sel_layer,:],axis=0)
 
 
     ########################################################################################################################
@@ -1928,12 +1857,12 @@ def carbon_budget_calculation(depth0,depthf,day0,dayf):
 day0=datetime.datetime(2021,4,13)        # starting date for the carbon budget calculation
 dayf=datetime.datetime(2021,7,30)        # starting date for the carbon budget calculation
 ndays=(dayf-day0).days          # number of days
-depth00=200                     # starting depth
-layer_thickness=100             # thickness of the layer considered
-delta_depth=25                  # every time I do a loop, how much I do increase depth0
-depthff=650                     # final maximal depth investigated
+dens00=1026.3                   # starting isopycnal
+layer_thickness=0.1             # thickness of the layer considered (in kg/m3)
+delta_dens=0.05                 # every time I do a loop, how much I do increase depth0
+densff=1027.5                   # final isopycnal investigated
 
-depth0_list=np.r_[depth00:depthff-layer_thickness+0.1:delta_depth]
+dens0_list=np.r_[dens00:densff-layer_thickness+0.1:delta_dens]
 
 #######################################################################
 # I loop on the different depths
@@ -1951,14 +1880,14 @@ POC_resp_mgC_m2_std_list_w1 = np.array([])
 O2_resp_mgC_m2_list_w1 = np.array([])
 O2_resp_mgC_m2_ci_list_w1 = np.array([])
 O2_depth_list_w1 = np.array([])
-depth0=depth0_list[0]
-for depth0 in depth0_list:
-    depthf = depth0 + layer_thickness
+dens0=dens0_list[0]
+for dens0 in dens0_list:
+    densf = dens0 + layer_thickness
     (Theoretical_Budget, Theoretical_Budget_std, Theoretical_Budget_eta_b, Theoretical_Budget_eta_b_std,
      Theoretical_Budget_extended, Theoretical_Budget_extended_std, Theoretical_Budget_extended_eta_b,
      Theoretical_Budget_extended_eta_b_std, POC_resp_mgC_m2, POC_resp_mgC_m2_std, O2_resp_mgC_m2, O2_resp_mgC_m2_ci,
      O2_depth, RespirationTypes, n_profiles, Delta_flux_eta_b, Delta_Integrated_POC, Delta_flux_eta_b_std,
-     Delta_Integrated_POC_std) = carbon_budget_calculation(depth0, depthf, day0, dayf)
+     Delta_Integrated_POC_std) = carbon_budget_calculation(dens0, densf, day0, dayf)
 
     Theoretical_Budget_list_w1=np.append(Theoretical_Budget_list_w1,Theoretical_Budget)
     Theoretical_Budget_eta_b_list_w1=np.append(Theoretical_Budget_eta_b_list_w1,Theoretical_Budget_eta_b)
@@ -1974,9 +1903,9 @@ for depth0 in depth0_list:
     O2_resp_mgC_m2_ci_list_w1=np.append(O2_resp_mgC_m2_ci_list_w1,O2_resp_mgC_m2_ci,axis=0)
     O2_depth_list_w1=np.append(O2_depth_list_w1,O2_depth)
 
-O2_resp_mgC_m2_ci_list_w1=O2_resp_mgC_m2_ci_list_w1.reshape(depth0_list.size,2)
-POC_resp_mgC_m2_list_w1=POC_resp_mgC_m2_list_w1.reshape(depth0_list.size,len(RespirationTypes))
-POC_resp_mgC_m2_std_list_w1=POC_resp_mgC_m2_std_list_w1.reshape(depth0_list.size,len(RespirationTypes))
+O2_resp_mgC_m2_ci_list_w1=O2_resp_mgC_m2_ci_list_w1.reshape(dens0_list.size,2)
+POC_resp_mgC_m2_list_w1=POC_resp_mgC_m2_list_w1.reshape(dens0_list.size,len(RespirationTypes))
+POC_resp_mgC_m2_std_list_w1=POC_resp_mgC_m2_std_list_w1.reshape(dens0_list.size,len(RespirationTypes))
 
 ########################################################################################################################
 ######### Fig. 04a
@@ -1989,20 +1918,20 @@ plt.plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
 plt.scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
 plt.fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
 for iResp in range(2,3):
-    plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
+    plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], dens0_list + layer_thickness / 2, c='b')
 
-plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list_w1[:,iResp]-POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5,
+plt.fill_betweenx(dens0_list+layer_thickness/2, POC_resp_mgC_m2_list_w1[:,iResp]-POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5,
                   POC_resp_mgC_m2_list_w1[:,iResp]+POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5, facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
 
-plt.plot(POC_resp_mgC_m2_list_w1[:, 0], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 3], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 4], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 5], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 6], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
-plt.plot(Theoretical_Budget_list_w1, depth0_list + layer_thickness / 2, c='red')
-plt.scatter(Theoretical_Budget_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
-plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_list_w1 - Theoretical_Budget_std_list_w1*0.5, Theoretical_Budget_list_w1 + Theoretical_Budget_std_list_w1*0.5,
+plt.plot(POC_resp_mgC_m2_list_w1[:, 0], dens0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 3], dens0_list + layer_thickness / 2, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 4], dens0_list + layer_thickness / 2, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 5], dens0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 6], dens0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+plt.plot(Theoretical_Budget_list_w1, dens0_list + layer_thickness / 2, c='red')
+plt.scatter(Theoretical_Budget_list_w1, dens0_list + layer_thickness / 2, c='red', s=5)
+plt.fill_betweenx(dens0_list + layer_thickness / 2, Theoretical_Budget_list_w1 - Theoretical_Budget_std_list_w1*0.5, Theoretical_Budget_list_w1 + Theoretical_Budget_std_list_w1*0.5,
                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
 plt.xlim(-570,7500)
@@ -2025,20 +1954,20 @@ plt.plot(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, 'k')
 plt.scatter(O2_resp_mgC_m2_list_w1,O2_depth_list_w1, c='black',s=5)
 plt.fill_betweenx(O2_depth_list_w1, O2_resp_mgC_m2_ci_list_w1[:, 1], O2_resp_mgC_m2_ci_list_w1[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
 for iResp in range(9,10):
-    plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], depth0_list + layer_thickness / 2, c='b')
+    plt.plot(POC_resp_mgC_m2_list_w1[:,iResp], dens0_list + layer_thickness / 2, c='b')
 
-plt.fill_betweenx(depth0_list+layer_thickness/2, POC_resp_mgC_m2_list_w1[:,iResp]-POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5,
+plt.fill_betweenx(dens0_list+layer_thickness/2, POC_resp_mgC_m2_list_w1[:,iResp]-POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5,
                   POC_resp_mgC_m2_list_w1[:,iResp]+POC_resp_mgC_m2_std_list_w1[:,iResp]*0.5, facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
 
-plt.plot(POC_resp_mgC_m2_list_w1[:, 7], depth0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 10], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 11], depth0_list + layer_thickness / 2, c='b',linestyle='dashed')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 12], depth0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
-plt.plot(POC_resp_mgC_m2_list_w1[:, 13], depth0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
-plt.plot(Theoretical_Budget_extended_list_w1, depth0_list + layer_thickness / 2, c='red')
-plt.scatter(Theoretical_Budget_extended_list_w1, depth0_list + layer_thickness / 2, c='red', s=5)
-plt.fill_betweenx(depth0_list + layer_thickness / 2, Theoretical_Budget_extended_list_w1 - Theoretical_Budget_extended_std_list_w1*0.5, Theoretical_Budget_extended_list_w1 + Theoretical_Budget_extended_std_list_w1*0.5,
+plt.plot(POC_resp_mgC_m2_list_w1[:, 7], dens0_list + layer_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 10], dens0_list + layer_thickness / 2, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 11], dens0_list + layer_thickness / 2, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 12], dens0_list + layer_thickness / 2, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+plt.plot(POC_resp_mgC_m2_list_w1[:, 13], dens0_list + layer_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+plt.plot(Theoretical_Budget_extended_list_w1, dens0_list + layer_thickness / 2, c='red')
+plt.scatter(Theoretical_Budget_extended_list_w1, dens0_list + layer_thickness / 2, c='red', s=5)
+plt.fill_betweenx(dens0_list + layer_thickness / 2, Theoretical_Budget_extended_list_w1 - Theoretical_Budget_extended_std_list_w1*0.5, Theoretical_Budget_extended_list_w1 + Theoretical_Budget_extended_std_list_w1*0.5,
                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
 plt.xlim(-570,7500)
