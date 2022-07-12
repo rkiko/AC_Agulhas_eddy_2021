@@ -150,6 +150,14 @@ for i in range(0,list_isopycnals.size):
             isopycnal_vs_depth[i,j] = np.mean(depth_tmp [sel_isopycnal])
 
 #######################################################################
+# I save: I manually assign the isopycnal of the mixed layer depth based on the first of the two plots above
+#######################################################################
+dictionary_data = {"mld": mld,"isopycnal_mld": 1026.35,"isopycnal_mld_vs_time": isopycnal_mld,"Date_Num": Date_Num,"lon": lon,"lat": lat}
+a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "wb")
+pickle.dump(dictionary_data, a_file)
+a_file.close()
+
+#######################################################################
 # Plot part: I select the data only in the period when the BGC Argo float was inside the eddy
 #######################################################################
 day_end_timeseries=np.array([2021,9,24])
@@ -276,12 +284,4 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 # I save
 plt.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an68/Isopycnal_of_MLD_vs_time_an68.pdf' % home,dpi=200)
 plt.close()
-
-#######################################################################
-# I save: I manually assign the isopycnal of the mixed layer depth based on the first of the two plots above
-#######################################################################
-dictionary_data = {"mld": mld,"isopycnal_mld": 1026.35,"isopycnal_mld_vs_time": isopycnal_mld,"Date_Num": Date_Num,"lon": lon,"lat": lat}
-a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "wb")
-pickle.dump(dictionary_data, a_file)
-a_file.close()
 
