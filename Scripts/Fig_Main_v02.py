@@ -594,7 +594,7 @@ plt.legend(fontsize=12,ncol=4)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
 ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v02/Fig02e_v01B.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig02e_v02.pdf' ,dpi=200)
 plt.close()
 
 
@@ -1063,7 +1063,9 @@ isopycnal_depth0 = np.mean(y_filtered[sel_layer])
 sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
 Flux_depthf = np.mean(Flux_interp[sel_layer,:],axis=0)
 isopycnal_depthf = np.mean(y_filtered[sel_layer])
-Flux_102635 = Flux_interp[35,:]
+depth_102635=np.interp(1026.35,y_filtered,depth_Flux_filtered)
+sel_layer = (np.abs(depth_Flux_filtered) >= depth_102635 - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth_102635 + delta_depth_flux)
+Flux_102635 = np.mean(Flux_interp[sel_layer,:],axis=0)
 
 #######################################################################
 # I plot
@@ -1855,9 +1857,9 @@ POC_resp_mgC_m3_list=POC_resp_mgC_m3_list.reshape(dens0_list.size,len(Respiratio
 POC_resp_mgC_m3_std_list=POC_resp_mgC_m3_std_list.reshape(dens0_list.size,len(RespirationTypes))
 
 ########################################################################################################################
-######### Fig. 04a
+######### Fig. 04a vs dens
 ########################################################################################################################
-set_ylim_lower=1026.7
+set_ylim_lower=1026.35
 set_ylim_upper=1027.25
 fs=10
 width, height = 0.72, 0.8
@@ -1892,20 +1894,74 @@ yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
 yticklabels=[]
 for i in range(0,nyticks):
     if yticks[i] == 1026.35:
-        yticklabels.append('[MLD]\n%0.1f kg/m$^3$'% (yticks[i]) )
+        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% (yticks[i]) )
     else:
-        yticklabels.append('[%d–%dm]\n%0.1f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
+        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
 ax.set_yticks(yticks)
-ax.set_yticklabels(yticklabels,fontsize=7)
+ax.set_yticklabels(yticklabels,fontsize=6)
 ax.text(-0.2, 1.065, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v02/Fig04a_v02.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig04a_vs_dens_v02.pdf' ,dpi=200)
 plt.close()
 
 
 ########################################################################################################################
-######### Fig. 04b
+######### Fig. 04a vs depth
 ########################################################################################################################
+idx1,idx2=1,37
+set_ylim_lower=depth_isopycnal_list[idx1]
+set_ylim_upper=depth_isopycnal_list[idx2]
+fs=10
+width, height = 0.72, 0.8
+fig = plt.figure(1, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+plt.plot(O2_resp_mgC_m3_list,depth_isopycnal_list, 'k')
+plt.scatter(O2_resp_mgC_m3_list,depth_isopycnal_list, c='black',s=5)
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_ci_list[:, 1], O2_resp_mgC_m3_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+for iResp in range(2,3):
+    plt.plot(POC_resp_mgC_m3_list[:,iResp], depth_isopycnal_list, c='b')
+
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp]*0.5,
+                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp]*0.5, facecolor='b',
+                  color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
+plt.plot(POC_resp_mgC_m3_list[:, 0], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m3_list[:, 3], depth_isopycnal_list, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m3_list[:, 4], depth_isopycnal_list, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m3_list[:, 5], depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+plt.plot(POC_resp_mgC_m3_list[:, 6], depth_isopycnal_list, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+plt.plot(Theoretical_Budget_list, depth_isopycnal_list, c='red')
+plt.scatter(Theoretical_Budget_list, depth_isopycnal_list, c='red', s=5)
+plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_list - Theoretical_Budget_std_list*0.5, Theoretical_Budget_list + Theoretical_Budget_std_list*0.5,
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+plt.xlim(-5,100)
+# plt.ylabel('Dens (kg/m$^3$)', fontsize=fs)
+plt.xlabel('Carbon Consumption Rate (mgC/m$^3$)', fontsize=fs)
+plt.legend(fontsize=7)
+plt.gca().invert_yaxis()
+#I set yticks
+nyticks=6
+yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
+yticks_down=np.linspace(depth_isopycnal_down_list[idx1], depth_isopycnal_down_list[idx2],nyticks)
+yticks_up=np.linspace(depth_isopycnal_up_list[idx1], depth_isopycnal_up_list[idx2],nyticks)
+yticklabels=[]
+for i in range(0,nyticks):
+    if i==0:
+        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% ( np.interp(yticks[i],depth_isopycnal_list,dens0_list) ) )
+    else:
+        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
+ax.set_yticks(yticks)
+ax.set_yticklabels(yticklabels,fontsize=6)
+ax.text(-0.2, 1.065, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/Fig_Main_v02/Fig04a_vs_depth_v02.pdf' ,dpi=200)
+plt.close()
+
+
+########################################################################################################################
+######### Fig. 04b vs dens
+########################################################################################################################
+set_ylim_lower=1026.35
+set_ylim_upper=1027.25
 fig = plt.figure(2, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_list,dens0_list, 'k')
@@ -1929,7 +1985,6 @@ plt.fill_betweenx(dens0_list + dens_thickness / 2, Theoretical_Budget_extended_l
                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
 plt.xlim(-5,100)
-plt.ylabel('Depth (m)', fontsize=fs)
 plt.xlabel('Carbon Consumption Rate (mgC/m$^3$)', fontsize=fs)
 plt.legend(fontsize=7)
 plt.gca().invert_yaxis()
@@ -1939,14 +1994,64 @@ yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
 yticklabels=[]
 for i in range(0,nyticks):
     if yticks[i] == 1026.35:
-        yticklabels.append('[MLD]\n%0.1f kg/m$^3$'% (yticks[i]) )
+        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% (yticks[i]) )
     else:
-        yticklabels.append('[%d–%dm]\n%0.1f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
+        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
 ax.set_yticks(yticks)
-ax.set_yticklabels(yticklabels,fontsize=7)
+ax.set_yticklabels(yticklabels,fontsize=6)
 ax.text(-0.2, 1.065, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v02/Fig04b_v02.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v02/Fig04b_vs_dens_v02.pdf' ,dpi=200)
+plt.close()
+
+########################################################################################################################
+######### Fig. 04b vs depth
+########################################################################################################################
+idx1,idx2=1,37
+set_ylim_lower=depth_isopycnal_list[idx1]
+set_ylim_upper=depth_isopycnal_list[idx2]
+fig = plt.figure(2, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+plt.plot(O2_resp_mgC_m3_list,depth_isopycnal_list, 'k')
+plt.scatter(O2_resp_mgC_m3_list,depth_isopycnal_list, c='black',s=5)
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_ci_list[:, 1], O2_resp_mgC_m3_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+for iResp in range(9,10):
+    plt.plot(POC_resp_mgC_m3_list[:,iResp], depth_isopycnal_list, c='b')
+
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp]*0.5,
+                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp]*0.5, facecolor='b',
+                  color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
+
+plt.plot(POC_resp_mgC_m3_list[:, 7], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m3_list[:, 10], depth_isopycnal_list, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m3_list[:, 11], depth_isopycnal_list, c='b',linestyle='dashed')
+plt.plot(POC_resp_mgC_m3_list[:, 12], depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1)')
+plt.plot(POC_resp_mgC_m3_list[:, 13], depth_isopycnal_list, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
+plt.plot(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red')
+plt.scatter(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red', s=5)
+plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_extended_list - Theoretical_Budget_extended_std_list*0.5, Theoretical_Budget_extended_list + Theoretical_Budget_extended_std_list*0.5,
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+
+plt.xlim(-5,100)
+plt.xlabel('Carbon Consumption Rate (mgC/m$^3$)', fontsize=fs)
+plt.legend(fontsize=7)
+plt.gca().invert_yaxis()
+#I set yticks
+nyticks=6
+yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
+yticks_down=np.linspace(depth_isopycnal_down_list[idx1], depth_isopycnal_down_list[idx2],nyticks)
+yticks_up=np.linspace(depth_isopycnal_up_list[idx1], depth_isopycnal_up_list[idx2],nyticks)
+yticklabels=[]
+for i in range(0,nyticks):
+    if i==0:
+        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% ( np.interp(yticks[i],depth_isopycnal_list,dens0_list) ) )
+    else:
+        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
+ax.set_yticks(yticks)
+ax.set_yticklabels(yticklabels,fontsize=6)
+ax.text(-0.2, 1.065, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/Fig_Main_v02/Fig04b_vs_depth_v02.pdf' ,dpi=200)
 plt.close()
 # endregion
 
