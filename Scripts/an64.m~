@@ -41,7 +41,7 @@ lontmp=CEs_max{53,1,1};
 %%%%%%%%%%%%%%%
 %I manually identify the eddy 2 (the one merging with the main eddy around
 %the beginning of August 2021) by looking for the eddy whos centroid on the
-%6 august is close to a location identified manually of Remi snapshot
+%6 augus
 clear
 load('~/GIT/AC_Agulhas_eddy_2021/Data/an64/Trajectories_Cyclo_filt.mat')
 
@@ -81,26 +81,11 @@ end
 
 end
 
-traj_eddy2_lon=Cyclonic_Trajectories{idx_eddy,5};
-traj_eddy2_lat=Cyclonic_Trajectories{idx_eddy,6};
-radius_max_eddy2=Cyclonic_Trajectories{idx_eddy,8};
-radius_out_eddy2=Cyclonic_Trajectories{idx_eddy,12};
-datenum_eddy2=Cyclonic_Trajectories{idx_eddy,7};
+lon_eddy=Cyclonic_Trajectories{idx_eddy,5};
+lat_eddy=Cyclonic_Trajectories{idx_eddy,6};
+date_num_eddy=Cyclonic_Trajectories{idx_eddy,7};
 
-clear xticklabels
-xticklabels=cell(4,1);xticklabels(1)=cellstr('Datenum');xticklabels(2)=cellstr('Lon');xticklabels(3)=cellstr('Lat');
-xticklabels(4)=cellstr('Rad_max');xticklabels(5)=cellstr('Rad_out');
-M=[datenum_eddy2;traj_eddy2_lon;traj_eddy2_lat;radius_max_eddy2;radius_out_eddy2]';
-M=array2table(M,'VariableNames',xticklabels);writetable(M,'~/GIT/AC_Agulhas_eddy_2021/Data/an64/traj_eddy2.csv')
-
-load('~/GIT/AC_Agulhas_eddy_2021/Data/an64/Coloc_BioArgo.mat','Cell_Traj_InterestCyclo')
-
-for j=1:3
-if j==2
 id_detection=Cyclonic_Trajectories{idx_eddy,2};
-else
-id_detection=Cell_Traj_InterestCyclo{j,2};
-end
 i=1;lon_cont=nan(200,length(id_detection));lat_cont=nan(200,length(id_detection));maxl=nan(length(id_detection),1);
 for i=1:length(id_detection)
 [a,b]=ind2sub(size(id_cyclo),id_detection(i));
@@ -114,9 +99,4 @@ maxl=max(maxl);
 lon_cont=lon_cont(1:maxl,:);
 lat_cont=lat_cont(1:maxl,:);
 
-M=array2table(lon_cont);writetable(M,sprintf('~/GIT/AC_Agulhas_eddy_2021/Data/an64/CEs_max_eddy%d_lon_an64m.csv',j))
-M=array2table(lat_cont);writetable(M,sprintf('~/GIT/AC_Agulhas_eddy_2021/Data/an64/CEs_max_eddy%d_lat_an64m.csv',j))
-
-end
-
-figure(1),clf,plot(traj_eddy2_lon,traj_eddy2_lat,'b'),hold on,plot(traj_eddy1_lon,traj_eddy1_lat,'r'),plot(traj_eddy3_lon,traj_eddy3_lat,'m')
+M=array2table(M,'VariableNames',xticklabels);writetable(M,'~/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_partialFile_an64m.csv')
