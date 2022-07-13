@@ -553,5 +553,13 @@ I calculate the ML depth for each profile and the isopycnal that better defines
 it, and I save the data
 
 
+\
+an69
+
+I download the chlorophyll inside and outside the two eddies (one is the 
+cyclone targetd dy the BGC Argo float, and the other is the eddy which 
+merged with this cyclone between the 1—11 August 2021) 
+
+
 
 
