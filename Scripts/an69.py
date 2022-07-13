@@ -1,13 +1,9 @@
-import os
+import os,sys
 import matplotlib.pyplot as plt
 import numpy as np
-import datetime
 import netCDF4 as nc
-# import seawater as sw
-# import gsw
 import pandas as pd
 import pickle
-from oceanpy import mixed_layer_depth
 from CallCppy import Chl_download
 from CallCppy import ellipsoid
 from scipy.interpolate import griddata
