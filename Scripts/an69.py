@@ -106,7 +106,7 @@ for i_eddy in range(0,2):
 
     #### I start the loop on every day for which I have an eddy contour
     i=73
-    for i in range(0,lonVmax1.shape[1]):#Date_Num_Eddy1.size):
+    for i in range(0,lonVmax.shape[1]):#Date_Num_Eddy1.size):
         #### I define the frame around the eddy center, for which I want to download the satellite chl data
         radius_frame_lon=radius_frame / np.cos(lonEddy[i]*np.pi/180)
         lon0_Chl_Down=lonEddy[i]-radius_frame_lon-0.1
