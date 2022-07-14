@@ -33,13 +33,11 @@ a_file = open("%s/an69/data_an69.pkl" % storedir, "rb")
 data_an69 = pickle.load(a_file)
 chl_inside_mean1=data_an69['chl_inside_mean1']
 chl_outside_mean1=data_an69['chl_outside_mean1']
-chl_inside_and_outside_mean1=data_an69['chl_inside_and_outside_mean1']
 Date_Num_Eddy1=data_an69['Date_Num_Eddy1']
 lonEddy1=data_an69['lonEddy1']
 latEddy1=data_an69['latEddy1']
 chl_inside_mean2=data_an69['chl_inside_mean2']
 chl_outside_mean2=data_an69['chl_outside_mean2']
-chl_inside_and_outside_mean2=data_an69['chl_inside_and_outside_mean2']
 Date_Num_Eddy2=data_an69['Date_Num_Eddy2']
 lonEddy2=data_an69['lonEddy2']
 latEddy2=data_an69['latEddy2']
@@ -207,6 +205,7 @@ day_end_eddy_merging=np.array([2021,8,11])
 day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)
 day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)
 
+# I plot
 width, height = 0.8, 0.5
 set_ylim_lower, set_ylim_upper = 0,150
 fig = plt.figure(1, figsize=(13,4))
@@ -223,7 +222,7 @@ xticks = np.linspace(Date_Num_float[0], day_end_timeseries, nxticks)
 xticklabels = []
 for i in xticks:
     tmp=matlab_datevec(i).astype(int)
-    xticklabels.append(datetime.datetime(tmp[0],tmp[1],tmp[2],tmp[4],tmp[4],tmp[5]).strftime('%d %B'))
+    xticklabels.append(datetime.datetime(tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5]).strftime('%d %B'))
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
@@ -235,6 +234,51 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an70/EddyRadiusAndDist_vs_time_an70.pdf' ,dpi=200)
 plt.close()
 
+#######################################################################
+# I plot chl content inside and outside the 2 eddies
+#######################################################################
+
+a_file = open("%s/an69/data_an69.pkl" % storedir, "rb")
+data_an69 = pickle.load(a_file)
+chl_inside_mean1=data_an69['chl_inside_mean1']
+chl_outside_mean1=data_an69['chl_outside_mean1']
+Date_Num_Eddy1=data_an69['Date_Num_Eddy1']
+chl_inside_mean2=data_an69['chl_inside_mean2']
+chl_outside_mean2=data_an69['chl_outside_mean2']
+Date_Num_Eddy2=data_an69['Date_Num_Eddy2']
+a_file.close()
+# I define the end of the time series
+day0_insideEddy=np.array([2021,4,13])
+dayf_insideEddy=np.array([2021,9,23])
+day0_insideEddy=matlab_datenum(day0_insideEddy)
+dayf_insideEddy=matlab_datenum(dayf_insideEddy)
+
+width, height = 0.8, 0.5
+set_xlim_lower, set_xlim_upper = min(Date_Num_Eddy1.min(),Date_Num_Eddy2.min()), Date_Num_Eddy1.max()+10
+set_ylim_lower, set_ylim_upper = 0,1.2#anom_meanE_meanOut.min()*1.1,chl_inside_mean.max()*1.1
+fig = plt.figure(1, figsize=(13,4))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(set_xlim_lower, set_xlim_upper))
+plt.plot(Date_Num_Eddy1,chl_inside_mean1,'tomato',label='Chl inside eddy 1')
+plt.plot(Date_Num_Eddy1,chl_outside_mean1,'seagreen',label='Chl outside eddy 1')
+plt.plot(Date_Num_Eddy2,chl_inside_mean2,'lightsalmon',label='Chl inside eddy 2')
+plt.plot(Date_Num_Eddy2,chl_outside_mean2,'lime',label='Chl outside eddy 2')
+plt.vlines([day0_insideEddy,dayf_insideEddy],set_ylim_lower, set_ylim_upper,colors='black',label='Float inside eddy',linewidth=3,linestyles='dashed')
+plt.hlines([set_ylim_lower+0.025,set_ylim_upper-0.025],day0_insideEddy, dayf_insideEddy,colors='black',linewidth=3,linestyles='dashed')
+# I set xticks
+nxticks = 10
+xticks = np.linspace(set_xlim_lower, set_xlim_upper, nxticks)
+xticklabels = []
+for i in xticks:
+    tmp=matlab_datevec(i).astype(int)
+    xticklabels.append(datetime.datetime(tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5]).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+plt.legend(fontsize=12)
+plt.ylabel('Chlorophyll (mg/m$^3$)', fontsize=15)
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an70/EddyChl_vs_time_an70.pdf' ,dpi=200)
+plt.close()
 
 
 
