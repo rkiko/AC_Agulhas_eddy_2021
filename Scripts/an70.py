@@ -83,47 +83,6 @@ latEddy1=latEddy1[sel_eddy1]
 
 # sel_eddy2=Date_Num_Eddy2<day_end_timeseries #it's all true so I don't select nothing for eddy2
 
-# #######################################################################
-# # I select the satellite chlorophyll data in the day of the BGC Argo float profiles
-# #######################################################################
-#
-# sel_Satel2Float=np.squeeze(np.zeros((1,Date_Num_float.size)))
-# i=0
-# for i in range(0,Date_Num_float.size):
-#     datetmp = np.squeeze(np.array([Date_Vec_float[i,0:3]]))
-#     datetmp = datetime.datetime(datetmp[0],datetmp[1],datetmp[2])
-#     idx=np.array(np.where(datetmp == DateTime_Eddy))
-#     if idx.size>1: print('error, i %d, ' % i, idx)
-#     if idx.size==0:
-#         print('Warning: missing eddy contour and center for %d-%d-%d' % (Date_Vec_float[i,0],Date_Vec_float[i,1],Date_Vec_float[i,2]))
-#         sel_Satel2Float[i] = 99999
-#         continue
-#     sel_Satel2Float[i] = idx[0]
-#
-# sel_Satel2Float=sel_Satel2Float.astype(int)
-# sel_eddyCont_missing_days=sel_Satel2Float!=99999
-# lonEddy_4float=np.array(lonEddy[sel_Satel2Float[sel_eddyCont_missing_days]])
-# latEddy_4float=np.array(latEddy[sel_Satel2Float[sel_eddyCont_missing_days]])
-# lonVmax_4float=lonVmax[:,sel_Satel2Float[sel_eddyCont_missing_days]]
-# latVmax_4float=latVmax[:,sel_Satel2Float[sel_eddyCont_missing_days]]
-# radius_Vmax=radius_Vmax[sel_Satel2Float[sel_eddyCont_missing_days]]
-# chl_inside_mean_4float=chl_inside_mean[sel_Satel2Float[sel_eddyCont_missing_days]]
-#
-#
-# #######################################################################
-# # I calculate the distance between the BGC argo and the eddy center
-# #######################################################################
-# dist=np.arccos(np.sin(lat_float*np.pi/180)*np.sin(latEddy_4float*np.pi/180)+np.cos(lat_float*np.pi/180)*np.cos(latEddy_4float*np.pi/180)*np.cos((lonEddy_4float-lon_float)*np.pi/180))*180/np.pi
-# dist_km=dist*111
-#
-# #######################################################################
-# # I exclude the profiles in which the BGC argo float was outside the eddy
-# #######################################################################
-# sel_insideEddy=dist_km<=radius_Vmax
-# lon_float_inside=lon_float[sel_insideEddy]
-# lat_float_inside=lat_float[sel_insideEddy]
-# lon_float_outside=lon_float[~sel_insideEddy]
-# lat_float_outside=lat_float[~sel_insideEddy]
 
 # #######################################################################
 # # I save the chl values for the latex document
@@ -146,7 +105,7 @@ latEddy1=latEddy1[sel_eddy1]
 # write_latex_data(filename,argument,'%0.d' % arg_value)
 
 #######################################################################################################################
-############### I plot
+############### I plot the float + eddy trajectories with chl content and anomalies
 #######################################################################################################################
 
 def resize_colobar(event):
@@ -223,6 +182,57 @@ gl.top_labels = False
 ax.legend(fontsize=15)#,ncol=2)
 
 fig.savefig('%s/GIT/AC_Agulhas_eddy_2021/Plots/an70/Eddy_Float_Trjs_and_Chl_anom_an70.pdf' % (home))
+plt.close()
+
+#######################################################################
+# I plot eddy 1 radius vs time and relative float position
+#######################################################################
+
+# I load eddy 1 radius
+filename_eddy1Data='%s/GIT/AC_Agulhas_eddy_2021/Data/an64/traj_eddy1.csv' % home
+data_eddy1=pd.read_csv(filename_eddy1Data, sep=',', header=0)
+Date_Num_Eddy1=data_eddy1['Datenum']   # mean radius_Vmax  = 60.25 km
+radius_Vmax1=data_eddy1['Rad_max']   # mean radius_Vmax  = 60.25 km
+# I load float distance from eddy1 centroid
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+Date_Num_float = data_dist_radius['Datenum']
+Distance_centroid = data_dist_radius['Distance_Centroid']
+# I define the end of the time series
+day_end_timeseries=np.array([2021,9,23])
+day_end_timeseries=matlab_datenum(day_end_timeseries)
+# I define the eddy merging period
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)
+
+width, height = 0.8, 0.5
+set_ylim_lower, set_ylim_upper = 0,150
+fig = plt.figure(1, figsize=(13,4))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_float[0], day_end_timeseries))
+plt.ylim(ax.get_ylim()[0],ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.plot(Date_Num_Eddy1,radius_Vmax1,'b',label='Eddy radius')
+plt.scatter(Date_Num_float,Distance_centroid,c='k',label='Float—eddy centroid distance',marker='*')
+plt.scatter(Date_Num_float[~sel_insideEddy],Distance_centroid[~sel_insideEddy],label='Profiles excluded',marker='o', facecolors='none', edgecolors='r',s=60)
+# I set xticks
+nxticks = 10
+xticks = np.linspace(Date_Num_float[0], day_end_timeseries, nxticks)
+xticklabels = []
+for i in xticks:
+    tmp=matlab_datevec(i).astype(int)
+    xticklabels.append(datetime.datetime(tmp[0],tmp[1],tmp[2],tmp[4],tmp[4],tmp[5]).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+# plt.legend(fontsize=12)
+plt.ylabel('Radius (km)', fontsize=15)
+ax.text(-0.075, 1.05, 'a', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+ax.legend(fontsize=15,ncol=3)
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an70/EddyRadiusAndDist_vs_time_an70.pdf' ,dpi=200)
 plt.close()
 
 
