@@ -24,7 +24,7 @@ ds = nc.Dataset('%s/%s' % (storedir,filename))
 
 lon=np.array(ds.variables['LONGITUDE'])
 lat=np.array(ds.variables['LATITUDE'])
-Date_Num=np.array(ds.variables['JULD'])
+Date_Num=np.array(ds.variables['JULD'])+matlab_datenum(1950,1,1)
 temp=np.array(ds.variables['TEMP_ADJUSTED'])
 pres=np.array(ds.variables['PRES_ADJUSTED'])
 psal=np.array(ds.variables['PSAL_ADJUSTED'])
@@ -137,16 +137,16 @@ for idepth in range(0,depth_tmp0_list.size):
         cons_temp_tmp = np.mean(cons_temp_tmp[sel_depth])
         doxy_tmp = np.mean(doxy_tmp[sel_depth])
 
-        Date_Num_float_tmp=Date_Num_float[i]
+        Date_Num_float_tmp=Date_Num[i]
         ####################################################################################################################
         # Plot part
         ####################################################################################################################
         plt.figure(1)
-        plot1 = plt.scatter(dist_float_eddy_km_tmp, temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        plot1 = plt.scatter(dist_float_eddy_km_tmp, temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
         plt.figure(2)
-        plot2 = plt.scatter(dist_float_eddy_km_tmp, doxy_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        plot2 = plt.scatter(dist_float_eddy_km_tmp, doxy_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
         plt.figure(3)
-        plot3 = plt.scatter(dist_float_eddy_km_tmp, cons_temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        plot3 = plt.scatter(dist_float_eddy_km_tmp, cons_temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
 
 
     # I add last details
@@ -156,13 +156,13 @@ for idepth in range(0,depth_tmp0_list.size):
     plt.title('%d m [%d—%d]' % (depth_tmp0,depth_tmp0-delta_depth,depth_tmp0+delta_depth), fontsize=fs)
     cbar = plt.colorbar(plot1)
     nxticks = 10
-    xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
+    xticks = np.linspace(Date_Num.min(), day_end_timeseries, nxticks)
     xticklabels = []
     for i in xticks:
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an60/01Temp_profiles_vs_distance_from_center_%dm_an60.pdf' % (depth_tmp0) ,dpi=200)
+    plt.savefig('%s/01Temp_profiles_vs_distance_from_center_%dm_an60.pdf' % (image_path,depth_tmp0) ,dpi=200)
     plt.close()
 
     plt.figure(2)
@@ -171,13 +171,13 @@ for idepth in range(0,depth_tmp0_list.size):
     plt.title('%d m [%d—%d]' % (depth_tmp0,depth_tmp0-delta_depth,depth_tmp0+delta_depth), fontsize=fs)
     cbar = plt.colorbar(plot2)
     nxticks = 10
-    xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
+    xticks = np.linspace(Date_Num.min(), day_end_timeseries, nxticks)
     xticklabels = []
     for i in xticks:
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an60/02Doxy_profiles_vs_distance_from_center_%dm_an60.pdf' % (depth_tmp0) ,dpi=200)
+    plt.savefig('%s/02Doxy_profiles_vs_distance_from_center_%dm_an60.pdf' % (image_path,depth_tmp0) ,dpi=200)
     plt.close()
 
     plt.figure(3)
@@ -186,13 +186,13 @@ for idepth in range(0,depth_tmp0_list.size):
     plt.title('%d m [%d—%d]' % (depth_tmp0,depth_tmp0-delta_depth,depth_tmp0+delta_depth), fontsize=fs)
     cbar = plt.colorbar(plot1)
     nxticks = 10
-    xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
+    xticks = np.linspace(Date_Num.min(), day_end_timeseries, nxticks)
     xticklabels = []
     for i in xticks:
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an60/03ConsTemp_profiles_vs_distance_from_center_%dm_an60.pdf' % (depth_tmp0) ,dpi=200)
+    plt.savefig('%s/03ConsTemp_profiles_vs_distance_from_center_%dm_an60.pdf' % (image_path,depth_tmp0) ,dpi=200)
     plt.close()
 
 
