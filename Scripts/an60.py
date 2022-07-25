@@ -18,7 +18,7 @@ from matlab_datevec import matlab_datevec
 ########################################################################################################################
 # I load the BGC Argo temperature, chl etc. profiles
 ########################################################################################################################
-filename='6903095_Sprof_old.nc'
+filename='6903095_Sprof_all.nc'
 storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 ds = nc.Dataset('%s/%s' % (storedir,filename))
 
@@ -80,16 +80,19 @@ cons_temp[mask_dens]=cons_tmp
 ########################################################################################################################
 # I load the eddy radiuses and the eddy-float distance
 ########################################################################################################################
-a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an57/data_an57.pkl" % (home), "rb")
-data_an57 = pickle.load(a_file)
-Date_Num_float = data_an57['Date_Num_float']
-dist_float_eddy_km = data_an57['dist_float_eddy_km']
-radius_Vmax_floatDays = data_an57['radius_Vmax_floatDays']
-radius_Out_floatDays = data_an57['radius_Out_floatDays']
-a_file.close()
+day_end_timeseries=np.array([2021,8,1])
+image_path='../Plots/an60/20210413to%d%02d%02d' % (day_end_timeseries[0],day_end_timeseries[1],day_end_timeseries[2])
+if not os.path.isdir(image_path):   os.system('mkdir %s' % image_path)
+day_end_timeseries=matlab_datenum(day_end_timeseries)
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+dist_float_eddy_km = data_dist_radius['Distance_Centroid']
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+sel_insideEddy = (Date_Num<=day_end_timeseries)&(sel_insideEddy==1)
+del data_dist_radius
 
 ########################################################################################################################
-# I plot by doing two loops: on on the different layers and one on the different profiles
+# I plot by doing two loops: one on the different layers and one on the different profiles
 ########################################################################################################################
 
 # General parameters
@@ -116,8 +119,7 @@ for idepth in range(0,depth_tmp0_list.size):
     i=0
     for i in range (0,temp.shape[0]):
         dist_float_eddy_km_tmp = dist_float_eddy_km[i]
-        radius_Vmax_floatDays_tmp = radius_Vmax_floatDays[i]
-        if dist_float_eddy_km_tmp>radius_Vmax_floatDays_tmp:    continue
+        if not sel_insideEddy[i]:    continue
 
         temp_tmp=temp[i,:]
         cons_temp_tmp=cons_temp[i,:]
