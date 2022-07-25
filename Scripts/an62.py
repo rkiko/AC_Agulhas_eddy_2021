@@ -83,7 +83,7 @@ dens[mask_dens] = dens_tmp + 1000
 ########################################################################################################################
 # I load the eddy radiuses and the eddy-float distance
 ########################################################################################################################
-day_end_timeseries=np.array([2021,8,1])
+day_end_timeseries=np.array([2021,9,23])
 image_path='../Plots/an62/20210413to%d%02d%02d' % (day_end_timeseries[0],day_end_timeseries[1],day_end_timeseries[2])
 if not os.path.isdir(image_path):   os.system('mkdir %s' % image_path)
 day_end_timeseries=matlab_datenum(day_end_timeseries)
@@ -176,7 +176,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.figure(1)
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Temp. (°C)', fontsize=fs)
-    plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    plt.title('%0.2f kg/m$^3$ [%d±%d m]' % (reference_isopycnal,depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std())), fontsize=fs)
     tmp=(max_temp-min_temp)/10
     plt.ylim(min_temp-tmp,max_temp+tmp)
     cbar = plt.colorbar(plot1)
@@ -193,7 +193,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.figure(2)
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Doxy ($\mu$mol/kg)', fontsize=fs)
-    plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    plt.title('%0.2f kg/m$^3$ [%d±%d m]' % (reference_isopycnal,depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std())), fontsize=fs)
     tmp=(max_doxy-min_doxy)/10
     plt.ylim(min_doxy-tmp,max_doxy+tmp)
     cbar = plt.colorbar(plot2)
@@ -210,7 +210,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.figure(3)
     plt.xlabel('Distance from center (km)', fontsize=fs)
     plt.ylabel('Cons. temp. (°C)', fontsize=fs)
-    plt.title('%d±%d m [%0.2f kg/m$^3$]' % (depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std()),reference_isopycnal), fontsize=fs)
+    plt.title('%0.2f kg/m$^3$ [%d±%d m]' % (reference_isopycnal,depth_isopycnal_tmp.mean(),np.round(depth_isopycnal_tmp.std())), fontsize=fs)
     tmp=(max_cons_temp-min_cons_temp)/10
     plt.ylim(min_cons_temp-tmp,max_cons_temp+tmp)
     cbar = plt.colorbar(plot1)
