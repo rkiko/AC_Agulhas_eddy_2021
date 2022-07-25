@@ -96,7 +96,7 @@ del data_dist_radius
 
 
 ########################################################################################################################
-# I plot by doing two loops: on on the different isopycnals and one on the different profiles
+# I plot by doing two loops: one on the different isopycnals and one on the different profiles
 ########################################################################################################################
 
 # General parameters
