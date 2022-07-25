@@ -117,7 +117,7 @@ for distance_limit in list_distances:
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2], matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.xlabel('Abs. Salinity (PSU)', fontsize=10)
+    plt.xlabel('Abs. Salinity (g/kg)', fontsize=10)
     plt.ylabel('Cons. Temperature (°C)', fontsize=10)
     plt.title('Profiles less than\n%d km from eddy center' % distance_limit, fontsize=10)
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
