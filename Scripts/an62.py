@@ -24,7 +24,7 @@ ds = nc.Dataset('%s/%s' % (storedir,filename))
 
 lon=np.array(ds.variables['LONGITUDE'])
 lat=np.array(ds.variables['LATITUDE'])
-Date_Num=np.array(ds.variables['JULD'])
+Date_Num=np.array(ds.variables['JULD'])+matlab_datenum(1950,1,1)
 temp=np.array(ds.variables['TEMP_ADJUSTED'])
 pres=np.array(ds.variables['PRES_ADJUSTED'])
 psal=np.array(ds.variables['PSAL_ADJUSTED'])
@@ -83,13 +83,17 @@ dens[mask_dens] = dens_tmp + 1000
 ########################################################################################################################
 # I load the eddy radiuses and the eddy-float distance
 ########################################################################################################################
-a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an57/data_an57.pkl" % (home), "rb")
-data_an57 = pickle.load(a_file)
-Date_Num_float = data_an57['Date_Num_float']
-dist_float_eddy_km = data_an57['dist_float_eddy_km']
-radius_Vmax_floatDays = data_an57['radius_Vmax_floatDays']
-radius_Out_floatDays = data_an57['radius_Out_floatDays']
-a_file.close()
+day_end_timeseries=np.array([2021,8,1])
+image_path='../Plots/an62/20210413to%d%02d%02d' % (day_end_timeseries[0],day_end_timeseries[1],day_end_timeseries[2])
+if not os.path.isdir(image_path):   os.system('mkdir %s' % image_path)
+day_end_timeseries=matlab_datenum(day_end_timeseries)
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+dist_float_eddy_km = data_dist_radius['Distance_Centroid']
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+sel_insideEddy = (Date_Num<=day_end_timeseries)&(sel_insideEddy==1)
+del data_dist_radius
+
 
 ########################################################################################################################
 # I plot by doing two loops: on on the different isopycnals and one on the different profiles
@@ -128,10 +132,9 @@ for i_isop in range(0,reference_isopycnal_list.size):
     max_doxy=-99999;min_doxy=99999
     depth_isopycnal_tmp = np.array([])
     i=0
-    for i in range (0,dist_float_eddy_km.size):
+    for i in range (0,Date_Num.size):
         dist_float_eddy_km_tmp = dist_float_eddy_km[i]
-        radius_Vmax_floatDays_tmp = radius_Vmax_floatDays[i]
-        if dist_float_eddy_km_tmp>radius_Vmax_floatDays_tmp:    continue
+        if not sel_insideEddy[i]:    continue
 
         temp_tmp=temp[i,:]
         cons_temp_tmp=cons_temp[i,:]
@@ -157,16 +160,16 @@ for i_isop in range(0,reference_isopycnal_list.size):
         max_cons_temp=np.max( np.array( [max_cons_temp,cons_temp_tmp] ) );min_cons_temp=np.min( np.array( [min_cons_temp,cons_temp_tmp] ) )
         max_doxy=np.max( np.array( [max_doxy,doxy_tmp] ) );min_doxy=np.min( np.array( [min_doxy,doxy_tmp] ) )
 
-        Date_Num_float_tmp=Date_Num_float[i]
+        Date_Num_float_tmp=Date_Num[i]
         ####################################################################################################################
         # Plot part
         ####################################################################################################################
         plt.figure(1)
-        plot1 = plt.scatter(dist_float_eddy_km_tmp, temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        plot1 = plt.scatter(dist_float_eddy_km_tmp, temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
         plt.figure(2)
-        plot2 = plt.scatter(dist_float_eddy_km_tmp, doxy_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        plot2 = plt.scatter(dist_float_eddy_km_tmp, doxy_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
         plt.figure(3)
-        plot3 = plt.scatter(dist_float_eddy_km_tmp, cons_temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        plot3 = plt.scatter(dist_float_eddy_km_tmp, cons_temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
 
 
     # I add last details
@@ -178,13 +181,13 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.ylim(min_temp-tmp,max_temp+tmp)
     cbar = plt.colorbar(plot1)
     nxticks = 10
-    xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
+    xticks = np.linspace(Date_Num.min(), day_end_timeseries, nxticks)
     xticklabels = []
     for i in xticks:
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an62/01Temp_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (reference_isopycnal) ,dpi=200)
+    plt.savefig('%s/01Temp_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (image_path,reference_isopycnal) ,dpi=200)
     plt.close()
 
     plt.figure(2)
@@ -195,13 +198,13 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.ylim(min_doxy-tmp,max_doxy+tmp)
     cbar = plt.colorbar(plot2)
     nxticks = 10
-    xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
+    xticks = np.linspace(Date_Num.min(), day_end_timeseries, nxticks)
     xticklabels = []
     for i in xticks:
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an62/02Doxy_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (reference_isopycnal) ,dpi=200)
+    plt.savefig('%s/02Doxy_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (image_path,reference_isopycnal) ,dpi=200)
     plt.close()
 
     plt.figure(3)
@@ -212,13 +215,13 @@ for i_isop in range(0,reference_isopycnal_list.size):
     plt.ylim(min_cons_temp-tmp,max_cons_temp+tmp)
     cbar = plt.colorbar(plot1)
     nxticks = 10
-    xticks = np.linspace(Date_Num_float.min(), Date_Num_float[59], nxticks)
+    xticks = np.linspace(Date_Num.min(), day_end_timeseries, nxticks)
     xticklabels = []
     for i in xticks:
         xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2],matlab_datevec(i)[1]))
     cbar.set_ticks(xticks)
     cbar.set_ticklabels(xticklabels)
-    plt.savefig('../Plots/an62/03ConsTemp_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (reference_isopycnal) ,dpi=200)
+    plt.savefig('%s/03ConsTemp_profiles_vs_distance_from_center_%0.2fkgm3_an62.pdf' % (image_path,reference_isopycnal) ,dpi=200)
     plt.close()
 
 
