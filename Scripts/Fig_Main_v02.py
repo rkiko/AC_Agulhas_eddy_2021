@@ -1295,8 +1295,8 @@ width, height = 0.82, 0.8
 
 fig = plt.figure(1, figsize=(5.5, 1.0))
 ax = fig.add_axes([0.12, 0.1, width, height])
-plt.plot(x_filtered,Flux_depth0,'r',label='%0.1f kg/m$^3$ [200 m]' % (isopycnal_depth0))
-plt.plot(x_filtered,Flux_depthf,'b',label='%0.1f kg/m$^3$ [600 m]' % (isopycnal_depthf))
+plt.plot(x_filtered,Flux_depth0,'r',label='%0.2f kg/m$^3$ [200 m]' % (isopycnal_depth0))
+plt.plot(x_filtered,Flux_depthf,'b',label='%0.2f kg/m$^3$ [600 m]' % (isopycnal_depthf))
 plt.plot(mld_datenum,Flux_MLD,'m--',label='MLD')
 plt.plot(x_filtered,Flux_102635,'m',label='1026.35 kg/m$^3$')
 plt.xlim(x_filtered.min(),x_filtered.max())
