@@ -333,7 +333,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 
 
     #Here, for the temperature and oxygen, I analyse how much they changed in the top 200 and in the 200-600 m layers
-    if (ipar == 1)|(ipar == 5):
+    if (ipar == 1)|(ipar == 4)|(ipar == 5):
         x_parameter = np.linspace(Date_Num_parameter.min(), Date_Num_parameter.max(), 100)
         y1_parameter = np.linspace(depth_parameter.min(), depth_parameter.max(), 200)
         y2_parameter = np.linspace(dens_parameter.min(), dens_parameter.max(), 200)
@@ -383,13 +383,19 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 
         if ipar==1:
             temp_mld = parameter_mld.copy()
+        elif ipar==4:
+            parameter_mld = parameter_mld * mld_int
+            chl_mld = parameter_mld.copy()
         elif ipar==5:
             doxy_mld = parameter_mld.copy()
 
         fig = plt.figure(1, figsize=(12, 4))
         ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
         plt.plot(x_parameter,parameter_mld)
-        plt.ylabel(parameter_ylabel_list[ipar])
+        if ipar == 4:
+            plt.ylabel('Integrated %s' % parameter_ylabel_list[ipar])
+        else:
+            plt.ylabel(parameter_ylabel_list[ipar])
         plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
         plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
         plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
@@ -409,6 +415,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         plt.savefig('../Plots/an37/ZTimeSeries_%s_ML_an37.pdf' % parameter_shortname_list[ipar],dpi=200)
         plt.close()
 
+        if ipar ==4: continue
         # Parameter below mixed layer (1026.35-1027.24 kg/m3 isopycnals)
         parameter_mld_102724 = np.zeros((mld_int.size,))
         dens0_list=np.array([1026.35,1026.4,1026.8])
@@ -534,6 +541,7 @@ for i in range(0, mld_int.size):
     sel_mld = y1_parameter <= (mld_int[i]-20)
     AOU_mld[i] = np.mean(tmp[sel_mld])
 
+# AOU_mld=AOU_interp[1,:]
 fig = plt.figure(1, figsize=(12, 4))
 ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
 plt.plot(x_parameter,AOU_interp[1,:])
@@ -556,6 +564,34 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 # I save
 plt.savefig('../Plots/an37/ZTimeSeries_AOU_ML_an37.pdf' ,dpi=200)
 plt.close()
+
+#Mean chl in the mixed layer (and not as integrated chl a as plotted above)
+width, height = 0.8, 0.7
+mean_chl_mld = chl_mld/mld_int
+
+fig = plt.figure(1, figsize=(12, 4))
+ax = fig.add_axes([0.12, 0.35, width, height-0.15])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+plt.plot(x_parameter,mean_chl_mld)
+plt.ylabel('Chlorophyll-a (mg/m$^3$)')
+plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+#I set xticks
+nxticks=10
+xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+xticklabels=[]
+for i in xticks:
+    date_time_obj = date_reference + datetime.timedelta(days=i)
+    xticklabels.append(date_time_obj.strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90,fontsize=12)
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+# I save
+plt.savefig('../Plots/an37/ZTimeSeries_chla_mean_ML_an37.pdf',dpi=200)
+plt.close()
+
 
 #######################################################################
 # I save the mixed layer depth and BVfreq values for the latex document
@@ -622,12 +658,11 @@ argument = 'doxy_ML_end'
 arg_value=doxy_mld[-1]
 write_latex_data(filename,argument,'%d' % arg_value)
 
-AOU_20m=AOU_interp[1,:]
 argument = 'AOU_ML_0413to0625'
-arg_value=np.mean(AOU_20m[0:44])
+arg_value=np.mean(AOU_mld[0:44])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
 argument = 'AOU_ML_0625to0905'
-arg_value=np.mean(AOU_20m[44:89])
+arg_value=np.mean(AOU_mld[44:89])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
 
 argument = 'temp200_600m_0413'
@@ -652,4 +687,37 @@ write_latex_data(filename,argument,'%d April' % arg_value[2])
 argument = 'temp102680_102721_endvalue'
 arg_value=temp_mld_102724[-1]
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+#######################################################################
+# I save the mean and integrated chl concentration values for the latex document
+#######################################################################
+argument = 'max_chl_value'
+arg_value=np.max(mean_chl_mld)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'max_chl_date'
+arg_value=np.where(mean_chl_mld==np.max(mean_chl_mld))[0][0]
+arg_value=matlab_datevec((x_parameter[arg_value]+matlab_datenum(1950,1,1)))[2]
+write_latex_data(filename,argument,'%d May' % arg_value)
+i=73;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'min_chl_value'
+arg_value=mean_chl_mld[i]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'min_chl_date'
+arg_value=matlab_datevec((x_parameter[i]+matlab_datenum(1950,1,1)))[2]
+write_latex_data(filename,argument,'%d August' % arg_value)
+i=90;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'increase_chl_date'
+arg_value=matlab_datevec((x_parameter[i]+matlab_datenum(1950,1,1)))[2]
+write_latex_data(filename,argument,'%d September' % arg_value)
+
+
+argument = 'integrated_chl_202104'
+arg_value=np.round(chl_mld[0])
+write_latex_data(filename,argument,'%d' % arg_value)
+
+i=69;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+
+argument = 'integrated_chl_20210805'
+arg_value=np.round(chl_mld[69])
+write_latex_data(filename,argument,'%d' % arg_value)
 
