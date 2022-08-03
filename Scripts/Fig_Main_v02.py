@@ -751,6 +751,8 @@ tmp = np.abs(y_filtered - 1026.35)
 idx1 = np.where( tmp == tmp.min() )[0][0]+1
 tmp = np.abs(y_filtered - isopycnal_600m)
 idx2 = np.where( tmp == tmp.min() )[0][0]
+tmp = np.abs(y_filtered - 1026.82)
+idx3 = np.where( tmp == tmp.min() )[0][0]+1
 
 MiP_POC_0_102635=np.mean(MiP_interp[0:idx1,:],0)
 MaP_POC_0_102635=np.mean(MaP_interp[0:idx1,:],0)
@@ -768,10 +770,20 @@ MiP_POC_102635_600_std = np.std(MiP_interp[idx1:idx2, :], 0)
 MaP_POC_102635_600_std = np.std(MaP_interp[idx1:idx2, :], 0)
 bbp_POC_102635_600_std = np.std(bbp_interp[idx1:idx2, :], 0)
 
+MiP_POC_102682_600=np.mean(MiP_interp[idx3:idx2,:],0)
+MaP_POC_102682_600=np.mean(MaP_interp[idx3:idx2,:],0)
+bbp_POC_102682_600=np.mean(bbp_interp[idx3:idx2,:],0)
+
+MiP_POC_102682_600_std = np.std(MiP_interp[idx3:idx2, :], 0)
+MaP_POC_102682_600_std = np.std(MaP_interp[idx3:idx2, :], 0)
+bbp_POC_102682_600_std = np.std(bbp_interp[idx3:idx2, :], 0)
+
 Integrated_POC_mgC_m3_0_102635 = MiP_POC_0_102635 + MaP_POC_0_102635 + bbp_POC_0_102635
 Integrated_POC_mgC_m3_0_102635_std = np.sqrt( MiP_POC_0_102635_std**2 + MaP_POC_0_102635_std**2 + bbp_POC_0_102635_std**2 )
 Integrated_POC_mgC_m3_102635_600 = MiP_POC_102635_600 + MaP_POC_102635_600 + bbp_POC_102635_600
 Integrated_POC_mgC_m3_102635_600_std = np.sqrt( MiP_POC_102635_600_std**2 + MaP_POC_102635_600_std**2 + bbp_POC_102635_600_std**2 )
+Integrated_POC_mgC_m3_102682_600 = MiP_POC_102682_600 + MaP_POC_102682_600 + bbp_POC_102682_600
+Integrated_POC_mgC_m3_102682_600_std = np.sqrt( MiP_POC_102682_600_std**2 + MaP_POC_102682_600_std**2 + bbp_POC_102682_600_std**2 )
 list_dates_Integrated_POC = x_filtered.copy()
 
 Integrated_POC_mgC_m3_0_MLD = MiP_MLD + MaP_MLD + bbp_MLD
@@ -786,13 +798,14 @@ day_end_eddy_merging = datetime.datetime(2021,8,11)
 day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 
 width, height = 0.8, 0.5
-set_ylim_lower, set_ylim_upper = min(Integrated_POC_mgC_m3_0_102635.min(),Integrated_POC_mgC_m3_102635_600.min()*10),max(Integrated_POC_mgC_m3_0_102635.max(),Integrated_POC_mgC_m3_102635_600.max()*10)*1.1
+set_ylim_lower, set_ylim_upper = min(Integrated_POC_mgC_m3_0_102635.min(),Integrated_POC_mgC_m3_102635_600.min()*10),max(Integrated_POC_mgC_m3_0_102635.max(),Integrated_POC_mgC_m3_102635_600.max()*10,Integrated_POC_mgC_m3_102682_600.max()*10)*1.1
 
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_0_102635,'r',linewidth=3,label='0—1026.35 kg/m$^3$ [0—MLD]')
 # plt.plot(mld_datenum,Integrated_POC_mgC_m3_0_MLD,'r--',linewidth=3,label='0-MLD') # 12-7-22: I don't plot this quantity cos it is biased: some profiles only reach 400m: thus when I calculate the mean value from MLD to the 600m isopycnl, this is biased
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102635_600*10,'b',linewidth=3,label='1026.35—%0.2f kg/m$^3$ [MLD—600 m] ($\cdot$10)' % (isopycnal_600m))
+plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102682_600*10,'m',linewidth=3,label='1026.82—%0.2f kg/m$^3$ [200—600 m] ($\cdot$10)' % (isopycnal_600m))
 # plt.plot(mld_datenum,Integrated_POC_mgC_m3_MLD_600*10,'b--',linewidth=3,label='MLD—%0.1f kg/m$^3$ [$\cdot$10]' % (isopycnal_600m))
 plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
@@ -805,12 +818,71 @@ for i in xticks:
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
 plt.xticks(rotation=90, fontsize=14)
-plt.legend(fontsize=12,ncol=4)
+plt.legend(fontsize=12,ncol=2)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
 ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig02e_v02.pdf' ,dpi=200)
 plt.close()
+
+#######################################################################
+# I save values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+i=49;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+argument = 'POC_0_102635_0413to0703_value'
+arg_value=np.mean(Integrated_POC_mgC_m3_0_102635[i])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'POC_0_102635_0413to0703_date'
+write_latex_data(filename,argument,'3 July')
+# Integrated_POC_mgC_m3_0_102635[49:58]
+i=53;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+argument = 'POC_0_102635_10July'
+arg_value=np.mean(Integrated_POC_mgC_m3_0_102635[i])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+i=67;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+argument = 'POC_0_102635_01August'
+arg_value=np.mean([Integrated_POC_mgC_m3_0_102635[i],Integrated_POC_mgC_m3_0_102635[i-1]])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+i=73;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+argument = 'POC_0_102635_11August'
+arg_value=np.mean([Integrated_POC_mgC_m3_0_102635[i],Integrated_POC_mgC_m3_0_102635[i-1]])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'POC_102682_102724_13April'
+arg_value=np.mean(Integrated_POC_mgC_m3_102682_600[0])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+i=32;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+Integrated_POC_mgC_m3_102682_600[26:34]
+argument = 'POC_102682_102724_peak_date'
+write_latex_data(filename,argument,'5 June')
+
+Integrated_POC_mgC_m3_102682_600[64:74]
+i=69;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+argument = 'POC_102682_102724_date_start_increase'
+write_latex_data(filename,argument,'5 August')
+argument = 'POC_102682_102724_0812date'
+i=73;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+arg_value=datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B')
+write_latex_data(filename,argument,'%s' % arg_value)
+argument = 'POC_102682_102724_0812value'
+arg_value=np.mean(Integrated_POC_mgC_m3_102682_600[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+i=60;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+Integrated_POC_mgC_m3_102635_600[53:85]
+argument = 'POC_102635_102724_0721date'
+write_latex_data(filename,argument,'21 July')
+argument = 'POC_102635_102724_0721value'
+arg_value=np.mean(Integrated_POC_mgC_m3_102635_600[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=82;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
+argument = 'POC_102635_102724_0826_value'
+arg_value=np.mean(Integrated_POC_mgC_m3_102635_600[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+plt.plot(x_filtered,bbp_POC_0_102635,'.b-')
 
 
 
