@@ -109,10 +109,10 @@ ax = plt.axes(projection=cartopy.crs.PlateCarree())
 ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
 ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
 ax.scatter(0, 0, c=0, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5, label='Eddy 1 trajectory')  # cmap='Blues_r')
-ax.scatter(0, 0, c=0, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='deepskyblue',linewidth=0.5, label='Eddy 2 trajectory')  # cmap='Blues_r')
+ax.scatter(0, 0, c=0, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenrod',linewidth=0.5, label='Eddy 2 trajectory')  # cmap='Blues_r')
 ax.plot(0, 0, 'k-',linewidth=2.5, label='BGC float trajectory')  # cmap='Blues_r')
 plot1 = ax.scatter(lonEddy1, latEddy1, c=anom_meanE_meanOut1, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5,zorder=2)  # cmap='Blues_r')
-plot4 = ax.scatter(lonEddy2, latEddy2, c=anom_meanE_meanOut2, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='deepskyblue',linewidth=0.5,zorder=2)  # cmap='Blues_r')
+plot4 = ax.scatter(lonEddy2, latEddy2, c=anom_meanE_meanOut2, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenrod',linewidth=0.5,zorder=2)  # cmap='Blues_r')
 plot3 = ax.scatter(lon_float_outside, lat_float_outside, c='k',marker='x', s=100,zorder=12)  # cmap='Blues_r')
 ax.plot(lon_float, lat_float, 'k', alpha=0.9,zorder=15,linewidth=2.5)
 plot2 = plt.scatter(0, 0, c=chl_inside_mean1[25],cmap='Greens', vmin=0, vmax=chl_max_plot, s=1)
@@ -138,7 +138,7 @@ for i in [3,32,116,189,268,325]:
     tmp1 = plt.scatter(x, y,c=lonVmax2[:, i]*0+chl_inside_mean2[i], cmap='Greens',vmin=0,vmax=chl_max_plot,s=1)
     a=tmp1.to_rgba(chl_inside_mean2[i])
     tmp2 = plt.plot(x,y,c=a,linewidth=3,zorder=9)
-    tmp3 = plt.scatter(lonEddy2[i], latEddy2[i], c=anom_meanE_meanOut2[i], cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='blue',linewidth=0.5,zorder=20)
+    tmp3 = plt.scatter(lonEddy2[i], latEddy2[i], c=anom_meanE_meanOut2[i], cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='darkgoldenrod',linewidth=0.5,zorder=20)
     idtmp=np.where(y==np.nanmax(y))
     if i in [116,325]: idtmp=np.where(y==np.nanmin(y))
     if i in [189]: idtmp=np.where(x==np.nanmin(x))
@@ -168,6 +168,7 @@ plt.savefig('../Plots/Fig_Main_v02/Fig01_v02.pdf',dpi=200)
 plt.close()
 
 # endregion
+
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
