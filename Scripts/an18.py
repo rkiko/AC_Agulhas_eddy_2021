@@ -618,6 +618,8 @@ bbp_POC_mld=np.array([])
 bbp_POC_out_mld=np.array([])
 MaP_POC_mld=np.array([])
 MaP_POC_out_mld=np.array([])
+MiP_POC_mld=np.array([])
+MiP_POC_out_mld=np.array([])
 i=0
 for i in range(0,bbp_POC_interp.shape[1]):
     sel_tmp = y_filtered<=mld_int[i]
@@ -625,6 +627,8 @@ for i in range(0,bbp_POC_interp.shape[1]):
     bbp_POC_out_mld = np.append(bbp_POC_out_mld, np.mean( bbp_POC_interp[~sel_tmp,i] ))
     MaP_POC_mld = np.append(MaP_POC_mld, np.mean( MAP_POC_interp[sel_tmp,i] ))
     MaP_POC_out_mld = np.append(MaP_POC_out_mld, np.mean( MAP_POC_interp[~sel_tmp,i] ))
+    MiP_POC_mld = np.append(MiP_POC_mld, np.mean( MIP_POC_interp[sel_tmp,i] ))
+    MiP_POC_out_mld = np.append(MiP_POC_out_mld, np.mean( MIP_POC_interp[~sel_tmp,i] ))
 
 fig = plt.figure(1, figsize=(12, 4))
 ax = fig.add_axes([0.12, 0.4, width, height])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
@@ -645,6 +649,7 @@ plt.xticks(rotation=90, fontsize=14)
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.legend()
+plt.ylim([0,bbp_POC_mld.max()*1.1])
 # I save
 plt.savefig('../Plots/an18/ZTimeSeries_bbp_ML_an18.pdf' ,dpi=200)
 plt.close()
@@ -668,8 +673,33 @@ plt.xticks(rotation=90, fontsize=14)
 # I add the grid
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.legend()
+plt.ylim([0,MaP_POC_mld.max()*1.1])
 # I save
 plt.savefig('../Plots/an18/ZTimeSeries_MaP_ML_an18.pdf' ,dpi=200)
+plt.close()
+
+fig = plt.figure(1, figsize=(12, 4))
+ax = fig.add_axes([0.12, 0.4, width, height])# ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+plt.plot(x_filtered,MiP_POC_mld,label='MiP POC in ML')
+plt.plot(x_filtered,MiP_POC_out_mld,label='MiP POC out ML')
+plt.ylabel('MiP POC (mgC/m$^3$)')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k')
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k')
+# I set xticks
+nxticks = 10
+xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append(datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.legend()
+plt.ylim([0,MiP_POC_mld.max()*1.1])
+# I save
+plt.savefig('../Plots/an18/ZTimeSeries_MiP_ML_an18.pdf' ,dpi=200)
 plt.close()
 
 argument = 'bbp_ML_0413'
@@ -697,6 +727,15 @@ arg_value=np.mean(MaP_POC_out_mld)
 write_latex_data(filename,argument,'%0.02f' % arg_value)
 argument = 'MaP_outML_0413to0923_std'
 arg_value=np.std(MaP_POC_out_mld)
+write_latex_data(filename,argument,'%0.02f' % arg_value)
+
+i=59;print(datetime.utcfromtimestamp(x_filtered[i]).strftime('%d %B'))
+argument = 'MiP_ML_0413to0719'
+arg_value=np.mean(MiP_POC_mld[0:59])
+write_latex_data(filename,argument,'%0.02f' % arg_value)
+i=71;print(datetime.utcfromtimestamp(x_filtered[i]).strftime('%d %B'))
+arg_value=np.mean(MiP_POC_mld[i])
+argument = 'MiP_ML_0808'
 write_latex_data(filename,argument,'%0.02f' % arg_value)
 
 #I calculate also the difference of the integrated POC 200—600 m between the 13 April and the 20 June 2021 (it is a statistic for the main paper)
