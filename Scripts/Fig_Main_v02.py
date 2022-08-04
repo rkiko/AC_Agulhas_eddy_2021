@@ -799,15 +799,19 @@ day_end_eddy_merging = datetime.datetime(2021,8,11)
 day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 
 width, height = 0.8, 0.5
-set_ylim_lower, set_ylim_upper = min(Integrated_POC_mgC_m3_0_102635.min(),Integrated_POC_mgC_m3_102635_600.min()*10),max(Integrated_POC_mgC_m3_0_102635.max(),Integrated_POC_mgC_m3_102635_600.max()*10,Integrated_POC_mgC_m3_102682_600.max()*10)*1.1
+set_ylim_lower, set_ylim_upper = min(Integrated_POC_mgC_m3_0_102635.min(),Integrated_POC_mgC_m3_102635_600.min()*10),max(Integrated_POC_mgC_m3_0_102635.max()+Integrated_POC_mgC_m3_0_102635_std.max(),Integrated_POC_mgC_m3_102635_600.max()*10,Integrated_POC_mgC_m3_102682_600.max()*10)*1.02
 
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_0_102635,'r',linewidth=3,label='0—1026.35 kg/m$^3$ [0—MLD]')
-# plt.plot(mld_datenum,Integrated_POC_mgC_m3_0_MLD,'r--',linewidth=3,label='0-MLD') # 12-7-22: I don't plot this quantity cos it is biased: some profiles only reach 400m: thus when I calculate the mean value from MLD to the 600m isopycnl, this is biased
+plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_0_102635 - Integrated_POC_mgC_m3_0_102635_std*0.5, Integrated_POC_mgC_m3_0_102635 + Integrated_POC_mgC_m3_0_102635_std*0.5,
+                  facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nresp. rate')
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102635_600*10,'b',linewidth=3,label='1026.35—%0.2f kg/m$^3$ [MLD—600 m] ($\cdot$10)' % (isopycnal_600m))
+plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102635_600*10 - Integrated_POC_mgC_m3_102635_600_std*0.5*10, Integrated_POC_mgC_m3_102635_600*10 + Integrated_POC_mgC_m3_102635_600_std*0.5*10,
+                  facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nresp. rate')
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102682_600*10,'m',linewidth=3,label='1026.82—%0.2f kg/m$^3$ [200—600 m] ($\cdot$10)' % (isopycnal_600m))
-# plt.plot(mld_datenum,Integrated_POC_mgC_m3_MLD_600*10,'b--',linewidth=3,label='MLD—%0.1f kg/m$^3$ [$\cdot$10]' % (isopycnal_600m))
+plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102682_600*10 - Integrated_POC_mgC_m3_102682_600_std*0.5*10, Integrated_POC_mgC_m3_102682_600*10 + Integrated_POC_mgC_m3_102682_600_std*0.5*10,
+                  facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nresp. rate')
 plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 # I set xticks
