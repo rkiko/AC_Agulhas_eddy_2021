@@ -428,7 +428,7 @@ day_end_eddy_merging=np.array([2021,8,11])
 day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
 day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
 
-parameter_ylabel_list=['Temperature ($^{\circ}$C)','Chlorophyll-a (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)']
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Chlorophyll $a$ (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)']
 parameter_panellabel_list=['b','d','c','f']
 parameter_shortname_list=['cons_temp','chla','doxy','bbpPOC']
 ipar=0
@@ -439,7 +439,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     elif ipar == 3: parameter=sPOC.copy()
 
     #I filter the profiles
-    parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([])
+    parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([])
     i=0
     for i in range(0,parameter.shape[0]):
         z = parameter[i, :]
@@ -450,15 +450,18 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
             z = savgol_filter(z, 5, 1)
             parameter_filtered = np.concatenate((parameter_filtered, z));Date_Num_parameter = np.concatenate((Date_Num_parameter, x))
             depth_parameter = np.concatenate((depth_parameter, y1))
+            dens_parameter = np.concatenate((dens_parameter, y2))
 
     parameter_filtered[parameter_filtered<0]=0
+    dens_parameter[dens_parameter<1026]=1026
+    dens_parameter[dens_parameter>1027.5]=1027.5
     # I define the x and y arrays for the contourf plot
     x_parameter = np.linspace(Date_Num_parameter.min(),Date_Num_parameter.max(),100)
     y1_parameter = np.linspace(depth_parameter.min(),depth_parameter.max(),50)
     # I interpolate
     x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y1_parameter)
     parameter_interp_depth = griddata((Date_Num_parameter,depth_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
-
+    dens_interp_depth = griddata((Date_Num_parameter,depth_parameter), dens_parameter, (x_parameter_g, y_parameter_g), method="nearest")
 
     ########################################################
     ####### I plot: versus depth
@@ -467,18 +470,29 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         parameter_interp_depth[parameter_interp_depth > 40] = 40
 
     width, height = 0.8, 0.7
-    set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
+    if ipar==0:
+        set_ylim_lower, set_ylim_upper = y1_parameter.min(),700
+    else:
+        set_ylim_lower, set_ylim_upper = y1_parameter.min(),600
     fig = plt.figure(1, figsize=(12,8))
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
     if (ipar==0):
         plt.plot(Date_Num,mld,'w')
+        plot3 = ax.contour(x_parameter, y1_parameter, dens_interp_depth, levels=[1026.82,1027.2397618090454],colors='white', linestyles='dashed', linewidths=1, zorder=10)  # ,cmap='Blues_r')
+        # ax.clabel(plot3, inline=1, fontsize=10)
+        fmt = {}
+        strs = ['1026.82 kg/m$^3$', '1027.24 kg/m$^3$']
+        for l, s in zip(plot3.levels, strs):
+            fmt[l] = s
+
+        ax.clabel(plot3, plot3.levels[::], inline=True, fmt=fmt, fontsize=10)
     elif ipar==1:
-        plt.plot(critical_depth_datenum,critical_depth,'w');plt.plot(critical_depth_datenum,critical_depth,'w.')
+        plt.plot(critical_depth_datenum,critical_depth,'w')#;plt.plot(critical_depth_datenum,critical_depth,'w.')
 
     plt.gca().invert_yaxis()
-    plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w',linestyles='dashed')
-    plt.vlines(day_end_eddy_merging,ymin=0,ymax=600,color='w',linestyles='dashed')
+    plt.vlines(day_start_eddy_merging,ymin=0,ymax=700,color='w',linestyles='dashed')
+    plt.vlines(day_end_eddy_merging,ymin=0,ymax=700,color='w',linestyles='dashed')
     # draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
@@ -501,6 +515,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I save
     plt.savefig('../Plots/Fig_Main_v02/Fig02%s_v02.pdf' % parameter_panellabel_list[ipar],dpi=200)
     plt.close()
+
 # endregion
 
 
@@ -1374,8 +1389,8 @@ fig = plt.figure(1, figsize=(5.5, 1.0))
 ax = fig.add_axes([0.12, 0.1, width, height])
 plt.plot(x_filtered,Flux_depth0,'r',label='%0.2f kg/m$^3$ [200 m]' % (isopycnal_depth0))
 plt.plot(x_filtered,Flux_depthf,'b',label='%0.2f kg/m$^3$ [600 m]' % (isopycnal_depthf))
-plt.plot(mld_datenum,Flux_MLD,'m--',label='MLD')
-plt.plot(x_filtered,Flux_102635,'m',label='1026.35 kg/m$^3$')
+plt.plot(mld_datenum,Flux_MLD,'m',label='MLD')
+# plt.plot(x_filtered,Flux_102635,'m',label='1026.35 kg/m$^3$')
 plt.xlim(x_filtered.min(),x_filtered.max())
 plt.ylim(ax.get_ylim()[0],ax.get_ylim()[1])
 plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k',linestyles='dashed')
@@ -2185,13 +2200,13 @@ nyticks=6
 yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
 yticklabels=[]
 for i in range(0,nyticks):
-    if yticks[i] == 1026.35:
-        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% (yticks[i]) )
-    else:
-        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
+    # if yticks[i] == 1026.35:
+    #     yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% (yticks[i]) )
+    # else:
+    yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
-ax.text(-0.2, 1.065, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax.text(-0.25, 1.075, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig04a_vs_dens_v02.pdf' ,dpi=200)
 plt.close()
@@ -2237,13 +2252,13 @@ yticks_down=np.linspace(depth_isopycnal_down_list[idx1], depth_isopycnal_down_li
 yticks_up=np.linspace(depth_isopycnal_up_list[idx1], depth_isopycnal_up_list[idx2],nyticks)
 yticklabels=[]
 for i in range(0,nyticks):
-    if i==0:
-        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% ( np.interp(yticks[i],depth_isopycnal_list,dens0_list) ) )
-    else:
-        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
+    # if i==0:
+    #     yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% ( np.interp(yticks[i],depth_isopycnal_list,dens0_list) ) )
+    # else:
+    yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
-ax.text(-0.2, 1.065, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax.text(-0.25, 1.075, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig04a_vs_depth_v02.pdf' ,dpi=200)
 plt.close()
@@ -2291,7 +2306,7 @@ for i in range(0,nyticks):
         yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
-ax.text(-0.2, 1.065, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax.text(-0.25, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig04b_vs_dens_v02.pdf' ,dpi=200)
 plt.close()
@@ -2341,7 +2356,7 @@ for i in range(0,nyticks):
         yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
-ax.text(-0.2, 1.065, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax.text(-0.25, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig04b_vs_depth_v02.pdf' ,dpi=200)
 plt.close()
@@ -2352,11 +2367,11 @@ plt.close()
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
-######### SUPPLEMENTARY FIG 02
+######### SUPPLEMENTARY FIG SATELLITE CHL TIME SERIES
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
-# region Supplementary Fig.2
+# region Supplementary Fig. Satellite Chl Time Series
 import numpy as np
 import pandas as pd
 import os,sys
@@ -2422,8 +2437,691 @@ plt.close()
 # endregion
 
 
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+######### SUPPLEMENTARY FIG TIME SERIES OF TEMP, CHL, MiP etc. in ML and EDDY CORE
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+# region Supplementary Fig. Part 1: Time Series of temp, chl, doxy, and bbp. in ML and eddy core
+import numpy as np
+import pandas as pd
+import os,sys
+import netCDF4 as nc
+import pickle
+import matplotlib.pyplot as plt
+from pathlib import Path
+home = str(Path.home())
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+filename_coriolis='6903095_Sprof_all.nc'
+######
+import datetime
+import seawater as sw
+import gsw
+from scipy.signal import savgol_filter
+from scipy.interpolate import griddata
+
+#Here I define the time at which I want to finish the time series in the plot
+day_end_timeseries=np.array([2021,9,24])
+day_end_timeseries=matlab_datenum(day_end_timeseries)
+
+#######################################################################
+# I load the Coriolis data
+#######################################################################
+ds = nc.Dataset('%s/%s' % (storedir,filename_coriolis))
+lon=np.array(ds.variables['LONGITUDE'])
+lat=np.array(ds.variables['LATITUDE'])
+Date_Num=np.array(ds.variables['JULD'])
+date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
+
+#Standard variables
+temp=np.array(ds.variables['TEMP_ADJUSTED'])
+pres=np.array(ds.variables['PRES_ADJUSTED'])
+psal=np.array(ds.variables['PSAL_ADJUSTED'])
+
+#BGC Variables
+chla=np.array(ds.variables['CHLA_ADJUSTED'])
+doxy=np.array(ds.variables['DOXY_ADJUSTED'])
+bbp700=np.array(ds.variables['BBP700_ADJUSTED'])
+
+#If adjusted values are not available yet, I take the non adjusted ones
+if np.sum(temp==99999)==temp.size:
+    print('Taking non adjusted temperature')
+    temp = np.array(ds.variables['TEMP'])
+if np.sum(pres==99999)==pres.size:
+    print('Taking non adjusted pressure')
+    pres = np.array(ds.variables['PRES'])
+if np.sum(psal==99999)==psal.size:
+    print('Taking non adjusted salinity')
+    psal = np.array(ds.variables['PSAL'])
+if np.sum(chla==99999)==chla.size:
+    print('Taking non adjusted chlorophyll-a')
+    chla = np.array(ds.variables['CHLA'])
+if np.sum(doxy==99999)==doxy.size:
+    print('Taking non adjusted oxygen')
+    doxy = np.array(ds.variables['DOXY'])
+if np.sum(bbp700==99999)==bbp700.size:
+    print('Taking non adjusted bbp700')
+    bbp700 = np.array(ds.variables['BBP700'])
+
+#######################################################################
+#I tranform the pressure to depth
+#######################################################################
+mask_depth=pres!=99999 #I select only valid values
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_depth]
+pres_tmp=pres[mask_depth]
+depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
+depth=np.ones(temp.shape)*99999
+depth[mask_depth]=depth_tmp
+
+#I compute the potential density: for that, I need absolute salinity and conservative temperature, so I transform
+#salinity and temperature first
+mask_dens=np.logical_and(pres!=99999,temp!=99999,psal!=99999) # I exclude the points with value = 99999
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lon_tmp=np.tile(lon,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_dens]
+lon_tmp=lon_tmp[mask_dens]
+pres_tmp=pres[mask_dens]
+psal_tmp=psal[mask_dens]
+temp_tmp=temp[mask_dens]
+abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
+dens_tmp = gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+abs_psal=np.ones(temp.shape)*99999
+abs_psal[mask_dens]=abs_psal_tmp
+cons_temp=np.ones(temp.shape)*99999
+cons_temp[mask_dens]=cons_tmp
+dens=np.ones(temp.shape)*99999
+dens[mask_dens]=dens_tmp+1000
+
+#######################################################################
+# I transform the bbp700 to small POC (sPOC)
+#######################################################################
+from oceanpy import bbp700toPOC
+sPOC=bbp700.copy()*0+99999
+i=0
+for i in range(0,bbp700.shape[0]):
+    bbp700tmp=bbp700[i,:]
+    depth_tmp=depth[i,:]
+    temp_tmp=temp[i,:]
+    # I exclude nan values
+    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)
+    bbp700tmp=bbp700tmp[sel]
+    depth_tmp=depth_tmp[sel]
+    temp_tmp=temp_tmp[sel]
+    # I convert to small POC (sPOC) and I set to 0 values <0
+    sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
+    sPOC_tmp[sPOC_tmp<0]=0
+    sPOC[i,sel]=sPOC_tmp
+
+#######################################################################
+# I select the data only when the BGC Argo float was inside the eddy AND before day_end_timeseries (which fixes the x limit)
+#######################################################################
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+datenum_profiles = data_dist_radius['Datenum']
+sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
+
+lon=lon[sel_insideEddy]
+lat=lat[sel_insideEddy]
+Date_Num=Date_Num[sel_insideEddy]
+pres=pres[sel_insideEddy]
+depth=depth[sel_insideEddy,:]
+dens=dens[sel_insideEddy,:]
+cons_temp=cons_temp[sel_insideEddy,:]
+chla=chla[sel_insideEddy,:]
+doxy=doxy[sel_insideEddy,:]
+sPOC=sPOC[sel_insideEddy,:]
+
+#######################################################################
+# I calculate the mixed layer depth
+#######################################################################
+from oceanpy import mixed_layer_depth
+mld=np.array([])
+i=0
+for i in range(0,chla.shape[0]):
+    depth_tmp=depth[i,:]
+    temp_tmp=cons_temp[i,:]
+    # I exclude nan values
+    sel_non_nan=(depth_tmp!=99999)&(temp_tmp!=99999)
+    temp_tmp=temp_tmp[sel_non_nan];depth_tmp=depth_tmp[sel_non_nan]
+    mld_tmp,_ = mixed_layer_depth(depth_tmp,temp_tmp,using_temperature='yes')
+    mld=np.append(mld,mld_tmp)
+
+#######################################################################
+# I plot
+#######################################################################
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
+
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Chlorophyll $a$ (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)']
+parameter_panellabel_list=['a','c','b','e']
+parameter_panellabel_list_EC=['a','c','b','c']
+parameter_shortname_list=['cons_temp','chla','doxy','bbpPOC']
+ipar=0
+for ipar in range(0,parameter_ylabel_list.__len__()):
+    if ipar==0:   parameter=cons_temp.copy()
+    elif ipar == 1: parameter=chla.copy()
+    elif ipar == 2: parameter=doxy.copy()
+    elif ipar == 3: parameter=sPOC.copy()
+
+    #I filter the profiles
+    parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([])
+    i=0
+    for i in range(0,parameter.shape[0]):
+        z = parameter[i, :]
+        sel=(z!=99999) & (depth[i,:]!=99999) & (dens[i,:]!=99999)
+        if ipar == 3: sel = (sel) & (z <= 100)
+        if sum(sel) > 0:
+            z=z[sel];x=np.ones(z.shape)*Date_Num[i];y1=depth[i,sel];y2=dens[i,sel];y3=pres[i,sel]
+            z = savgol_filter(z, 5, 1)
+            parameter_filtered = np.concatenate((parameter_filtered, z));Date_Num_parameter = np.concatenate((Date_Num_parameter, x))
+            depth_parameter = np.concatenate((depth_parameter, y1));dens_parameter = np.concatenate((dens_parameter, y2))
+
+    parameter_filtered[parameter_filtered<0]=0
+    # I define the x and y arrays for the contourf plot
+    x_parameter = np.linspace(Date_Num_parameter.min(),Date_Num_parameter.max(),100)
+    y1_parameter = np.linspace(depth_parameter.min(),depth_parameter.max(),200)
+    y2_parameter = np.linspace(dens_parameter.min(), dens_parameter.max(), 200)
+    # I interpolate
+    x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y1_parameter)
+    parameter_interp_depth = griddata((Date_Num_parameter,depth_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
+    x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y2_parameter)
+    parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
+
+    # Parameter in the mixed layer
+    mld_int = np.interp(x_parameter, Date_Num, mld)
+    parameter_mld = np.zeros((mld_int.size,))
+    i = 0
+    for i in range(0, mld_int.size):
+        tmp = parameter_interp_depth[:, i]
+        sel_mld = y1_parameter <= (mld_int[i] - 20)
+        parameter_mld[i] = np.mean(tmp[sel_mld])
+
+    if ipar == 0:
+        temp_mld = parameter_mld.copy()
+    elif ipar == 1:
+        chla_mld = parameter_mld.copy()
+    elif ipar == 2:
+        doxy_mld = parameter_mld.copy()
+    elif ipar == 3:
+        bbpPOC_mld = parameter_mld.copy()
+
+    width, height = 0.8, 0.7
+    fig = plt.figure(1, figsize=(12, 4))
+    ax = fig.add_axes([0.12, 0.4, width,height - 0.15])  # ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+    plt.plot(x_parameter, parameter_mld)
+    if ipar == 4:
+        plt.ylabel('Integrated %s' % parameter_ylabel_list[ipar])
+    else:
+        plt.ylabel(parameter_ylabel_list[ipar])
+    plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
+    plt.xlim(x_parameter[0], x_parameter[-1])
+    plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+    plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+    # I set xticks
+    nxticks = 10
+    xticks = np.linspace(Date_Num.min(), Date_Num.max(), nxticks)
+    xticklabels = []
+    for i in xticks:
+        date_time_obj = date_reference + datetime.timedelta(days=i)
+        xticklabels.append(date_time_obj.strftime('%d %B'))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    plt.xticks(rotation=90, fontsize=14)
+    # I add the panel label
+    ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+    # I add the grid
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    # I save
+    plt.savefig('../Plots/Fig_Main_v02/Supplementary/TimeSeries_ML/TimeSeries_ML_%s_Fig02_v02.pdf' % parameter_shortname_list[ipar], dpi=200)
+    plt.close()
+
+    if ipar == 1:
+        chla_mld_integrated = parameter_mld.copy()*mld_int
+        width, height = 0.8, 0.7
+        fig = plt.figure(1, figsize=(12, 4))
+        ax = fig.add_axes([0.12, 0.4, width,
+                           height - 0.15])  # ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+        plt.plot(x_parameter, chla_mld_integrated)
+        plt.ylabel('Integrated chlorophyll $a$ (mg/m$^2$)')
+        plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
+        plt.xlim(x_parameter[0], x_parameter[-1])
+        plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+        plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+        # I set xticks
+        nxticks = 10
+        xticks = np.linspace(Date_Num.min(), Date_Num.max(), nxticks)
+        xticklabels = []
+        for i in xticks:
+            date_time_obj = date_reference + datetime.timedelta(days=i)
+            xticklabels.append(date_time_obj.strftime('%d %B'))
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticklabels)
+        plt.xticks(rotation=90, fontsize=14)
+        # I add the panel label
+        ax.text(-0.05, 1.05, 'd', transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+        # I add the grid
+        plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+        # I save
+        plt.savefig('../Plots/Fig_Main_v02/Supplementary/TimeSeries_ML/TimeSeries_ML_chla_integrated_Fig02_v02.pdf', dpi=200)
+        plt.close()
+
+        continue # I do not plot chl in the eddy core
+
+    # Parameter in the eddy core
+    dens0 = 1026.82
+    dens1 = 1027.2397618090454  # calculated at step 4 of Fig. 3a
+    parameter_eddy_core = np.zeros((mld_int.size,))
+    i = 0
+    for i in range(0, mld_int.size):
+        tmp = parameter_interp_dens[:, i]
+        sel_tmp = (y2_parameter >= dens0) & (y2_parameter < dens1)
+        parameter_eddy_core[i] = np.mean(tmp[sel_tmp])
+
+    parameter_eddy_core = savgol_filter(parameter_eddy_core, 5, 1)
+
+    if ipar == 0:
+        temp_eddy_core = parameter_eddy_core.copy()
+    elif ipar == 2:
+        doxy_eddy_core = parameter_eddy_core.copy()
+    elif ipar == 3:
+        bbpPOC_eddy_core = parameter_eddy_core.copy()
+
+    fig = plt.figure(1, figsize=(12, 4))
+    ax = fig.add_axes([0.12, 0.4, width, height - 0.15])
+    plt.plot(x_parameter, parameter_eddy_core)
+    plt.ylabel(parameter_ylabel_list[ipar])
+    plt.xlim(x_parameter[0], x_parameter[-1])
+    plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
+    plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+    plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+    # I set xticks
+    nxticks = 10
+    xticks = np.linspace(Date_Num.min(), Date_Num.max(), nxticks)
+    xticklabels = []
+    for i in xticks:
+        date_time_obj = date_reference + datetime.timedelta(days=i)
+        xticklabels.append(date_time_obj.strftime('%d %B'))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    plt.xticks(rotation=90, fontsize=14)
+    # I add the panel label
+    ax.text(-0.05, 1.05, parameter_panellabel_list_EC[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+    # I add the grid
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    # I save
+    plt.savefig('../Plots/Fig_Main_v02/Supplementary/TimeSeries_EddyCore/TimeSeries_EddyCore_%s_Fig02_v02.pdf' % parameter_shortname_list[ipar], dpi=200)
+    plt.close()
+
+#######################################################################
+# I save the some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+i=5;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'doxy_0421_eddy_core'
+arg_value=np.mean(doxy_eddy_core[i])
+write_latex_data(filename,argument,'%d' % arg_value)
+i=74;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'doxy_0813_eddy_core'
+arg_value=np.mean(doxy_eddy_core[i])
+write_latex_data(filename,argument,'%d' % arg_value)
+i=92;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'doxy_0912_eddy_core'
+arg_value=np.mean(doxy_eddy_core[i])
+write_latex_data(filename,argument,'%d' % arg_value)
+i=10;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'bbp_April_eddy_core'
+arg_value=np.mean(bbpPOC_eddy_core[0:i+1])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=48;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'bbp_0701to0923_eddy_core'
+arg_value=np.mean(bbpPOC_eddy_core[i:])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=73;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'bbp_0812_eddy_core'
+arg_value=np.mean(bbpPOC_eddy_core[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 
+
+# endregion
+# region Supplementary Fig. Part 2: Time Series of MiP MaP in ML and eddy core
+import numpy as np
+import pandas as pd
+import os,sys
+import netCDF4 as nc
+import pickle
+import matplotlib.pyplot as plt
+from pathlib import Path
+home = str(Path.home())
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+filename_coriolis='6903095_Sprof_all.nc'
+###########
+import datetime
+import seawater as sw
+import gsw
+from scipy.signal import savgol_filter
+from scipy.interpolate import griddata
+import calendar
+
+#Here I define the time at which I want to finish the time series in the plot
+# day_end_timeseries=datetime.datetime(2021,9,24)
+# day_end_timeseries = calendar.timegm(day_end_timeseries.timetuple())
+day_end_timeseries=np.array([2021,9,24])
+day_end_timeseries=matlab_datenum(day_end_timeseries)
+
+#######################################################################
+# I load the Coriolis data
+#######################################################################
+ds = nc.Dataset('%s/%s' % (storedir,filename_coriolis))
+lon=np.array(ds.variables['LONGITUDE'])
+lat=np.array(ds.variables['LATITUDE'])
+Date_Num_bbp=np.array(ds.variables['JULD'])+matlab_datenum(1950,1,1)
+date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
+
+Date_Vec=np.zeros([Date_Num_bbp.size,6])
+for i in range(0,Date_Num_bbp.size):
+    date_time_obj = date_reference + datetime.timedelta(days=Date_Num_bbp[i]-matlab_datenum(1950,1,1))
+    Date_Vec[i,0]=date_time_obj.year;Date_Vec[i,1]=date_time_obj.month;Date_Vec[i,2]=date_time_obj.day
+    Date_Vec[i,3]=date_time_obj.hour;Date_Vec[i,4]=date_time_obj.minute;Date_Vec[i,5]=date_time_obj.second
+
+Date_Vec=Date_Vec.astype(int)
+
+#Standard variables
+temp=np.array(ds.variables['TEMP_ADJUSTED'])
+pres=np.array(ds.variables['PRES_ADJUSTED'])
+psal=np.array(ds.variables['PSAL_ADJUSTED'])
+
+#BGC Variables
+chla=np.array(ds.variables['CHLA_ADJUSTED'])
+doxy=np.array(ds.variables['DOXY_ADJUSTED'])
+bbp700=np.array(ds.variables['BBP700_ADJUSTED'])
+
+#If adjusted values are not available yet, I take the non adjusted ones
+if np.sum(temp==99999)==temp.size:
+    print('Taking non adjusted temperature')
+    temp = np.array(ds.variables['TEMP'])
+if np.sum(pres==99999)==pres.size:
+    print('Taking non adjusted pressure')
+    pres = np.array(ds.variables['PRES'])
+if np.sum(psal==99999)==psal.size:
+    print('Taking non adjusted salinity')
+    psal = np.array(ds.variables['PSAL'])
+if np.sum(chla==99999)==chla.size:
+    print('Taking non adjusted chlorophyll-a')
+    chla = np.array(ds.variables['CHLA'])
+if np.sum(doxy==99999)==doxy.size:
+    print('Taking non adjusted oxygen')
+    doxy = np.array(ds.variables['DOXY'])
+if np.sum(bbp700==99999)==bbp700.size:
+    print('Taking non adjusted bbp700')
+    bbp700 = np.array(ds.variables['BBP700'])
+
+#######################################################################
+#I tranform the pressure to depth
+#######################################################################
+mask_depth=pres!=99999 #I select only valid values
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_depth]
+pres_tmp=pres[mask_depth]
+depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
+depth_bbp=np.ones(temp.shape)*99999
+depth_bbp[mask_depth]=depth_tmp
+
+#######################################################################
+# I transform the bbp700 to small POC (sPOC)
+#######################################################################
+from oceanpy import bbp700toPOC
+bbp_POC=bbp700.copy()*0+99999
+i=0
+for i in range(0,bbp700.shape[0]):
+    bbp700tmp=bbp700[i,:]
+    depth_tmp=depth_bbp[i,:]
+    temp_tmp=temp[i,:]
+    # I exclude nan values
+    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)
+    bbp700tmp=bbp700tmp[sel]
+    depth_tmp=depth_tmp[sel]
+    temp_tmp=temp_tmp[sel]
+    # I convert to small POC (sPOC) and I set to 0 values <0
+    sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
+    sPOC_tmp[sPOC_tmp<0]=0
+    bbp_POC[i,sel]=sPOC_tmp
+
+#######################################################################
+# I convert the bbp dates to float values (in seconds from 1970 1 1)
+#######################################################################
+Date_Num_bbp_calendar = Date_Num_bbp.copy()
+for i in range(0, Date_Num_bbp_calendar.size):
+    date_time_obj = datetime.datetime(Date_Vec[i, 0], Date_Vec[i, 1], Date_Vec[i, 2],
+                             Date_Vec[i, 3], Date_Vec[i, 4], Date_Vec[i, 5])
+    Date_Num_bbp_calendar[i] = calendar.timegm(date_time_obj.timetuple())
+    # datetime.utcfromtimestamp(Date_Num[i])
+
+#######################################################################
+# I load the MiP MaP data
+#######################################################################
+filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_diagnostics_data_356.tsv' % home
+data_ecopart=pd.read_csv(filename_ecopart, sep='\t', header=0)
+RAWfilename=data_ecopart.RAWfilename
+
+#I select only the profiles data, which contain 'ASC' in the filename, and I exclude the parkings
+ct=0
+sel_filename = [True for i in range(RAWfilename.size)]
+for a in RAWfilename:
+    if a.split('-')[-1].split('_')[0] == 'ASC':
+        sel_filename[ct]=True
+    else:
+        sel_filename[ct] = False
+    ct+=1
+
+# I extract the data_ecopart
+lon=np.array(data_ecopart['Longitude'][sel_filename])
+lat=np.array(data_ecopart['Latitude'][sel_filename])
+Date_Time=np.array(data_ecopart['Date_Time'][sel_filename])
+pressure=np.array(data_ecopart['Pressure [dbar]'][sel_filename])
+Flux=np.array(data_ecopart['Flux_mgC_m2'][sel_filename])
+MiP_abund=np.array(data_ecopart['MiP_abun'][sel_filename])
+MaP_abund=np.array(data_ecopart['MaP_abun'][sel_filename])
+MiP_POC=np.array(data_ecopart['Mip_POC_cont_mgC_m3'][sel_filename])
+MaP_POC=np.array(data_ecopart['Map_POC_cont_mgC_m3'][sel_filename])
+depth=np.array(data_ecopart['Depth [m]'][sel_filename])
+dens=np.array(data_ecopart['Potential density [kg/m3]'][sel_filename])
+
+# I convert the dates to float values (in seconds from 1970 1 1)
+Date_Num=np.r_[0:Flux.size]
+for i in Date_Num:
+    date_time_obj = datetime.datetime.strptime(Date_Time[i], '%Y-%m-%dT%H:%M:%S')
+    Date_Num[i] = calendar.timegm(date_time_obj.timetuple())
+    #datetime.utcfromtimestamp(Date_Num[i])
+
+list_dates=np.sort(np.unique(Date_Num))
+#######################################################################
+# I select the data only in the period when the BGC Argo float was inside the eddy
+#######################################################################
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+datenum_profiles = data_dist_radius['Datenum']
+sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
+
+list_dates=list_dates[sel_insideEddy[0:list_dates.size]]
+Date_Num_bbp=Date_Num_bbp[sel_insideEddy]
+Date_Num_bbp_calendar=Date_Num_bbp_calendar[sel_insideEddy]
+depth_bbp=depth_bbp[sel_insideEddy]
+temp=temp[sel_insideEddy]
+bbp_POC=bbp_POC[sel_insideEddy,:]
+
+#######################################################################
+# I plot
+#######################################################################
+day_start_eddy_merging = datetime.datetime(2021,8,1)
+day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+day_end_eddy_merging = datetime.datetime(2021,8,11)
+day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
+
+ipar=0
+parameter_shortname_list=['MiP_POC','MaP_POC']
+parameter_panellabel_list=['f','g']
+parameter_panellabel_list_EC=['d','e'] # Panel label for the eddy core
+parameter_ylabel_list=['MiP (mgC $m^{-3}$)','MaP (mgC $m^{-3}$)']
+max_parameter_list=np.array([2.15,0.30])
+for ipar in range(0,parameter_ylabel_list.__len__()):
+    if ipar == 0: parameter=MiP_POC.copy()
+    elif ipar == 1: parameter=MaP_POC.copy()
+
+    parameter_filtered=np.array([]);Date_Num_filtered=np.array([]);depth_filtered=np.array([]);dens_filtered=np.array([])
+    # I filter the prophiles
+    i=0
+    for i in range(0,list_dates.size):
+        sel=Date_Num==list_dates[i];x=Date_Num[sel];y=depth[sel];k=dens[sel]
+        z=parameter[sel];sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2];k2=k[sel2]
+        if sum(sel2)>0:
+            z=savgol_filter(z,5,1)
+            parameter_filtered = np.concatenate((parameter_filtered, z))
+            Date_Num_filtered = np.concatenate((Date_Num_filtered, x2))
+            depth_filtered = np.concatenate((depth_filtered, y2))
+            dens_filtered = np.concatenate((dens_filtered, k2))
+
+    # I define the x and y arrays for the contourf plot
+    x_filtered = np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),100)
+    y1_parameter = np.linspace(depth_filtered.min(), depth_filtered.max(), 200)
+    y2_parameter = np.linspace(dens_filtered.min(), dens_filtered.max(), 200)
+
+    # I interpolate
+    x_parameter_g, y_parameter_g = np.meshgrid(x_filtered, y1_parameter)
+    parameter_interp_depth = griddata((Date_Num_filtered, depth_filtered), parameter_filtered,(x_parameter_g, y_parameter_g), method="nearest")
+    x_parameter_g, y_parameter_g = np.meshgrid(x_filtered, y2_parameter)
+    parameter_interp_dens = griddata((Date_Num_filtered, dens_filtered), parameter_filtered,(x_parameter_g, y_parameter_g), method="nearest")
+
+    # I load the mixed layer
+    a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "rb")
+    data_an68 = pickle.load(a_file)
+    mld = data_an68['mld']
+    mld_date = data_an68['Date_Num']
+    a_file.close()
+    mld = mld[sel_insideEddy]
+    mld_date = mld_date[sel_insideEddy]
+    # I transform the x_filtered in matlab datenum format
+    x_filtered_datenum = x_filtered.copy()
+    i =0
+    for i in range(0,x_filtered.size):
+        d = datetime.datetime.utcfromtimestamp(x_filtered[i])
+        x_filtered_datenum[i] = matlab_datenum(d.year,d.month,d.day,d.hour,d.minute,d.second)
+        # datetime.utcfromtimestamp(Date_Num[i])
+
+    # I interpolate the mixed layer
+    mld_int = np.interp(x_filtered_datenum, mld_date, mld)
+
+    # Parameter in the mixed layer
+    parameter_mld = np.zeros((mld_int.size,))
+    i = 0
+    for i in range(0, mld_int.size):
+        tmp = parameter_interp_depth[:, i]
+        sel_mld = y1_parameter <= (mld_int[i] - 20)
+        parameter_mld[i] = np.mean(tmp[sel_mld])
+
+    if ipar == 0:
+        MiP_mld = parameter_mld.copy()
+    elif ipar == 1:
+        MaP_mld = parameter_mld.copy()
+
+    width, height = 0.8, 0.7
+    fig = plt.figure(1, figsize=(12, 4))
+    ax = fig.add_axes([0.12, 0.4, width,height - 0.15])  # ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
+    plt.plot(x_filtered, parameter_mld)
+    plt.ylabel(parameter_ylabel_list[ipar])
+    plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
+    plt.xlim(x_filtered[0], x_filtered[-1])
+    plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+    plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
+    # I set xticks
+    nxticks = 10
+    xticks = np.linspace(x_filtered.min(), x_filtered.max(), nxticks)
+    xticklabels = []
+    for i in xticks:
+        xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    plt.xticks(rotation=90, fontsize=14)
+    # I add the panel label
+    ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+    # I add the grid
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    # I save
+    plt.savefig('../Plots/Fig_Main_v02/Supplementary/TimeSeries_ML/TimeSeries_ML_%s_Fig02_v02.pdf' % parameter_shortname_list[ipar], dpi=200)
+    plt.close()
+
+    # Parameter in the eddy core
+    dens0 = 1026.82
+    dens1 = 1027.2397618090454  # calculated at step 4 of Fig. 3a
+    parameter_eddy_core = np.zeros((mld_int.size,))
+    i = 0
+    for i in range(0, mld_int.size):
+        tmp = parameter_interp_dens[:, i]
+        sel_tmp = (y2_parameter >= dens0) & (y2_parameter < dens1)
+        parameter_eddy_core[i] = np.mean(tmp[sel_tmp])
+
+    parameter_eddy_core = savgol_filter(parameter_eddy_core, 5, 1)
+
+    if ipar == 0:
+        MiP_eddy_core = parameter_eddy_core.copy()
+    elif ipar == 1:
+        MaP_eddy_core = parameter_eddy_core.copy()
+
+    fig = plt.figure(1, figsize=(12, 4))
+    ax = fig.add_axes([0.12, 0.4, width, height - 0.15])
+    plt.plot(x_filtered, parameter_eddy_core)
+    plt.ylabel(parameter_ylabel_list[ipar])
+    plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
+    plt.xlim(x_filtered[0], x_filtered[-1])
+    plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+    plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+    # I set xticks
+    nxticks = 10
+    xticks = np.linspace(x_filtered.min(), x_filtered.max(), nxticks)
+    xticklabels = []
+    for i in xticks:
+        xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels)
+    plt.xticks(rotation=90, fontsize=14)
+    # I add the panel label
+    ax.text(-0.05, 1.05, parameter_panellabel_list_EC[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+    # I add the grid
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    # I save
+    plt.savefig('../Plots/Fig_Main_v02/Supplementary/TimeSeries_EddyCore/TimeSeries_EddyCore_%s_Fig02_v02.pdf' % parameter_shortname_list[ipar], dpi=200)
+    plt.close()
+
+#######################################################################
+# I save the some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+i=5;print(matlab_datevec(x_filtered_datenum[i]).astype(int))
+argument = 'MiP_0421_eddy_core'
+arg_value=np.mean(doxy_eddy_core[i])
+write_latex_data(filename,argument,'%d' % arg_value)
+
+# endregion
 
 
 
