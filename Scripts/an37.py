@@ -257,7 +257,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     elif ipar == 7: parameter=bvf.copy()
 
     #I filter the profiles
-    parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([]);pressure_parameter=np.array([])
+    parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([])
     i=0
     for i in range(0,parameter.shape[0]):
         sel=(parameter[i,:]!=99999) & (depth[i,:]!=99999) & (dens[i,:]!=99999)
@@ -265,14 +265,13 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
             z=parameter[i,sel];x=np.ones(z.shape)*Date_Num[i];y1=depth[i,sel];y2=dens[i,sel];y3=pres[i,sel]
             z = savgol_filter(z, 5, 1)
             parameter_filtered = np.concatenate((parameter_filtered, z));Date_Num_parameter = np.concatenate((Date_Num_parameter, x))
-            depth_parameter = np.concatenate((depth_parameter, y1));dens_parameter = np.concatenate((dens_parameter, y2));pressure_parameter = np.concatenate((pressure_parameter, y3))
+            depth_parameter = np.concatenate((depth_parameter, y1));dens_parameter = np.concatenate((dens_parameter, y2))
 
     parameter_filtered[parameter_filtered<0]=0
     # I define the x and y arrays for the contourf plot
     x_parameter = np.linspace(Date_Num_parameter.min(),Date_Num_parameter.max(),100)
     y1_parameter = np.linspace(depth_parameter.min(),depth_parameter.max(),50)
     y2_parameter = np.linspace(dens_parameter.min(),dens_parameter.max(),50)
-    y3_parameter = np.linspace(pressure_parameter.min(),pressure_parameter.max(),50)
     # I interpolate
     x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y1_parameter)
     parameter_interp_depth = griddata((Date_Num_parameter,depth_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
@@ -339,8 +338,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         y2_parameter = np.linspace(dens_parameter.min(), dens_parameter.max(), 200)
         # I interpolate
         x_parameter_g, y_parameter_g = np.meshgrid(x_parameter, y1_parameter)
-        parameter_interp_depth = griddata((Date_Num_parameter, depth_parameter), parameter_filtered,
-                                          (x_parameter_g, y_parameter_g), method="nearest")
+        parameter_interp_depth = griddata((Date_Num_parameter, depth_parameter), parameter_filtered,(x_parameter_g, y_parameter_g), method="nearest")
         x_parameter_g, y_parameter_g = np.meshgrid(x_parameter, y2_parameter)
         parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
 
@@ -420,8 +418,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         parameter_mld_102724 = np.zeros((mld_int.size,))
         dens0_list=np.array([1026.35,1026.4,1026.8])
         dens0=dens0_list[0]
+        dens1 = 1027.24  # 600 m
         for dens0 in dens0_list:
-            dens1=1027.24 #600 m
             i=0
             for i in range(0,mld_int.size):
                 tmp=parameter_interp_dens[:,i]
