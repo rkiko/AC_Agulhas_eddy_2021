@@ -561,5 +561,13 @@ cyclone targetd dy the BGC Argo float, and the other is the eddy which
 merged with this cyclone between the 1—11 August 2021) 
 
 
+\
+an70
+
+I plot Fig. 1: Eddy 1 and Eddy 2 trajectories with their chl anomaly and 
+contours, and float trajectory. I also plot time series of satellite chl 
+inside and outside the Eddy 1 and Eddy 2, and the time series of eddy radius
+and float distance from centroid
+
 
 

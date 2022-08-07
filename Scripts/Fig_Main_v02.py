@@ -197,8 +197,6 @@ storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 filename_coriolis='6903095_Sprof_all.nc'
 ######
 import datetime
-import cartopy
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # I load eddy 1 radius
 filename_eddy1Data='%s/GIT/AC_Agulhas_eddy_2021/Data/an64/traj_eddy1.csv' % home
@@ -209,12 +207,12 @@ radius_Vmax1=data_eddy1['Rad_max']   # mean radius_Vmax  = 60.25 km
 filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
 data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
 sel_insideEddy = data_dist_radius['sel_insideEddy']
-sel_insideEddy = (Date_Num_float<=day_end_timeseries)&(sel_insideEddy==1)
 Date_Num_float = data_dist_radius['Datenum']
 Distance_centroid = data_dist_radius['Distance_Centroid']
 # I define the end of the time series
 day_end_timeseries=np.array([2021,9,23])
 day_end_timeseries=matlab_datenum(day_end_timeseries)
+sel_insideEddy = (Date_Num_float<=day_end_timeseries)&(sel_insideEddy==1)
 # I define the eddy merging period
 day_start_eddy_merging=np.array([2021,8,1])
 day_end_eddy_merging=np.array([2021,8,11])
@@ -249,6 +247,15 @@ ax.legend(fontsize=15,ncol=3)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig02a_v02.pdf',dpi=200)
 plt.close()
+
+#######################################################################
+# I save some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'dist_float_centroid_mean'
+arg_value=np.mean(Distance_centroid[sel_insideEddy])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
 
 # endregion
 
@@ -1201,9 +1208,9 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 ########################################################################################################################
 
 #######################################################################################################################
-######### Fig. 03a
+######### Fig. 03a and Time Series of Flux in Eddy Core
 ########################################################################################################################
-#region Fig. 03a
+#region Fig. 03a and Time Series of Flux in Eddy Core
 import numpy as np
 import pandas as pd
 import os,sys
@@ -1255,9 +1262,8 @@ Date_Time=np.array(data['Date_Time'][sel_filename])
 depth=np.array(data['Depth [m]'][sel_filename])
 dens=np.array(data['Potential density [kg/m3]'][sel_filename])
 Flux=np.array(data['Flux_mgC_m2'][sel_filename])
-Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
-Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
-Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
+Flux_MiP=np.array(data['Flux_MiP_mgC_m2'][sel_filename])
+Flux_MaP=np.array(data['Flux_MaP_mgC_m2'][sel_filename])
 MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
 MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
 MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
@@ -1274,12 +1280,13 @@ list_dates=np.sort(np.unique(Date_Num))
 a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "rb")
 data_an68 = pickle.load(a_file)
 mld = data_an68['mld']
-mld_datenum = data_an68['Date_Num']
+mld_datenum0 = data_an68['Date_Num']
 a_file.close()
 #I convert datenum to calendar
+mld_datenum = mld_datenum0.copy()
 i=0
-for i in range(0,mld_datenum.size):
-    date_time_obj = matlab_datevec(mld_datenum[i]).astype(int)
+for i in range(0,mld_datenum0.size):
+    date_time_obj = matlab_datevec(mld_datenum0[i]).astype(int)
     date_time_obj = datetime.datetime(date_time_obj[0],date_time_obj[1],date_time_obj[2],date_time_obj[3],date_time_obj[4],date_time_obj[5])
     mld_datenum[i] = calendar.timegm(date_time_obj.timetuple())
 
@@ -1296,6 +1303,7 @@ sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
 list_dates=list_dates[sel_insideEddy[0:list_dates.size]]
 mld=mld[sel_insideEddy]
 mld_datenum=mld_datenum[sel_insideEddy]
+mld_datenum0=mld_datenum0[sel_insideEddy]
 n_profiles=list_dates.size
 
 ########################################################################################################################
@@ -1308,21 +1316,26 @@ n_profiles=list_dates.size
 
 ##############################################
 # Step 1 and 2, filter and interpolation
-Flux_filtered=np.array([]);dens_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([]);Flux_MLD=np.array([])
+Flux_filtered=np.array([]);Flux_MiP_filtered=np.array([]);Flux_MaP_filtered=np.array([]);dens_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([]);Flux_MLD=np.array([])
 i=0
 for i in range(0,list_dates.size):
     sel=Date_Num==list_dates[i]
-    z=Flux[sel];x=Date_Num[sel];y=dens[sel];y2=depth[sel]
-    sel2=~np.isnan(z);z=z[sel2];x=x[sel2];y=y[sel2];y2=y2[sel2]
+    z=Flux[sel];x=Date_Num[sel];y=dens[sel];y2=depth[sel];z_MiP = Flux_MiP[sel];z_MaP = Flux_MaP[sel]
+    sel2=~np.isnan(z);z=z[sel2];x=x[sel2];y=y[sel2];y2=y2[sel2];z_MiP=z_MiP[sel2];z_MaP=z_MaP[sel2]
     mld_tmp = mld[i]
     if sum(sel2) > 0:
         z = savgol_filter(z, 5, 1)
+        z_MiP = savgol_filter(z_MiP, 5, 1)
+        z_MaP = savgol_filter(z_MaP, 5, 1)
         Flux_filtered = np.concatenate((Flux_filtered, z))
+        Flux_MiP_filtered = np.concatenate((Flux_MiP_filtered, z_MiP))
+        Flux_MaP_filtered = np.concatenate((Flux_MaP_filtered, z_MaP))
         Date_Num_Flux_filtered = np.concatenate((Date_Num_Flux_filtered, x))
         dens_Flux_filtered = np.concatenate((dens_Flux_filtered, y))
         sel_mld = (y2>=mld_tmp-delta_depth_flux)&(y2<mld_tmp+delta_depth_flux)
         if sum(sel_mld) > 0:
             Flux_MLD=np.append(Flux_MLD, np.mean(z[sel_mld]) )
+
 
 # I define the x and y arrays for the Flux interpolation
 x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
@@ -1330,6 +1343,8 @@ y_filtered = np.linspace(dens_Flux_filtered.min(), dens_Flux_filtered.max(), 200
 x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
 # I interpolate
 Flux_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+Flux_MiP_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+Flux_MaP_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
 ##############################################
 # Step 3: for each density layer I calculate the corresponding mean depth
@@ -1366,14 +1381,20 @@ depth0=200
 depthf=600
 sel_layer = (np.abs(depth_Flux_filtered) >= depth0-delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth0+delta_depth_flux)
 Flux_depth0 = np.mean(Flux_interp[sel_layer,:],axis=0)
+Flux_MiP_depth0 = np.mean(Flux_MiP_interp[sel_layer,:],axis=0)
+Flux_MaP_depth0 = np.mean(Flux_MaP_interp[sel_layer,:],axis=0)
 isopycnal_depth0 = np.mean(y_filtered[sel_layer])
 sel_layer = (np.abs(depth_Flux_filtered) >= depthf - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depthf + delta_depth_flux)
 Flux_depthf = np.mean(Flux_interp[sel_layer,:],axis=0)
+Flux_MiP_depthf = np.mean(Flux_MiP_interp[sel_layer,:],axis=0)
+Flux_MaP_depthf = np.mean(Flux_MaP_interp[sel_layer,:],axis=0)
 isopycnal_depthf = np.mean(y_filtered[sel_layer])
 depth_102635=np.interp(1026.35,y_filtered,depth_Flux_filtered)
 sel_layer = (np.abs(depth_Flux_filtered) >= depth_102635 - delta_depth_flux) & (np.abs(depth_Flux_filtered) < depth_102635 + delta_depth_flux)
 Flux_102635 = np.mean(Flux_interp[sel_layer,:],axis=0)
 
+sel_layer= (y_filtered>isopycnal_depth0)&(y_filtered<=isopycnal_depthf)
+Flux_eddy_core = np.mean(Flux_interp[sel_layer,:],axis=0)
 #######################################################################
 # I plot
 #######################################################################
@@ -1408,6 +1429,80 @@ ax.set_xticklabels([])
 plt.xticks(rotation=90, fontsize=7)
 plt.savefig('../Plots/Fig_Main_v02/Fig03a_v02.pdf'  ,dpi=200)
 plt.close()
+
+# I transform the x_filtered in matlab datenum format
+x_filtered_datenum = x_filtered.copy()
+i = 0
+for i in range(0, x_filtered.size):
+    d = datetime.datetime.utcfromtimestamp(x_filtered[i])
+    x_filtered_datenum[i] = matlab_datenum(d.year, d.month, d.day, d.hour, d.minute, d.second)
+    # datetime.utcfromtimestamp(Date_Num[i])
+
+# Time series of POC flux in the eddy core
+width, height = 0.8, 0.7
+fig = plt.figure(1, figsize=(12, 4))
+ax = fig.add_axes([0.12, 0.4, width, height - 0.15])
+plt.plot(x_filtered, Flux_eddy_core)
+plt.ylabel('Flux(mgC/$m^2$/d)')
+plt.ylim(0, ax.get_ylim()[1])
+plt.xlim(x_filtered[0], x_filtered[-1])
+plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='k')
+# I set xticks
+nxticks = 10
+xticks = np.linspace(x_filtered.min(), x_filtered.max(), nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+# I add the panel label
+ax.text(-0.05, 1.05, 'f', transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+# I save
+plt.savefig('../Plots/Fig_Main_v02/Supplementary/TimeSeries_EddyCore/TimeSeries_EddyCore_Flux_Fig02_v02.pdf' , dpi=200)
+plt.close()
+
+#######################################################################
+# I save some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+i=68;print(matlab_datevec(x_filtered_datenum[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Flux_0413to0803_eddy_core_down'
+arg_value=np.mean(Flux_depthf[0:i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Flux_0413to0803_eddy_core_up'
+arg_value=np.mean(Flux_depth0[0:i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=73;print(matlab_datevec(x_filtered_datenum[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Flux_0812_eddy_core_up'
+arg_value=np.mean(Flux_depth0[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=44;print(matlab_datevec(mld_datenum0[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Flux_0810_ML'
+arg_value=np.mean(Flux_MLD[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'FluxMiP_eddy_core_up_percentage'
+arg_value=np.mean(Flux_MiP_depth0/(Flux_MiP_depth0+Flux_MaP_depth0)*100)
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'FluxMiP_eddy_core_down_percentage'
+arg_value=np.mean(Flux_MiP_depthf/(Flux_MiP_depthf+Flux_MaP_depthf)*100)
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Flux_0413_eddy_core'
+arg_value=np.mean(Flux_eddy_core[0])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=61;print(matlab_datevec(x_filtered_datenum[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Flux_0723_eddy_core'
+arg_value=np.mean(Flux_eddy_core[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=84;print(matlab_datevec(x_filtered_datenum[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Flux_0830_eddy_core'
+arg_value=np.mean(Flux_eddy_core[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
 
 #endregion
 
@@ -1558,6 +1653,17 @@ ax.text(-0.05, 1.05, 'b', transform=ax.transAxes,fontsize=24, fontweight='bold',
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig03b_v02.pdf' ,dpi=200)
 plt.close()
+
+#######################################################################
+# I save some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+i=68;print(matlab_datevec(x_filtered_datenum[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Flux_0413to0803_eddy_core_low'
+arg_value=np.mean(Flux_depthf[0:i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
 # endregion
 
 ########################################################################################################################
@@ -1631,9 +1737,9 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     depth=np.array(data['Depth [m]'][sel_filename])
     dens=np.array(data['Potential density [kg/m3]'][sel_filename])
     Flux=np.array(data['Flux_mgC_m2'][sel_filename])
-    Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
+    # Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
     Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
-    Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
+    # Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
     MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
     MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
     MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
@@ -1764,9 +1870,9 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     ##############################################
     # Step 1 and 2, filter and interpolation
     Flux_filtered=np.array([]);dens_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([])
-    Flux_eta_b_filtered=np.array([]);dens_Flux_eta_b_filtered=np.array([]);Date_Num_Flux_eta_b_filtered=np.array([])
+    # Flux_eta_b_filtered=np.array([]);dens_Flux_eta_b_filtered=np.array([]);Date_Num_Flux_eta_b_filtered=np.array([])
     Flux_extended_filtered=np.array([]);dens_Flux_extended_filtered=np.array([]);Date_Num_Flux_extended_filtered=np.array([])
-    Flux_extended_filtered_eta_b=np.array([]);dens_Flux_extended_filtered_eta_b=np.array([]);Date_Num_Flux_extended_filtered_eta_b=np.array([])
+    # Flux_extended_filtered_eta_b=np.array([]);dens_Flux_extended_filtered_eta_b=np.array([]);Date_Num_Flux_extended_filtered_eta_b=np.array([])
     i=0
     for i in range(0,list_dates.size):
         sel=Date_Num==list_dates[i]
@@ -1777,13 +1883,13 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
             Flux_filtered = np.concatenate((Flux_filtered, z))
             Date_Num_Flux_filtered = np.concatenate((Date_Num_Flux_filtered, x2))
             dens_Flux_filtered = np.concatenate((dens_Flux_filtered, y2))
-        z=Flux_eta_b[sel];x=Date_Num[sel];y=dens[sel]
-        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
-        if sum(sel2) > 0:
-            z = savgol_filter(z, 5, 1)
-            Flux_eta_b_filtered = np.concatenate((Flux_eta_b_filtered, z))
-            Date_Num_Flux_eta_b_filtered = np.concatenate((Date_Num_Flux_eta_b_filtered, x2))
-            dens_Flux_eta_b_filtered = np.concatenate((dens_Flux_eta_b_filtered, y2))
+        # z=Flux_eta_b[sel];x=Date_Num[sel];y=dens[sel]
+        # sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        # if sum(sel2) > 0:
+        #     z = savgol_filter(z, 5, 1)
+        #     Flux_eta_b_filtered = np.concatenate((Flux_eta_b_filtered, z))
+        #     Date_Num_Flux_eta_b_filtered = np.concatenate((Date_Num_Flux_eta_b_filtered, x2))
+        #     dens_Flux_eta_b_filtered = np.concatenate((dens_Flux_eta_b_filtered, y2))
         z=Flux_extended[sel];x=Date_Num[sel];y=dens[sel]
         sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
@@ -1791,13 +1897,13 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
             Flux_extended_filtered = np.concatenate((Flux_extended_filtered, z))
             Date_Num_Flux_extended_filtered = np.concatenate((Date_Num_Flux_extended_filtered, x2))
             dens_Flux_extended_filtered = np.concatenate((dens_Flux_extended_filtered, y2))
-        z=Flux_extended_eta_b[sel];x=Date_Num[sel];y=dens[sel]
-        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
-        if sum(sel2) > 0:
-            z = savgol_filter(z, 5, 1)
-            Flux_extended_filtered_eta_b = np.concatenate((Flux_extended_filtered_eta_b, z))
-            Date_Num_Flux_extended_filtered_eta_b = np.concatenate((Date_Num_Flux_extended_filtered_eta_b, x2))
-            dens_Flux_extended_filtered_eta_b = np.concatenate((dens_Flux_extended_filtered_eta_b, y2))
+        # z=Flux_extended_eta_b[sel];x=Date_Num[sel];y=dens[sel]
+        # sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        # if sum(sel2) > 0:
+        #     z = savgol_filter(z, 5, 1)
+        #     Flux_extended_filtered_eta_b = np.concatenate((Flux_extended_filtered_eta_b, z))
+        #     Date_Num_Flux_extended_filtered_eta_b = np.concatenate((Date_Num_Flux_extended_filtered_eta_b, x2))
+        #     dens_Flux_extended_filtered_eta_b = np.concatenate((dens_Flux_extended_filtered_eta_b, y2))
 
     # I define the x and y arrays for the Flux interpolation
     x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
@@ -1805,9 +1911,9 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     Flux_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    Flux_eta_b_interp = griddata((Date_Num_Flux_eta_b_filtered, dens_Flux_eta_b_filtered), Flux_eta_b_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    # Flux_eta_b_interp = griddata((Date_Num_Flux_eta_b_filtered, dens_Flux_eta_b_filtered), Flux_eta_b_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     Flux_extended_interp = griddata((Date_Num_Flux_extended_filtered, dens_Flux_extended_filtered), Flux_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
-    Flux_extended_eta_b_interp = griddata((Date_Num_Flux_extended_filtered_eta_b, dens_Flux_extended_filtered_eta_b), Flux_extended_filtered_eta_b,(x_filtered_g, y_filtered_g), method="nearest")
+    # Flux_extended_eta_b_interp = griddata((Date_Num_Flux_extended_filtered_eta_b, dens_Flux_extended_filtered_eta_b), Flux_extended_filtered_eta_b,(x_filtered_g, y_filtered_g), method="nearest")
 
 
     ##############################################
@@ -1815,15 +1921,15 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
 
     sel_layer = (np.abs(y_filtered) >= dens0-delta_dens_flux) & (np.abs(y_filtered) < dens0+delta_dens_flux)
     Flux_dens0 = np.mean(Flux_interp[sel_layer,:],axis=0)
-    Flux_eta_b_dens0 = np.mean(Flux_eta_b_interp[sel_layer, :], axis=0)
+    # Flux_eta_b_dens0 = np.mean(Flux_eta_b_interp[sel_layer, :], axis=0)
     Flux_extended_dens0 = np.mean(Flux_extended_interp[sel_layer, :], axis=0)
-    Flux_extended_eta_b_dens0 = np.mean(Flux_extended_eta_b_interp[sel_layer, :], axis=0)
+    # Flux_extended_eta_b_dens0 = np.mean(Flux_extended_eta_b_interp[sel_layer, :], axis=0)
 
     sel_layer = (np.abs(y_filtered) >= densf - delta_dens_flux) & (np.abs(y_filtered) < densf + delta_dens_flux)
     Flux_densf = np.mean(Flux_interp[sel_layer,:],axis=0)
-    Flux_eta_b_densf = np.mean(Flux_eta_b_interp[sel_layer,:],axis=0)
+    # Flux_eta_b_densf = np.mean(Flux_eta_b_interp[sel_layer,:],axis=0)
     Flux_extended_densf = np.mean(Flux_extended_interp[sel_layer,:],axis=0)
-    Flux_extended_eta_b_densf = np.mean(Flux_extended_eta_b_interp[sel_layer,:],axis=0)
+    # Flux_extended_eta_b_densf = np.mean(Flux_extended_eta_b_interp[sel_layer,:],axis=0)
 
 
     ########################################################################################################################
@@ -2056,58 +2162,57 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     Flux_densf_mgC_m3 = np.mean(Flux_densf) * ndays / layer_thickness
     Flux_densf_mgC_m3_std = np.std(Flux_densf) * ndays / layer_thickness
 
-    Flux_eta_b_dens0_mgC_m3 = np.mean(Flux_eta_b_dens0) * ndays / layer_thickness
-    Flux_eta_b_dens0_mgC_m3_std = np.std(Flux_eta_b_dens0) * ndays / layer_thickness
-    Flux_eta_b_densf_mgC_m3 = np.mean(Flux_eta_b_densf) * ndays / layer_thickness
-    Flux_eta_b_densf_mgC_m3_std = np.std(Flux_eta_b_densf) * ndays / layer_thickness
+    # Flux_eta_b_dens0_mgC_m3 = np.mean(Flux_eta_b_dens0) * ndays / layer_thickness
+    # Flux_eta_b_dens0_mgC_m3_std = np.std(Flux_eta_b_dens0) * ndays / layer_thickness
+    # Flux_eta_b_densf_mgC_m3 = np.mean(Flux_eta_b_densf) * ndays / layer_thickness
+    # Flux_eta_b_densf_mgC_m3_std = np.std(Flux_eta_b_densf) * ndays / layer_thickness
 
     Flux_extended_dens0_mgC_m3 = np.mean(Flux_extended_dens0) * ndays / layer_thickness
     Flux_extended_dens0_mgC_m3_std = np.std(Flux_extended_dens0) * ndays / layer_thickness
     Flux_extended_densf_mgC_m3 = np.mean(Flux_extended_densf) * ndays / layer_thickness
     Flux_extended_densf_mgC_m3_std = np.std(Flux_extended_densf) * ndays / layer_thickness
 
-    Flux_extended_eta_b_dens0_mgC_m3 = np.mean(Flux_extended_eta_b_dens0) * ndays / layer_thickness
-    Flux_extended_eta_b_dens0_mgC_m3_std = np.std(Flux_extended_eta_b_dens0) * ndays / layer_thickness
-    Flux_extended_eta_b_densf_mgC_m3 = np.mean(Flux_extended_eta_b_densf) * ndays / layer_thickness
-    Flux_extended_eta_b_densf_mgC_m3_std = np.std(Flux_extended_eta_b_densf) * ndays / layer_thickness
+    # Flux_extended_eta_b_dens0_mgC_m3 = np.mean(Flux_extended_eta_b_dens0) * ndays / layer_thickness
+    # Flux_extended_eta_b_dens0_mgC_m3_std = np.std(Flux_extended_eta_b_dens0) * ndays / layer_thickness
+    # Flux_extended_eta_b_densf_mgC_m3 = np.mean(Flux_extended_eta_b_densf) * ndays / layer_thickness
+    # Flux_extended_eta_b_densf_mgC_m3_std = np.std(Flux_extended_eta_b_densf) * ndays / layer_thickness
 
     Delta_flux = Flux_dens0_mgC_m3 - Flux_densf_mgC_m3
-    Delta_flux_eta_b = Flux_eta_b_dens0_mgC_m3 - Flux_eta_b_densf_mgC_m3
+    # Delta_flux_eta_b = Flux_eta_b_dens0_mgC_m3 - Flux_eta_b_densf_mgC_m3
     Delta_flux_extended = Flux_extended_dens0_mgC_m3 - Flux_extended_densf_mgC_m3
-    Delta_flux_extended_eta_b = Flux_extended_eta_b_dens0_mgC_m3 - Flux_extended_eta_b_densf_mgC_m3
+    # Delta_flux_extended_eta_b = Flux_extended_eta_b_dens0_mgC_m3 - Flux_extended_eta_b_densf_mgC_m3
 
     Delta_flux_std = np.sqrt( Flux_dens0_mgC_m3_std**2 + Flux_densf_mgC_m3_std**2 )
-    Delta_flux_eta_b_std = np.sqrt( Flux_eta_b_dens0_mgC_m3_std**2 + Flux_eta_b_densf_mgC_m3_std**2 )
+    # Delta_flux_eta_b_std = np.sqrt( Flux_eta_b_dens0_mgC_m3_std**2 + Flux_eta_b_densf_mgC_m3_std**2 )
     Delta_flux_extended_std = np.sqrt( Flux_extended_dens0_mgC_m3_std**2 + Flux_extended_densf_mgC_m3_std**2 )
-    Delta_flux_extended_eta_b_std = np.sqrt( Flux_extended_eta_b_dens0_mgC_m3_std**2 + Flux_extended_eta_b_densf_mgC_m3_std**2 )
+    # Delta_flux_extended_eta_b_std = np.sqrt( Flux_extended_eta_b_dens0_mgC_m3_std**2 + Flux_extended_eta_b_densf_mgC_m3_std**2 )
 
     Theoretical_Budget = Delta_flux - Delta_Integrated_POC
-    Theoretical_Budget_eta_b = Delta_flux_eta_b - Delta_Integrated_POC
+    # Theoretical_Budget_eta_b = Delta_flux_eta_b - Delta_Integrated_POC
     Theoretical_Budget_extended = Delta_flux_extended - Delta_Integrated_POC_extended
-    Theoretical_Budget_extended_eta_b = Delta_flux_extended_eta_b - Delta_Integrated_POC_extended
+    # Theoretical_Budget_extended_eta_b = Delta_flux_extended_eta_b - Delta_Integrated_POC_extended
 
     Theoretical_Budget_std = np.sqrt( Delta_flux_std**2 + Delta_Integrated_POC_std**2 )
-    Theoretical_Budget_eta_b_std = np.sqrt( Delta_flux_eta_b_std**2 + Delta_Integrated_POC_std**2 )
+    # Theoretical_Budget_eta_b_std = np.sqrt( Delta_flux_eta_b_std**2 + Delta_Integrated_POC_std**2 )
     Theoretical_Budget_extended_std = np.sqrt( Delta_flux_extended_std**2 + Delta_Integrated_POC_extended_std**2 )
-    Theoretical_Budget_extended_eta_b_std = np.sqrt( Delta_flux_extended_eta_b_std**2 + Delta_Integrated_POC_extended_std**2 )
+    # Theoretical_Budget_extended_eta_b_std = np.sqrt( Delta_flux_extended_eta_b_std**2 + Delta_Integrated_POC_extended_std**2 )
 
 
     ############### I return the data
-    return Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,\
+    return Theoretical_Budget,Theoretical_Budget_std,\
            Theoretical_Budget_extended,Theoretical_Budget_extended_std,\
-           Theoretical_Budget_extended_eta_b,Theoretical_Budget_extended_eta_b_std,\
            POC_resp_mgC_m3_list,POC_resp_mgC_m3_std_list,O2_resp_mgC_m3,O2_resp_mgC_m3_ci,list_Respi_types,n_profiles, \
-           Delta_flux_eta_b, Delta_Integrated_POC,Delta_flux_eta_b_std, Delta_Integrated_POC_std, \
+           Delta_Integrated_POC, Delta_Integrated_POC_std, Delta_flux, Delta_flux_std,Flux_dens0_mgC_m3,Flux_densf_mgC_m3,\
            depth_isopycnal,depth_isopycnal_down,depth_isopycnal_up,layer_thickness
 
 #######################################################################
 # Parameters for the carbon budget calculation
 #######################################################################
 day0=datetime.datetime(2021,4,13)        # starting date for the carbon budget calculation
-dayf=datetime.datetime(2021,7,30)        # starting date for the carbon budget calculation
+dayf=datetime.datetime(2021,7,31)        # starting date for the carbon budget calculation
 ndays=(dayf-day0).days          # number of days
 dens00=1026.3                   # starting isopycnal
-dens_thickness=0.1             # thickness of the layer considered (in kg/m3)
+dens_thickness=0.05             # thickness of the layer considered (in kg/m3)
 delta_dens=0.025                 # every time I do a loop, how much I do increase depth0
 densff=1027.5                   # final isopycnal investigated
 
@@ -2117,13 +2222,9 @@ dens0_list=np.r_[dens00:densff-dens_thickness+0.01:delta_dens]
 # I loop on the different depths
 #######################################################################
 Theoretical_Budget_list = np.array([])
-Theoretical_Budget_eta_b_list = np.array([])
 Theoretical_Budget_extended_list = np.array([])
-Theoretical_Budget_extended_eta_b_list = np.array([])
 Theoretical_Budget_std_list = np.array([])
-Theoretical_Budget_eta_b_std_list = np.array([])
 Theoretical_Budget_extended_std_list = np.array([])
-Theoretical_Budget_extended_eta_b_std_list = np.array([])
 POC_resp_mgC_m3_list = np.array([])
 POC_resp_mgC_m3_std_list = np.array([])
 O2_resp_mgC_m3_list = np.array([])
@@ -2135,21 +2236,15 @@ layer_thickness_list = np.array([])
 dens0=dens0_list[0]
 for dens0 in dens0_list:
     densf = dens0 + dens_thickness
-    (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_eta_b,Theoretical_Budget_eta_b_std,
-       Theoretical_Budget_extended,Theoretical_Budget_extended_std,Theoretical_Budget_extended_eta_b,
-       Theoretical_Budget_extended_eta_b_std,POC_resp_mgC_m3,POC_resp_mgC_m3_std,
-       O2_resp_mgC_m3,O2_resp_mgC_m3_ci,RespirationTypes,n_profiles,Delta_flux_eta_b, Delta_Integrated_POC,
-       Delta_flux_eta_b_std, Delta_Integrated_POC_std,depth_isopycnal,
+    (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,
+       POC_resp_mgC_m3,POC_resp_mgC_m3_std,O2_resp_mgC_m3,O2_resp_mgC_m3_ci,RespirationTypes,n_profiles,
+       Delta_Integrated_POC,Delta_Integrated_POC_std,_,_,_,_,depth_isopycnal,
        depth_isopycnal_down,depth_isopycnal_up,layer_thickness) = carbon_budget_calculation(dens0, densf, day0, dayf)
 
     Theoretical_Budget_list=np.append(Theoretical_Budget_list,Theoretical_Budget)
-    Theoretical_Budget_eta_b_list=np.append(Theoretical_Budget_eta_b_list,Theoretical_Budget_eta_b)
     Theoretical_Budget_extended_list=np.append(Theoretical_Budget_extended_list,Theoretical_Budget_extended)
-    Theoretical_Budget_extended_eta_b_list=np.append(Theoretical_Budget_extended_eta_b_list,Theoretical_Budget_extended_eta_b)
     Theoretical_Budget_std_list=np.append(Theoretical_Budget_std_list,Theoretical_Budget_std)
-    Theoretical_Budget_eta_b_std_list=np.append(Theoretical_Budget_eta_b_std_list,Theoretical_Budget_eta_b_std)
     Theoretical_Budget_extended_std_list=np.append(Theoretical_Budget_extended_std_list,Theoretical_Budget_extended_std)
-    Theoretical_Budget_extended_eta_b_std_list=np.append(Theoretical_Budget_extended_eta_b_std_list,Theoretical_Budget_extended_eta_b_std)
     POC_resp_mgC_m3_list=np.append(POC_resp_mgC_m3_list,POC_resp_mgC_m3,axis=0)
     POC_resp_mgC_m3_std_list=np.append(POC_resp_mgC_m3_std_list,POC_resp_mgC_m3_std,axis=0)
     O2_resp_mgC_m3_list=np.append(O2_resp_mgC_m3_list,O2_resp_mgC_m3)
@@ -2162,6 +2257,9 @@ for dens0 in dens0_list:
 O2_resp_mgC_m3_ci_list=O2_resp_mgC_m3_ci_list.reshape(dens0_list.size,2)
 POC_resp_mgC_m3_list=POC_resp_mgC_m3_list.reshape(dens0_list.size,len(RespirationTypes))
 POC_resp_mgC_m3_std_list=POC_resp_mgC_m3_std_list.reshape(dens0_list.size,len(RespirationTypes))
+
+dens_eddy_core_up = 1026.82
+dens_eddy_core_down = 1027.2397618090454 #calculated at step 4 of Fig. 3a
 
 ########################################################################################################################
 ######### Fig. 04a vs dens
@@ -2178,8 +2276,8 @@ plt.fill_betweenx(dens0_list, O2_resp_mgC_m3_ci_list[:, 1], O2_resp_mgC_m3_ci_li
 for iResp in range(2,3):
     plt.plot(POC_resp_mgC_m3_list[:,iResp], dens0_list + dens_thickness / 2, c='b')
 
-plt.fill_betweenx(dens0_list+dens_thickness/2, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp]*0.5,
-                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp]*0.5, facecolor='b',
+plt.fill_betweenx(dens0_list+dens_thickness/2, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp],
+                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
 plt.plot(POC_resp_mgC_m3_list[:, 0], dens0_list + dens_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
 plt.plot(POC_resp_mgC_m3_list[:, 3], dens0_list + dens_thickness / 2, c='b',linestyle='dashed')
@@ -2188,8 +2286,11 @@ plt.plot(POC_resp_mgC_m3_list[:, 5], dens0_list + dens_thickness / 2, c='g',line
 plt.plot(POC_resp_mgC_m3_list[:, 6], dens0_list + dens_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
 plt.plot(Theoretical_Budget_list, dens0_list + dens_thickness / 2, c='red')
 plt.scatter(Theoretical_Budget_list, dens0_list + dens_thickness / 2, c='red', s=5)
-plt.fill_betweenx(dens0_list + dens_thickness / 2, Theoretical_Budget_list - Theoretical_Budget_std_list*0.5, Theoretical_Budget_list + Theoretical_Budget_std_list*0.5,
+plt.fill_betweenx(dens0_list + dens_thickness / 2, Theoretical_Budget_list - Theoretical_Budget_std_list, Theoretical_Budget_list + Theoretical_Budget_std_list,
                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+plt.hlines(dens_eddy_core_up, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(dens_eddy_core_down, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(1026.35, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
 plt.xlim(-5,100)
 # plt.ylabel('Dens (kg/m$^3$)', fontsize=fs)
 plt.xlabel('Carbon Consumption Rate (mgC/m$^3$)', fontsize=fs)
@@ -2215,7 +2316,7 @@ plt.close()
 ########################################################################################################################
 ######### Fig. 04a vs depth
 ########################################################################################################################
-idx1,idx2=1,37
+idx1,idx2=0,38
 set_ylim_lower=depth_isopycnal_list[idx1]
 set_ylim_upper=depth_isopycnal_list[idx2]
 fs=10
@@ -2228,8 +2329,8 @@ plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_ci_list[:, 1], O2_resp_mg
 for iResp in range(2,3):
     plt.plot(POC_resp_mgC_m3_list[:,iResp], depth_isopycnal_list, c='b')
 
-plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp]*0.5,
-                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp]*0.5, facecolor='b',
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp],
+                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
 plt.plot(POC_resp_mgC_m3_list[:, 0], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
 plt.plot(POC_resp_mgC_m3_list[:, 3], depth_isopycnal_list, c='b',linestyle='dashed')
@@ -2238,8 +2339,11 @@ plt.plot(POC_resp_mgC_m3_list[:, 5], depth_isopycnal_list, c='g',linestyle='dash
 plt.plot(POC_resp_mgC_m3_list[:, 6], depth_isopycnal_list, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
 plt.plot(Theoretical_Budget_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_list, depth_isopycnal_list, c='red', s=5)
-plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_list - Theoretical_Budget_std_list*0.5, Theoretical_Budget_list + Theoretical_Budget_std_list*0.5,
+plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_list - Theoretical_Budget_std_list, Theoretical_Budget_list + Theoretical_Budget_std_list,
                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
 plt.xlim(-5,100)
 # plt.ylabel('Dens (kg/m$^3$)', fontsize=fs)
 plt.xlabel('Carbon Consumption Rate (mgC/m$^3$)', fontsize=fs)
@@ -2277,8 +2381,8 @@ plt.fill_betweenx(dens0_list, O2_resp_mgC_m3_ci_list[:, 1], O2_resp_mgC_m3_ci_li
 for iResp in range(9,10):
     plt.plot(POC_resp_mgC_m3_list[:,iResp], dens0_list + dens_thickness / 2, c='b')
 
-plt.fill_betweenx(dens0_list+dens_thickness/2, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp]*0.5,
-                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp]*0.5, facecolor='b',
+plt.fill_betweenx(dens0_list+dens_thickness/2, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp],
+                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
 
 plt.plot(POC_resp_mgC_m3_list[:, 7], dens0_list + dens_thickness / 2, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
@@ -2288,9 +2392,12 @@ plt.plot(POC_resp_mgC_m3_list[:, 12], dens0_list + dens_thickness / 2, c='g',lin
 plt.plot(POC_resp_mgC_m3_list[:, 13], dens0_list + dens_thickness / 2, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
 plt.plot(Theoretical_Budget_extended_list, dens0_list + dens_thickness / 2, c='red')
 plt.scatter(Theoretical_Budget_extended_list, dens0_list + dens_thickness / 2, c='red', s=5)
-plt.fill_betweenx(dens0_list + dens_thickness / 2, Theoretical_Budget_extended_list - Theoretical_Budget_extended_std_list*0.5, Theoretical_Budget_extended_list + Theoretical_Budget_extended_std_list*0.5,
+plt.fill_betweenx(dens0_list + dens_thickness / 2, Theoretical_Budget_extended_list - Theoretical_Budget_extended_std_list, Theoretical_Budget_extended_list + Theoretical_Budget_extended_std_list,
                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
+plt.hlines(dens_eddy_core_up, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(dens_eddy_core_down, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(1026.35, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
 plt.xlim(-5,100)
 plt.xlabel('Carbon Consumption Rate (mgC/m$^3$)', fontsize=fs)
 plt.legend(fontsize=7)
@@ -2300,10 +2407,10 @@ nyticks=6
 yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
 yticklabels=[]
 for i in range(0,nyticks):
-    if yticks[i] == 1026.35:
-        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% (yticks[i]) )
-    else:
-        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
+    # if yticks[i] == 1026.35:
+    #     yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% (yticks[i]) )
+    # else:
+    yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (np.interp(yticks[i],dens0_list,depth_isopycnal_down_list),np.interp(yticks[i],dens0_list,depth_isopycnal_up_list),yticks[i] ) )
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
 ax.text(-0.25, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
@@ -2314,7 +2421,7 @@ plt.close()
 ########################################################################################################################
 ######### Fig. 04b vs depth
 ########################################################################################################################
-idx1,idx2=1,37
+idx1,idx2=0,38
 set_ylim_lower=depth_isopycnal_list[idx1]
 set_ylim_upper=depth_isopycnal_list[idx2]
 fig = plt.figure(2, figsize=(3.5, 3.5))
@@ -2325,8 +2432,8 @@ plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_ci_list[:, 1], O2_resp_mg
 for iResp in range(9,10):
     plt.plot(POC_resp_mgC_m3_list[:,iResp], depth_isopycnal_list, c='b')
 
-plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp]*0.5,
-                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp]*0.5, facecolor='b',
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_list[:,iResp]-POC_resp_mgC_m3_std_list[:,iResp],
+                  POC_resp_mgC_m3_list[:,iResp]+POC_resp_mgC_m3_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013;\nBelcher et al.)')
 
 plt.plot(POC_resp_mgC_m3_list[:, 7], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
@@ -2336,9 +2443,12 @@ plt.plot(POC_resp_mgC_m3_list[:, 12], depth_isopycnal_list, c='g',linestyle='das
 plt.plot(POC_resp_mgC_m3_list[:, 13], depth_isopycnal_list, c='g',ls='-.',label='PARR\n($k_{rem}$=0.5)')
 plt.plot(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red', s=5)
-plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_extended_list - Theoretical_Budget_extended_std_list*0.5, Theoretical_Budget_extended_list + Theoretical_Budget_extended_std_list*0.5,
+plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_extended_list - Theoretical_Budget_extended_std_list, Theoretical_Budget_extended_list + Theoretical_Budget_extended_std_list,
                   facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
 
+plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
 plt.xlim(-5,100)
 plt.xlabel('Carbon Consumption Rate (mgC/m$^3$)', fontsize=fs)
 plt.legend(fontsize=7)
@@ -2350,9 +2460,9 @@ yticks_down=np.linspace(depth_isopycnal_down_list[idx1], depth_isopycnal_down_li
 yticks_up=np.linspace(depth_isopycnal_up_list[idx1], depth_isopycnal_up_list[idx2],nyticks)
 yticklabels=[]
 for i in range(0,nyticks):
-    if i==0:
-        yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% ( np.interp(yticks[i],depth_isopycnal_list,dens0_list) ) )
-    else:
+    # if i==0:
+    #     yticklabels.append('[MLD]\n%0.2f kg/m$^3$'% ( np.interp(yticks[i],depth_isopycnal_list,dens0_list) ) )
+    # else:
         yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
@@ -2360,6 +2470,64 @@ ax.text(-0.25, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Fig04b_vs_depth_v02.pdf' ,dpi=200)
 plt.close()
+
+#######################################################################
+# I save some values for the latex document
+#######################################################################
+
+(Theoretical_Budget, Theoretical_Budget_std, Theoretical_Budget_extended, Theoretical_Budget_extended_std,
+ POC_resp_mgC_m3, POC_resp_mgC_m3_std, O2_resp_mgC_m3, O2_resp_mgC_m3_ci, RespirationTypes, n_profiles,
+ Delta_Integrated_POC, Delta_Integrated_POC_std, Delta_flux, Delta_flux_std,Flux_dens0_mgC_m3,Flux_densf_mgC_m3, depth_isopycnal,
+ depth_isopycnal_down, depth_isopycnal_up, layer_thickness) = carbon_budget_calculation(dens_eddy_core_up, dens_eddy_core_down, day0, dayf)
+
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'Flux_0413to0731_eddy_core_up'
+arg_value=Flux_dens0_mgC_m3
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Flux_0413to0731_eddy_core_down'
+arg_value=Flux_densf_mgC_m3
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Flux_0413to0731eddy_core_difference'
+arg_value=abs((Flux_dens0_mgC_m3-Flux_densf_mgC_m3))
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Flux_0413to0731eddy_core_difference_std'
+arg_value=abs(Delta_flux_std)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Integrated_POC_0413to0731difference'
+arg_value=abs(Delta_Integrated_POC)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Integrated_POC_0413to0731difference_std'
+arg_value=abs(Delta_Integrated_POC_std)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bulkPOC_0413to0731_eddycore'
+arg_value=Theoretical_Budget
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bulkPOC_0413to0731_eddycore_std'
+arg_value=Theoretical_Budget_std
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'PARR_0413to0731_eddycore'
+arg_value=POC_resp_mgC_m3[2]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'PARR_0413to0731_eddycore_std'
+arg_value=POC_resp_mgC_m3_std[2]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+sel = (dens0_list+dens_thickness*0.5)>=dens0
+Theoretical_Budget_list_sel = Theoretical_Budget_list[sel]
+Theoretical_Budget_std_list_sel = Theoretical_Budget_std_list[sel]
+argument = 'bulkPOC_0413to0731_max_layer'
+arg_value=Theoretical_Budget_list_sel.max()
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bulkPOC_0413to0731_max_layer_std'
+arg_value=Theoretical_Budget_std_list_sel[7]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bulkPOC_0413to0731_min_layer'
+arg_value=Theoretical_Budget_list_sel.min()
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bulkPOC_0413to0731_min_layer_std'
+arg_value=Theoretical_Budget_std_list_sel[12]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
 # endregion
 
 
@@ -2433,6 +2601,35 @@ plt.ylabel('Chlorophyll (mg/m$^3$)', fontsize=15)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v02/Supplementary/Supplementary_Fig02_v02.pdf' ,dpi=200)
 plt.close()
+
+#######################################################################
+# I save some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+i=0;print(matlab_datevec(Date_Num_Eddy1[i]).astype(int))
+argument = 'chl_Eddy1_20201018'
+arg_value=chl_inside_mean1[i]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=73;print(matlab_datevec(Date_Num_Eddy1[i]).astype(int))
+i=285;print(matlab_datevec(Date_Num_Eddy1[i]).astype(int))
+argument = 'chl_Eddy1_0101to0108'
+arg_value=np.mean(chl_inside_mean1[73:i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=175;print(matlab_datevec(Date_Num_Eddy1[i]).astype(int))
+i=339;print(matlab_datevec(Date_Num_Eddy1[i]).astype(int))
+argument = 'chl_percentage_difference_inside_outside'
+arg_value = np.mean(chl_inside_mean1[175:i]-chl_outside_mean1[175:i])/np.mean(chl_outside_mean1[175:i])*100
+write_latex_data(filename,argument,'%d' % np.round(arg_value))
+i=3;print(matlab_datevec(Date_Num_Eddy2[i]).astype(int))
+argument = 'chl_Eddy2_20200921'
+arg_value=chl_inside_mean2[i]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=105;print(matlab_datevec(Date_Num_Eddy2[i]).astype(int))
+i=317;print(matlab_datevec(Date_Num_Eddy2[i]).astype(int))
+argument = 'chl_Eddy2_0101to0108'
+arg_value=np.mean(chl_inside_mean2[105:i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 # endregion
 
@@ -3116,10 +3313,24 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 #######################################################################
 from write_latex_data import write_latex_data
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
-i=5;print(matlab_datevec(x_filtered_datenum[i]).astype(int))
-argument = 'MiP_0421_eddy_core'
-arg_value=np.mean(doxy_eddy_core[i])
-write_latex_data(filename,argument,'%d' % arg_value)
+i=0;print(matlab_datevec(x_filtered_datenum[i]).astype(int))
+argument = 'MiP_0413_eddy_core'
+arg_value=np.mean(MiP_eddy_core[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=45;print(matlab_datevec(x_filtered_datenum[i]).astype(int))
+argument = 'MiP_0626_eddy_core'
+arg_value=np.mean(MiP_eddy_core[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=81;print(matlab_datevec(x_filtered_datenum[i]).astype(int))
+argument = 'MiP_0825_eddy_core'
+arg_value=np.mean(MiP_eddy_core[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'MaP_0413to0923_eddy_core'
+arg_value=np.mean(MaP_eddy_core)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'MaP_0413to0923_eddy_core_std'
+arg_value=np.std(MaP_eddy_core)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 # endregion
 
