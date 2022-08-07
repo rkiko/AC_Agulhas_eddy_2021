@@ -80,7 +80,7 @@ cons_temp[mask_dens]=cons_tmp
 ########################################################################################################################
 # I load the eddy radiuses and the eddy-float distance
 ########################################################################################################################
-day_end_timeseries=np.array([2021,8,1])
+day_end_timeseries=np.array([2021,9,24])
 image_path='../Plots/an60/20210413to%d%02d%02d' % (day_end_timeseries[0],day_end_timeseries[1],day_end_timeseries[2])
 if not os.path.isdir(image_path):   os.system('mkdir %s' % image_path)
 day_end_timeseries=matlab_datenum(day_end_timeseries)
@@ -104,6 +104,8 @@ width, height = 0.73, 0.75
 set_xlim_lower, set_xlim_upper = 0, 50
 temp0, temp1 = 3,16
 doxy0, doxy1 = 180,245
+cons_temp_isodepth=np.zeros((depth_tmp0_list.size,temp.shape[0]))
+doxy_isodepth=np.zeros((depth_tmp0_list.size,temp.shape[0]))
 
 idepth=0
 for idepth in range(0,depth_tmp0_list.size):
@@ -138,6 +140,9 @@ for idepth in range(0,depth_tmp0_list.size):
         doxy_tmp = np.mean(doxy_tmp[sel_depth])
 
         Date_Num_float_tmp=Date_Num[i]
+
+        cons_temp_isodepth[idepth,i] = cons_temp_tmp
+        doxy_isodepth[idepth,i] = doxy_tmp
         ####################################################################################################################
         # Plot part
         ####################################################################################################################
@@ -195,6 +200,26 @@ for idepth in range(0,depth_tmp0_list.size):
     plt.savefig('%s/03ConsTemp_profiles_vs_distance_from_center_%dm_an60.pdf' % (image_path,depth_tmp0) ,dpi=200)
     plt.close()
 
+
+#######################################################################
+# I save some values for the latex document
+#######################################################################
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'Temp_200m_0413'
+arg_value=np.mean(cons_temp_isodepth[1,0])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=59;print(matlab_datevec(Date_Num[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Temp_200m_0923'
+arg_value=np.mean(cons_temp_isodepth[1,i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'Temp_500m_0413'
+arg_value=np.mean(cons_temp_isodepth[4,6])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=59;print(matlab_datevec(Date_Num[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Temp_500m_0923'
+arg_value=np.mean(cons_temp_isodepth[4,i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 
 
