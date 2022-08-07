@@ -37,6 +37,7 @@ lonEddy1=data_eddy1['Lon']
 latEddy1=data_eddy1['Lat']
 radius_Vmax1=data_eddy1['Rad_max']   # mean radius_Vmax  = 60.25 km
 radius_Out1=data_eddy1['Rad_out']    # mean radius_Out  = 84.60 km
+Vel_Azimuth1=data_eddy1['Vel_Azimuth']    # mean radius_Out  = 84.60 km
 lonVmax1=data_xVMax1.values[:,:]
 latVmax1=data_yVMax1.values[:,:]
 
@@ -51,6 +52,7 @@ lonEddy2=data_eddy2['Lon']
 latEddy2=data_eddy2['Lat']
 radius_Vmax2=data_eddy2['Rad_max']   # mean radius_Vmax  = 53.49 km
 radius_Out2=data_eddy2['Rad_out']    # mean radius_Out  = 92.01 km
+Vel_Azimuth2=data_eddy2['Vel_Azimuth']    # mean radius_Out  = 84.60 km
 lonVmax2=data_xVMax2.values[:,:]
 latVmax2=data_yVMax2.values[:,:]
 
@@ -60,11 +62,39 @@ radius_frame=np.max( [np.mean(radius_Out1), np.mean(radius_Out2)] )*4/111 #radiu
 #######################################################################
 # I save the radius_frame values for the latex document
 #######################################################################
-# from write_latex_data import write_latex_data
-# filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
-# argument = 'radius_frame'
-# arg_value=radius_frame
-# write_latex_data(filename,argument,'%d' % arg_value)
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'radius_frame'
+arg_value=radius_frame*111
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'lon0_Eddy1'
+arg_value=abs(lonEddy1[0])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'lat0_Eddy1'
+arg_value=abs(latEddy1[0])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'radVmax0_Eddy1'
+arg_value=radius_Vmax1[0]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+i=175;print(matlab_datevec(Date_Num_Eddy1[i]).astype(int))
+argument = 'radVmax0413_Eddy1'
+arg_value=radius_Vmax1[i]
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'radVmaxMean_Eddy1'
+arg_value=np.mean(radius_Vmax1)
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'radVmaxStd_Eddy1'
+arg_value=np.std(radius_Vmax1)
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'VelAzimuthMean_Eddy1'
+arg_value=abs(np.mean(Vel_Azimuth1))
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'VelAzimuthStd_Eddy1'
+arg_value=abs(np.std(Vel_Azimuth1))
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'VelAzimuthMax_Eddy1'
+arg_value=np.max(np.abs(Vel_Azimuth1))
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 #######################################################################################################################
 ############### Calculating Chlorophyll using satellite data
