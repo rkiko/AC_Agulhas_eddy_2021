@@ -2482,6 +2482,7 @@ plt.close()
 
 from write_latex_data import write_latex_data
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+#These values are extracted from the bulk POC and PARR calculated in the eddy core considering only one unique layer
 argument = 'Flux_0413to0731_eddy_core_up'
 arg_value=Flux_dens0_mgC_m3
 write_latex_data(filename,argument,'%0.2f' % arg_value)
@@ -2512,9 +2513,21 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 argument = 'PARR_0413to0731_eddycore_std'
 arg_value=POC_resp_mgC_m3_std[2]
 write_latex_data(filename,argument,'%0.2f' % arg_value)
-sel = (dens0_list+dens_thickness*0.5)>=dens0
+
+#These values are extracted from the bulk POC and PARR calculated for different layers within the eddy core
+sel = (dens0_list+dens_thickness*0.5)>=dens_eddy_core_up
 Theoretical_Budget_list_sel = Theoretical_Budget_list[sel]
 Theoretical_Budget_std_list_sel = Theoretical_Budget_std_list[sel]
+Theoretical_Budget_extended_list_sel = Theoretical_Budget_extended_list[sel]
+Theoretical_Budget_extended_std_list_sel = Theoretical_Budget_extended_std_list[sel]
+POC_resp_mgC_m3_list_sel = POC_resp_mgC_m3_list[sel,:]
+POC_resp_mgC_m3_std_list_sel = POC_resp_mgC_m3_std_list[sel,:]
+O2_resp_mgC_m3_list_sel = O2_resp_mgC_m3_list[sel]
+O2_resp_mgC_m3_ci_list_sel = O2_resp_mgC_m3_ci_list[sel]
+dens_list_sel = dens0_list[sel]+dens_thickness*0.5
+depth_isopycnal_list_sel = depth_isopycnal_list[sel]
+depth_isopycnal_down_list_sel = depth_isopycnal_down_list[sel]
+depth_isopycnal_up_list_sel = depth_isopycnal_up_list[sel]
 argument = 'bulkPOC_0413to0731_max_layer'
 arg_value=Theoretical_Budget_list_sel.max()
 write_latex_data(filename,argument,'%0.2f' % arg_value)
@@ -2527,6 +2540,53 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 argument = 'bulkPOC_0413to0731_min_layer_std'
 arg_value=Theoretical_Budget_std_list_sel[12]
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'PARR_0413to0731_max_layer'
+arg_value=POC_resp_mgC_m3_list_sel[:,2].max()
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'PARR_0413to0731_max_layer_std'
+arg_value=POC_resp_mgC_m3_std_list_sel[14,2]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'PARR_0413to0731_min_layer'
+arg_value=POC_resp_mgC_m3_list_sel[:,2].min()
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'PARR_0413to0731_min_layer_std'
+arg_value=POC_resp_mgC_m3_std_list_sel[-1,2]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+print(depth_isopycnal_list_sel[0],depth_isopycnal_list_sel[8],dens_list_sel[0],dens_list_sel[8])
+argument = 'OxyCR_0413to0731_175to295m_up'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[0:9,0])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'OxyCR_0413to0731_175to295m_down'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[0:9,1])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+print(depth_isopycnal_down_list_sel[10],depth_isopycnal_up_list_sel[10],dens_list_sel[10],dens_list_sel[10])
+argument = 'OxyCR_0413to0731_320to365m_up'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[10,0])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'OxyCR_0413to0731_320to365m_down'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[10,1])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+print(depth_isopycnal_list_sel[11],depth_isopycnal_list_sel[14],dens_list_sel[11],dens_list_sel[14])
+argument = 'OxyCR_0413to0731_373to484m_up'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[11:15,0])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'OxyCR_0413to0731_373to484m_down'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[11:15,1])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+print(depth_isopycnal_list_sel[15],depth_isopycnal_list_sel[17],dens_list_sel[15],dens_list_sel[17])
+argument = 'OxyCR_0413to0731_520to581m_up'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[15:18,0])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'OxyCR_0413to0731_520to581m_down'
+arg_value=np.mean(O2_resp_mgC_m3_ci_list_sel[15:18,1])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+print(depth_isopycnal_list_sel[11],depth_isopycnal_list_sel[12],dens_list_sel[11],dens_list_sel[12])
+argument = 'bulkPOC_0413to0731_373to410m_extended'
+arg_value=np.mean(Theoretical_Budget_extended_list_sel[11:13])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'bulkPOC_0413to0731_373to410m_extended_std'
+arg_value=np.mean(Theoretical_Budget_extended_std_list_sel[11:13])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
 
 # endregion
 
