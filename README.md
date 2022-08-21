@@ -19,6 +19,13 @@ to show the change in average POC, flux, and carbon budget
 
 
 \
+Fig_Main_v03
+
+I change Fig 4 because I do not include anymore the extended carbon budget. Also,
+I do not plot anymore the carbon budget vs density, but only vs depth
+
+
+\
 an01
 
 First script to load Ecopart_mip_map_flux_data.tsv and plot the flux in the whole water column over time
@@ -569,5 +576,10 @@ contours, and float trajectory. I also plot time series of satellite chl
 inside and outside the Eddy 1 and Eddy 2, and the time series of eddy radius
 and float distance from centroid
 
+
+\
+an71
+
+I calculate sink speed of spherical clay particles using Dioguardi function
 
 
