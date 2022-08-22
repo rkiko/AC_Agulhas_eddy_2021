@@ -2617,6 +2617,278 @@ plt.close()
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
+######### SUPPLEMENTARY FIG TEMPERATURE ANOMALY
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+# region Supplementary Fig. Temperature anomaly
+import scipy.io as sp
+import numpy as np
+import pandas as pd
+import os,sys
+import netCDF4 as nc
+import pickle
+import matplotlib.pyplot as plt
+from pathlib import Path
+home = str(Path.home())
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+filename_coriolis='6903095_Sprof_all.nc'
+######
+import datetime
+import seawater as sw
+import gsw
+from scipy.signal import savgol_filter
+from scipy.interpolate import griddata
+
+#Here I define the time at which I want to finish the time series in the plot
+day_end_timeseries=np.array([2021,9,24])
+day_end_timeseries=matlab_datenum(day_end_timeseries)
+
+#######################################################################
+# I load the reference temperature
+#######################################################################
+mat_contents = sp.loadmat("%s/MatHydroProperties.mat" % (storedir))
+# CT_Float=mat_contents["CT_Float"]
+CT_Ref=mat_contents["CT_Ref"]
+
+#######################################################################
+# I load the Coriolis data
+#######################################################################
+ds = nc.Dataset('%s/%s' % (storedir,filename_coriolis))
+lon=np.array(ds.variables['LONGITUDE'])
+lat=np.array(ds.variables['LATITUDE'])
+Date_Num=np.array(ds.variables['JULD'])
+date_reference = datetime.datetime.strptime("1/1/1950", "%d/%m/%Y")
+
+#Standard variables
+temp=np.array(ds.variables['TEMP_ADJUSTED'])
+pres=np.array(ds.variables['PRES_ADJUSTED'])
+psal=np.array(ds.variables['PSAL_ADJUSTED'])
+
+
+#If adjusted values are not available yet, I take the non adjusted ones
+if np.sum(temp==99999)==temp.size:
+    print('Taking non adjusted temperature')
+    temp = np.array(ds.variables['TEMP'])
+if np.sum(pres==99999)==pres.size:
+    print('Taking non adjusted pressure')
+    pres = np.array(ds.variables['PRES'])
+if np.sum(psal==99999)==psal.size:
+    print('Taking non adjusted salinity')
+    psal = np.array(ds.variables['PSAL'])
+
+CT_Ref=CT_Ref.T[0:Date_Num.size,:]
+# CT_Float=CT_Float.T[0:Date_Num.size,:]
+
+#######################################################################
+#I tranform the pressure to depth
+#######################################################################
+mask_depth=pres!=99999 #I select only valid values
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_depth]
+pres_tmp=pres[mask_depth]
+depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
+depth=np.ones(temp.shape)*99999
+depth[mask_depth]=depth_tmp
+
+#I compute the potential density: for that, I need absolute salinity and conservative temperature, so I transform
+#salinity and temperature first
+mask_dens=np.logical_and(pres!=99999,temp!=99999,psal!=99999) # I exclude the points with value = 99999
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lon_tmp=np.tile(lon,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_dens]
+lon_tmp=lon_tmp[mask_dens]
+pres_tmp=pres[mask_dens]
+psal_tmp=psal[mask_dens]
+temp_tmp=temp[mask_dens]
+abs_psal_tmp = gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp)  # I compute absolute salinity
+cons_tmp = gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
+dens_tmp = gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+abs_psal=np.ones(temp.shape)*99999
+abs_psal[mask_dens]=abs_psal_tmp
+cons_temp=np.ones(temp.shape)*99999
+cons_temp[mask_dens]=cons_tmp
+dens=np.ones(temp.shape)*99999
+dens[mask_dens]=dens_tmp+1000
+cons_temp_anom = cons_temp - CT_Ref
+
+#######################################################################
+# I select the data only when the BGC Argo float was inside the eddy AND before day_end_timeseries (which fixes the x limit)
+#######################################################################
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+datenum_profiles = data_dist_radius['Datenum']
+sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
+
+lon=lon[sel_insideEddy]
+lat=lat[sel_insideEddy]
+Date_Num=Date_Num[sel_insideEddy]
+pres=pres[sel_insideEddy]
+depth=depth[sel_insideEddy,:]
+dens=dens[sel_insideEddy,:]
+cons_temp=cons_temp[sel_insideEddy,:]
+cons_temp_anom=cons_temp_anom[sel_insideEddy,:]
+
+#######################################################################
+# I calculate the mixed layer depth
+#######################################################################
+from oceanpy import mixed_layer_depth
+mld=np.array([])
+i=0
+for i in range(0,cons_temp.shape[0]):
+    depth_tmp=depth[i,:]
+    temp_tmp=cons_temp[i,:]
+    # I exclude nan values
+    sel_non_nan=(depth_tmp!=99999)&(temp_tmp!=99999)
+    temp_tmp=temp_tmp[sel_non_nan];depth_tmp=depth_tmp[sel_non_nan]
+    mld_tmp,_ = mixed_layer_depth(depth_tmp,temp_tmp,using_temperature='yes')
+    mld=np.append(mld,mld_tmp)
+
+#######################################################################
+# I plot
+#######################################################################
+day_start_eddy_merging=np.array([2021,8,1])
+day_end_eddy_merging=np.array([2021,8,11])
+day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
+day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
+
+parameter_ylabel_list=['Temperature anom. ($^{\circ}$C)']
+parameter_panellabel_list=[' ']
+parameter_shortname_list=['cons_temp_anom']
+ipar=0
+if ipar==0:   parameter=cons_temp_anom.copy()
+
+#I filter the profiles
+parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([])
+i=0
+for i in range(0,parameter.shape[0]):
+    z = parameter[i, :]
+    sel=(z!=99999) & (depth[i,:]!=99999) & (dens[i,:]!=99999) & (~np.isnan(z))
+    if sum(sel) > 0:
+        z=z[sel];x=np.ones(z.shape)*Date_Num[i];y1=depth[i,sel];y2=dens[i,sel];y3=pres[i,sel]
+        z = savgol_filter(z, 5, 1)
+        parameter_filtered = np.concatenate((parameter_filtered, z));Date_Num_parameter = np.concatenate((Date_Num_parameter, x))
+        depth_parameter = np.concatenate((depth_parameter, y1))
+        dens_parameter = np.concatenate((dens_parameter, y2))
+
+# parameter_filtered[parameter_filtered<0]=0
+dens_parameter[dens_parameter<1026]=1026
+dens_parameter[dens_parameter>1027.5]=1027.5
+# I define the x and y arrays for the contourf plot
+x_parameter = np.linspace(Date_Num_parameter.min(),Date_Num_parameter.max(),100)
+y1_parameter = np.linspace(depth_parameter.min(),depth_parameter.max(),200)
+y2_parameter = np.linspace(dens_parameter.min(), dens_parameter.max(), 200)
+# I interpolate
+x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y1_parameter)
+parameter_interp_depth = griddata((Date_Num_parameter,depth_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
+dens_interp_depth = griddata((Date_Num_parameter,depth_parameter), dens_parameter, (x_parameter_g, y_parameter_g), method="nearest")
+x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y2_parameter)
+parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
+
+#cons temp anom in the ML
+mld_int = np.interp(x_parameter, Date_Num, mld)
+parameter_mld = np.zeros((mld_int.size,))
+i = 0
+for i in range(0, mld_int.size):
+    tmp = parameter_interp_depth[:, i]
+    sel_mld = y1_parameter <= (mld_int[i] - 20)
+    parameter_mld[i] = np.mean(tmp[sel_mld])
+
+cons_temp_anom_ML = parameter_mld.copy()
+
+# Parameter in the eddy core
+dens0 = 1026.82
+dens1 = 1027.2397618090454  # calculated at step 4 of Fig. 3a
+parameter_eddy_core = np.zeros((mld_int.size,))
+i = 0
+for i in range(0, mld_int.size):
+    tmp = parameter_interp_dens[:, i]
+    sel_tmp = (y2_parameter >= dens0) & (y2_parameter < dens1)
+    parameter_eddy_core[i] = np.mean(tmp[sel_tmp])
+
+parameter_eddy_core = savgol_filter(parameter_eddy_core, 5, 1)
+cons_temp_anom_eddy_core = parameter_eddy_core.copy()
+
+# Parameter between ML and lower boundary of the eddy core
+parameter_ML_eddy_core_down = np.zeros((mld_int.size,))
+i = 0
+for i in range(0, mld_int.size):
+    tmp = parameter_interp_dens[:, i]
+    sel_tmp = (y1_parameter > mld_int[i] ) & (y2_parameter < dens1)
+    parameter_ML_eddy_core_down[i] = np.mean(tmp[sel_tmp])
+
+parameter_ML_eddy_core_down = savgol_filter(parameter_ML_eddy_core_down, 5, 1)
+cons_temp_anom_ML_eddy_core_down = parameter_ML_eddy_core_down.copy()
+
+from write_latex_data import write_latex_data
+filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
+argument = 'temp_anom_ML_0413_0923'
+arg_value=np.mean(cons_temp_anom_ML)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'temp_anom_eddy_core_0413_0923'
+arg_value=np.mean(cons_temp_anom_eddy_core)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'temp_anom_ML_eddy_core_down_0413_0923'
+arg_value=np.mean(cons_temp_anom_ML_eddy_core_down)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'temp_anom_minimum_0413_0923'
+arg_value=np.mean(np.min(parameter_interp_depth,axis=0))
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+########################################################
+####### (Useless part for the moment) I plot: versus depth
+########################################################
+
+width, height = 0.8, 0.7
+set_ylim_lower, set_ylim_upper = y1_parameter.min(),800
+fig = plt.figure(1, figsize=(12,8))
+ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
+ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth,cmap='RdBu_r')
+plt.plot(Date_Num,mld,'w')
+# plot3 = ax.contour(x_parameter, y1_parameter, dens_interp_depth, levels=[1026.35],colors='white', linestyles='dashed', linewidths=1, zorder=10 )#,cmap='RdBu')
+# fmt = {}
+# strs = ['1026.35 kg/m$^3$']
+# for l, s in zip(plot3.levels, strs):
+#     fmt[l] = s
+# ax.clabel(plot3, plot3.levels[::], inline=True, fmt=fmt, fontsize=10)
+
+plt.gca().invert_yaxis()
+plt.vlines(day_start_eddy_merging,ymin=0,ymax=700,color='w',linestyles='dashed')
+plt.vlines(day_end_eddy_merging,ymin=0,ymax=700,color='w',linestyles='dashed')
+# draw colorbar
+cbar = plt.colorbar(plot2)
+cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
+plt.ylabel('Depth (m)', fontsize=18)
+#I set xticks
+nxticks=10
+xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
+xticklabels=[]
+for i in xticks:
+    date_time_obj = date_reference + datetime.timedelta(days=i)
+    xticklabels.append(date_time_obj.strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90,fontsize=12)
+# I add the panel label
+ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+# I don't save cos I prefer the plot by Artemis
+# plt.savefig('../Plots/Supplementary/Anom_ConsTemp_v03.pdf',dpi=200)
+# plt.close()
+
+# endregion
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
 ######### SUPPLEMENTARY FIG SATELLITE CHL TIME SERIES
 ########################################################################################################################
 ########################################################################################################################

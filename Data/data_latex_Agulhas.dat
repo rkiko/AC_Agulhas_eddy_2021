@@ -169,3 +169,7 @@ Kiko2020_zooRR_down = 0.01
 Kiko2020_zooRR_up = 0.03
 OxyCR_0413to0731_eddycore = 0.6978
 OxyCR_0413to0731_eddycore_std = 0.1368
+temp_anom_ML_0413_0923 = 0.65
+temp_anom_eddy_core_0413_0923 = -4.75
+temp_anom_ML_eddy_core_down_0413_0923 = -3.70
+temp_anom_minimum_0413_0923 = -5.42
