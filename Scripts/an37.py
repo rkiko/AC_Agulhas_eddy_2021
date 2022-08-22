@@ -245,7 +245,7 @@ day_start_eddy_merging=np.array([2021,8,1])
 day_end_eddy_merging=np.array([2021,8,11])
 day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
 day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
-ipar=0
+ipar=7
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0: parameter=temp.copy()
     elif ipar==1:   parameter=cons_temp.copy()
@@ -275,6 +275,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I interpolate
     x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y1_parameter)
     parameter_interp_depth = griddata((Date_Num_parameter,depth_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
+    dens_interp_depth = griddata((Date_Num_parameter,depth_parameter), dens_parameter, (x_parameter_g, y_parameter_g), method="nearest")
     x_parameter_g,y_parameter_g=np.meshgrid(x_parameter,y2_parameter)
     parameter_interp_dens = griddata((Date_Num_parameter,dens_parameter), parameter_filtered, (x_parameter_g, y_parameter_g), method="nearest")
 
@@ -304,6 +305,15 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         plt.plot(Date_Num,mld,'w')
     elif ipar==4:
         plt.plot(zeu_datenum,zeu_float,'w')
+    elif ipar==7:
+        plt.plot(Date_Num, mld, 'orangered')
+        plot3 = ax.contour(x_parameter, y1_parameter, dens_interp_depth, levels=[1026.35],colors='orangered', linestyles='dashed', linewidths=1, zorder=10 )#,cmap='RdBu')
+        fmt = {}
+        strs = ['1026.35 kg/m$^3$']
+        for l, s in zip(plot3.levels, strs):
+            fmt[l] = s
+        ax.clabel(plot3, plot3.levels[::], inline=True, fmt=fmt, fontsize=10)
+
     plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w')
     plt.vlines(day_end_eddy_merging,ymin=0,ymax=600,color='w')
     plt.gca().invert_yaxis()
