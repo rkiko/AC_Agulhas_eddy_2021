@@ -365,21 +365,28 @@ dens[mask_dens]=dens_tmp+1000
 # I transform the bbp700 to small POC (sPOC)
 #######################################################################
 from oceanpy import bbp700toPOC
+from oceanpy import bbp700toPOC_Koestner
 sPOC=bbp700.copy()*0+99999
+sPOC_Koestner=bbp700.copy()*0+99999
 i=0
 for i in range(0,bbp700.shape[0]):
     bbp700tmp=bbp700[i,:]
     depth_tmp=depth[i,:]
     temp_tmp=temp[i,:]
+    chl_tmp=chla[i,:]
     # I exclude nan values
-    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)
+    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)&(chl_tmp!=99999)
     bbp700tmp=bbp700tmp[sel]
     depth_tmp=depth_tmp[sel]
     temp_tmp=temp_tmp[sel]
+    chl_tmp=chl_tmp[sel]
     # I convert to small POC (sPOC) and I set to 0 values <0
     sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
     sPOC_tmp[sPOC_tmp<0]=0
     sPOC[i,sel]=sPOC_tmp
+    sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl_tmp)
+    sPOC_tmp[np.isnan(sPOC_tmp)]=0
+    sPOC_Koestner[i,sel]=sPOC_tmp
 
 #######################################################################
 # I select the data only when the BGC Argo float was inside the eddy AND before day_end_timeseries (which fixes the x limit)
@@ -401,6 +408,7 @@ cons_temp=cons_temp[sel_insideEddy,:]
 chla=chla[sel_insideEddy,:]
 doxy=doxy[sel_insideEddy,:]
 sPOC=sPOC[sel_insideEddy,:]
+sPOC_Koestner=sPOC_Koestner[sel_insideEddy,:]
 
 #######################################################################
 # I calculate the mixed layer depth
@@ -435,15 +443,16 @@ day_end_eddy_merging=np.array([2021,8,11])
 day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
 day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
 
-parameter_ylabel_list=['Temperature ($^{\circ}$C)','Chlorophyll $a$ (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)']
-parameter_panellabel_list=['b','d','c','f']
-parameter_shortname_list=['cons_temp','chla','doxy','bbpPOC']
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Chlorophyll $a$ (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$b_{bp}$POC (mgC $m^{-3}$)']
+parameter_panellabel_list=['b','d','c','f','f']
+parameter_savelabel_list=['b','d','c','f_Cetinic','f_Koestner']
 ipar=0
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0:   parameter=cons_temp.copy()
     elif ipar == 1: parameter=chla.copy()
     elif ipar == 2: parameter=doxy.copy()
     elif ipar == 3: parameter=sPOC.copy()
+    elif ipar == 4: parameter=sPOC_Koestner.copy()
 
     #I filter the profiles
     parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([])
@@ -475,6 +484,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ########################################################
     if ipar==3:
         parameter_interp_depth[parameter_interp_depth > 40] = 40
+    if ipar==4:
+        parameter_interp_depth[parameter_interp_depth > 120] = 120
 
     width, height = 0.8, 0.7
     if ipar==0:
@@ -520,7 +531,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     # I save
-    plt.savefig('../Plots/Fig_Main_v04/Fig02%s_v04.pdf' % parameter_panellabel_list[ipar],dpi=200)
+    plt.savefig('../Plots/Fig_Main_v04/Fig02%s_v04.pdf' % parameter_savelabel_list[ipar],dpi=200)
     plt.close()
 
 # endregion
@@ -639,6 +650,7 @@ storedir = '%s/GIT/AC_Agulhas_eddy_2021/Data' % home
 a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
 data_an18 = pickle.load(a_file)
 bbp_POC = data_an18['bbp_POC']
+bbp_POC_Koestner = data_an18['bbp_POC_Koestner']
 Date_Num_bbp = data_an18['Date_Num_bbp']
 Date_Vec_bbp = data_an18['Date_Vec_bbp']
 depth_bbp = data_an18['depth_bbp']
@@ -651,6 +663,7 @@ Date_Vec_bbp = Date_Vec_bbp[sel_dates,:]
 depth_bbp = depth_bbp[sel_dates,:]
 dens_bbp = dens_bbp[sel_dates,:]
 bbp_POC = bbp_POC[sel_dates, :]
+bbp_POC_Koestner = bbp_POC_Koestner[sel_dates, :]
 
 # I convert the dates to float values (in seconds from 1970 1 1)
 Date_Num_bbp_calendar = Date_Num_bbp.copy()
@@ -673,8 +686,9 @@ for i in range(0,Date_Num_bbp_calendar.size):
 MiP_filtered=np.array([]);dens_MiP_filtered=np.array([]);Date_Num_MiP_filtered=np.array([])
 MaP_filtered=np.array([]);dens_MaP_filtered=np.array([]);Date_Num_MaP_filtered=np.array([])
 bbp_filtered=np.array([]);dens_bbp_filtered=np.array([]);Date_Num_bbp_filtered=np.array([])
-MiP_MLD=np.array([]);MaP_MLD=np.array([]);bbp_MLD=np.array([])
-MiP_outMLD=np.array([]);MaP_outMLD=np.array([]);bbp_outMLD=np.array([])
+bbp_Koestner_filtered=np.array([]);dens_bbp_Koestner_filtered=np.array([]);Date_Num_bbp_Koestner_filtered=np.array([])
+MiP_MLD=np.array([]);MaP_MLD=np.array([]);bbp_MLD=np.array([]);bbp_Koestner_MLD=np.array([])
+MiP_outMLD=np.array([]);MaP_outMLD=np.array([]);bbp_outMLD=np.array([]);bbp_Koestner_outMLD=np.array([])
 isopycnal_600m = 1027.2397618090454 #calculated at step 4 of Fig. 3a
 
 i=0
@@ -708,6 +722,7 @@ for i in range(0,list_dates.size):
 
 i=0
 for i in range(0, bbp_POC.shape[0]):
+    #Cetinic
     z=bbp_POC[i,:];y=dens_bbp[i,:];y2=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
     z[z>100] = 99999
     sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y=y[sel2];y2=y2[sel2]
@@ -724,6 +739,23 @@ for i in range(0, bbp_POC.shape[0]):
         sel_outMLD = (y2>mld[i])&(y<isopycnal_600m)
         if sum(sel_outMLD) > 0:
             bbp_outMLD=np.append(bbp_outMLD,np.mean(z[sel_outMLD]))
+    #Koestner
+    z=bbp_POC_Koestner[i,:];y=dens_bbp[i,:];y2=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
+    z[z>100] = 99999
+    sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y=y[sel2];y2=y2[sel2]
+    sel3=z==0
+    if sum(sel2) > 0:
+        z = savgol_filter(z, 5, 1)
+        z[sel3]=0
+        bbp_Koestner_filtered = np.concatenate((bbp_Koestner_filtered, z))
+        Date_Num_bbp_Koestner_filtered = np.concatenate((Date_Num_bbp_Koestner_filtered, np.tile(x,sum(sel2)) ))
+        dens_bbp_Koestner_filtered = np.concatenate((dens_bbp_Koestner_filtered, y))
+        sel_MLD = y2<=mld[i]
+        if sum(sel_MLD) > 0:
+            bbp_Koestner_MLD=np.append(bbp_Koestner_MLD,np.mean(z[sel_MLD]))
+        sel_outMLD = (y2>mld[i])&(y<isopycnal_600m)
+        if sum(sel_outMLD) > 0:
+            bbp_Koestner_outMLD=np.append(bbp_Koestner_outMLD,np.mean(z[sel_outMLD]))
 
 
 # I define the x and y arrays for the MiP+MaP+bbp interpolation
@@ -734,6 +766,7 @@ x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
 MiP_interp = griddata((Date_Num_MiP_filtered, dens_MiP_filtered), MiP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 MaP_interp = griddata((Date_Num_MaP_filtered, dens_MaP_filtered), MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 bbp_interp = griddata((Date_Num_bbp_filtered, dens_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+bbp_Koestner_interp = griddata((Date_Num_bbp_Koestner_filtered, dens_bbp_Koestner_filtered), bbp_Koestner_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
 ##############################################
 # Step 3: for each density layer I calculate the corresponding mean depth
@@ -780,26 +813,32 @@ idx3 = np.where( tmp == tmp.min() )[0][0]+1
 MiP_POC_0_102635=np.mean(MiP_interp[0:idx1,:],0)
 MaP_POC_0_102635=np.mean(MaP_interp[0:idx1,:],0)
 bbp_POC_0_102635=np.mean(bbp_interp[0:idx1,:],0)
+bbp_POC_Koestner_0_102635=np.mean(bbp_Koestner_interp[0:idx1,:],0)
 
 MiP_POC_0_102635_std = np.std(MiP_interp[0:idx1, :], 0)
 MaP_POC_0_102635_std = np.std(MaP_interp[0:idx1, :], 0)
 bbp_POC_0_102635_std = np.std(bbp_interp[0:idx1, :], 0)
+bbp_POC_Koestner_0_102635_std = np.std(bbp_Koestner_interp[0:idx1, :], 0)
 
 MiP_POC_102635_600=np.mean(MiP_interp[idx1:idx2,:],0)
 MaP_POC_102635_600=np.mean(MaP_interp[idx1:idx2,:],0)
 bbp_POC_102635_600=np.mean(bbp_interp[idx1:idx2,:],0)
+bbp_POC_Koestner_102635_600=np.mean(bbp_Koestner_interp[idx1:idx2,:],0)
 
 MiP_POC_102635_600_std = np.std(MiP_interp[idx1:idx2, :], 0)
 MaP_POC_102635_600_std = np.std(MaP_interp[idx1:idx2, :], 0)
 bbp_POC_102635_600_std = np.std(bbp_interp[idx1:idx2, :], 0)
+bbp_POC_Koestner_102635_600_std = np.std(bbp_Koestner_interp[idx1:idx2, :], 0)
 
 MiP_POC_102682_600=np.mean(MiP_interp[idx3:idx2,:],0)
 MaP_POC_102682_600=np.mean(MaP_interp[idx3:idx2,:],0)
 bbp_POC_102682_600=np.mean(bbp_interp[idx3:idx2,:],0)
+bbp_POC_Koestner_102682_600=np.mean(bbp_Koestner_interp[idx3:idx2,:],0)
 
 MiP_POC_102682_600_std = np.std(MiP_interp[idx3:idx2, :], 0)
 MaP_POC_102682_600_std = np.std(MaP_interp[idx3:idx2, :], 0)
 bbp_POC_102682_600_std = np.std(bbp_interp[idx3:idx2, :], 0)
+bbp_POC_Koestner_102682_600_std = np.std(bbp_Koestner_interp[idx3:idx2, :], 0)
 
 Integrated_POC_mgC_m3_0_102635 = MiP_POC_0_102635 + MaP_POC_0_102635 + bbp_POC_0_102635
 Integrated_POC_mgC_m3_0_102635_std = np.sqrt( MiP_POC_0_102635_std**2 + MaP_POC_0_102635_std**2 + bbp_POC_0_102635_std**2 )
@@ -807,13 +846,21 @@ Integrated_POC_mgC_m3_102635_600 = MiP_POC_102635_600 + MaP_POC_102635_600 + bbp
 Integrated_POC_mgC_m3_102635_600_std = np.sqrt( MiP_POC_102635_600_std**2 + MaP_POC_102635_600_std**2 + bbp_POC_102635_600_std**2 )
 Integrated_POC_mgC_m3_102682_600 = MiP_POC_102682_600 + MaP_POC_102682_600 + bbp_POC_102682_600
 Integrated_POC_mgC_m3_102682_600_std = np.sqrt( MiP_POC_102682_600_std**2 + MaP_POC_102682_600_std**2 + bbp_POC_102682_600_std**2 )
+Integrated_POC_Koestner_mgC_m3_0_102635 = MiP_POC_0_102635 + MaP_POC_0_102635 + bbp_POC_Koestner_0_102635
+Integrated_POC_Koestner_mgC_m3_0_102635_std = np.sqrt( MiP_POC_0_102635_std**2 + MaP_POC_0_102635_std**2 + bbp_POC_Koestner_0_102635_std**2 )
+Integrated_POC_Koestner_mgC_m3_102635_600 = MiP_POC_102635_600 + MaP_POC_102635_600 + bbp_POC_Koestner_102635_600
+Integrated_POC_Koestner_mgC_m3_102635_600_std = np.sqrt( MiP_POC_102635_600_std**2 + MaP_POC_102635_600_std**2 + bbp_POC_Koestner_102635_600_std**2 )
+Integrated_POC_Koestner_mgC_m3_102682_600 = MiP_POC_102682_600 + MaP_POC_102682_600 + bbp_POC_Koestner_102682_600
+Integrated_POC_Koestner_mgC_m3_102682_600_std = np.sqrt( MiP_POC_102682_600_std**2 + MaP_POC_102682_600_std**2 + bbp_POC_Koestner_102682_600_std**2 )
 list_dates_Integrated_POC = x_filtered.copy()
 
 Integrated_POC_mgC_m3_0_MLD = MiP_MLD + MaP_MLD + bbp_MLD
 Integrated_POC_mgC_m3_MLD_600 = MiP_outMLD + MaP_outMLD + bbp_outMLD
+Integrated_POC_Koestner_mgC_m3_0_MLD = MiP_MLD + MaP_MLD + bbp_Koestner_MLD
+Integrated_POC_Koestner_mgC_m3_MLD_600 = MiP_outMLD + MaP_outMLD + bbp_Koestner_outMLD
 
 #######################################################################
-# I plot
+# I plot: Cetinic
 #######################################################################
 day_start_eddy_merging = datetime.datetime(2021,8,1)
 day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
@@ -849,7 +896,47 @@ plt.legend(fontsize=12,ncol=2)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
 ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v04/Fig02e_v04.pdf' ,dpi=200)
+plt.savefig('../Plots/Fig_Main_v04/Fig02e_Cetinic_v04.pdf' ,dpi=200)
+plt.close()
+
+#######################################################################
+# I plot: Koestner
+#######################################################################
+day_start_eddy_merging = datetime.datetime(2021,8,1)
+day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+day_end_eddy_merging = datetime.datetime(2021,8,11)
+day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
+
+width, height = 0.8, 0.5
+set_ylim_lower, set_ylim_upper = min(Integrated_POC_Koestner_mgC_m3_0_102635.min(),Integrated_POC_Koestner_mgC_m3_102635_600.min()*10),max(Integrated_POC_Koestner_mgC_m3_0_102635.max()+Integrated_POC_Koestner_mgC_m3_0_102635_std.max(),Integrated_POC_Koestner_mgC_m3_102635_600.max()*10,Integrated_POC_Koestner_mgC_m3_102682_600.max()*10)*1.02
+
+fig = plt.figure(1, figsize=(13,4))
+ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+plt.plot(list_dates_Integrated_POC,Integrated_POC_Koestner_mgC_m3_0_102635,'r',linewidth=3,label='0—1026.35 kg/m$^3$ [0—MLD]')
+plt.fill_between(list_dates_Integrated_POC, Integrated_POC_Koestner_mgC_m3_0_102635 - Integrated_POC_Koestner_mgC_m3_0_102635_std*0.5, Integrated_POC_Koestner_mgC_m3_0_102635 + Integrated_POC_mgC_m3_0_102635_std*0.5,
+                  facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nresp. rate')
+plt.plot(list_dates_Integrated_POC,Integrated_POC_Koestner_mgC_m3_102635_600*10,'b',linewidth=3,label='1026.35—%0.2f kg/m$^3$ [MLD—600 m] ($\cdot$10)' % (isopycnal_600m))
+plt.fill_between(list_dates_Integrated_POC, Integrated_POC_Koestner_mgC_m3_102635_600*10 - Integrated_POC_Koestner_mgC_m3_102635_600_std*0.5*10, Integrated_POC_Koestner_mgC_m3_102635_600*10 + Integrated_POC_Koestner_mgC_m3_102635_600_std*0.5*10,
+                  facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nresp. rate')
+plt.plot(list_dates_Integrated_POC,Integrated_POC_Koestner_mgC_m3_102682_600*10,'m',linewidth=3,label='1026.82—%0.2f kg/m$^3$ [200—600 m] ($\cdot$10)' % (isopycnal_600m))
+plt.fill_between(list_dates_Integrated_POC, Integrated_POC_Koestner_mgC_m3_102682_600*10 - Integrated_POC_Koestner_mgC_m3_102682_600_std*0.5*10, Integrated_POC_Koestner_mgC_m3_102682_600*10 + Integrated_POC_Koestner_mgC_m3_102682_600_std*0.5*10,
+                  facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nresp. rate')
+plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
+plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
+# I set xticks
+nxticks = 10
+xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90, fontsize=14)
+plt.legend(fontsize=12,ncol=2)
+plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
+ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/Fig_Main_v04/Fig02e_Koestner_v04.pdf' ,dpi=200)
 plt.close()
 
 #######################################################################
@@ -3367,21 +3454,28 @@ dens[mask_dens]=dens_tmp+1000
 # I transform the bbp700 to small POC (sPOC)
 #######################################################################
 from oceanpy import bbp700toPOC
+from oceanpy import bbp700toPOC_Koestner
 sPOC=bbp700.copy()*0+99999
+sPOC_Koestner=bbp700.copy()*0+99999
 i=0
 for i in range(0,bbp700.shape[0]):
     bbp700tmp=bbp700[i,:]
     depth_tmp=depth[i,:]
     temp_tmp=temp[i,:]
+    chl_tmp=chla[i,:]
     # I exclude nan values
-    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)
+    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)&(chl_tmp!=99999)
     bbp700tmp=bbp700tmp[sel]
     depth_tmp=depth_tmp[sel]
     temp_tmp=temp_tmp[sel]
+    chl_tmp=chl_tmp[sel]
     # I convert to small POC (sPOC) and I set to 0 values <0
     sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
     sPOC_tmp[sPOC_tmp<0]=0
     sPOC[i,sel]=sPOC_tmp
+    sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl_tmp)
+    sPOC_tmp[np.isnan(sPOC_tmp)]=0
+    sPOC_Koestner[i,sel]=sPOC_tmp
 
 #######################################################################
 # I select the data only when the BGC Argo float was inside the eddy AND before day_end_timeseries (which fixes the x limit)
@@ -3403,6 +3497,7 @@ cons_temp=cons_temp[sel_insideEddy,:]
 chla=chla[sel_insideEddy,:]
 doxy=doxy[sel_insideEddy,:]
 sPOC=sPOC[sel_insideEddy,:]
+sPOC_Koestner=sPOC_Koestner[sel_insideEddy,:]
 
 #######################################################################
 # I calculate the mixed layer depth
@@ -3427,16 +3522,17 @@ day_end_eddy_merging=np.array([2021,8,11])
 day_start_eddy_merging=matlab_datenum(day_start_eddy_merging)-matlab_datenum(1950,1,1)
 day_end_eddy_merging=matlab_datenum(day_end_eddy_merging)-matlab_datenum(1950,1,1)
 
-parameter_ylabel_list=['Temperature ($^{\circ}$C)','Chlorophyll $a$ (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)']
-parameter_panellabel_list=['a','c','b','e']
-parameter_panellabel_list_EC=['a','c','b','c']
-parameter_shortname_list=['cons_temp','chla','doxy','bbpPOC']
+parameter_ylabel_list=['Temperature ($^{\circ}$C)','Chlorophyll $a$ (mg/m$^3$)','Dissolved oxygen ($\mu$mol/kg)','$b_{bp}$POC (mgC $m^{-3}$)','$b_{bp}$POC (mgC $m^{-3}$)']
+parameter_panellabel_list=['a','c','b','e','e']
+parameter_panellabel_list_EC=['a','c','b','c','c']
+parameter_shortname_list=['cons_temp','chla','doxy','bbpPOC_Cetinic','bbpPOC_Koestner']
 ipar=0
 for ipar in range(0,parameter_ylabel_list.__len__()):
     if ipar==0:   parameter=cons_temp.copy()
     elif ipar == 1: parameter=chla.copy()
     elif ipar == 2: parameter=doxy.copy()
     elif ipar == 3: parameter=sPOC.copy()
+    elif ipar == 4: parameter=sPOC_Koestner.copy()
 
     #I filter the profiles
     parameter_filtered=np.array([]);Date_Num_parameter=np.array([]);depth_parameter=np.array([]);dens_parameter=np.array([])
@@ -3479,15 +3575,14 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         doxy_mld = parameter_mld.copy()
     elif ipar == 3:
         bbpPOC_mld = parameter_mld.copy()
+    elif ipar == 4:
+        bbpPOC_Koestner_mld = parameter_mld.copy()
 
     width, height = 0.8, 0.7
     fig = plt.figure(1, figsize=(12, 4))
     ax = fig.add_axes([0.12, 0.4, width,height - 0.15])  # ylim=(set_ylim_lower, set_ylim_upper),xlim=(Date_Num.min(), Date_Num.max()))
     plt.plot(x_parameter, parameter_mld)
-    if ipar == 4:
-        plt.ylabel('Integrated %s' % parameter_ylabel_list[ipar])
-    else:
-        plt.ylabel(parameter_ylabel_list[ipar])
+    plt.ylabel(parameter_ylabel_list[ipar])
     plt.ylim(ax.get_ylim()[0], ax.get_ylim()[1])
     plt.xlim(x_parameter[0], x_parameter[-1])
     plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='k')
@@ -3507,7 +3602,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     # I save
-    plt.savefig('../Plots/Fig_Main_v04/Supplementary/TimeSeries_ML/TimeSeries_ML_%s_Fig02_v04.pdf' % parameter_shortname_list[ipar], dpi=200)
+    plt.savefig('../Plots/Fig_Main_v04/Supplementary/TimeSeries_ML/TimeSeries_ML_%s_v04.pdf' % parameter_shortname_list[ipar], dpi=200)
     plt.close()
 
     if ipar == 1:
@@ -3537,7 +3632,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         # I add the grid
         plt.grid(color='k', linestyle='dashed', linewidth=0.5)
         # I save
-        plt.savefig('../Plots/Fig_Main_v04/Supplementary/TimeSeries_ML/TimeSeries_ML_chla_integrated_Fig02_v04.pdf', dpi=200)
+        plt.savefig('../Plots/Fig_Main_v04/Supplementary/TimeSeries_ML/TimeSeries_ML_chla_integrated_v04.pdf', dpi=200)
         plt.close()
 
         continue # I do not plot chl in the eddy core
@@ -3560,6 +3655,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         doxy_eddy_core = parameter_eddy_core.copy()
     elif ipar == 3:
         bbpPOC_eddy_core = parameter_eddy_core.copy()
+    elif ipar == 4:
+        bbpPOC_Koestner_eddy_core = parameter_eddy_core.copy()
 
     fig = plt.figure(1, figsize=(12, 4))
     ax = fig.add_axes([0.12, 0.4, width, height - 0.15])
@@ -3584,7 +3681,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # I add the grid
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     # I save
-    plt.savefig('../Plots/Fig_Main_v04/Supplementary/TimeSeries_EddyCore/TimeSeries_EddyCore_%s_Fig02_v04.pdf' % parameter_shortname_list[ipar], dpi=200)
+    plt.savefig('../Plots/Fig_Main_v04/Supplementary/TimeSeries_EddyCore/TimeSeries_EddyCore_%s_v04.pdf' % parameter_shortname_list[ipar], dpi=200)
     plt.close()
 
 #######################################################################
