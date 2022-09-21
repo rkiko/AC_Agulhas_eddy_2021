@@ -22,7 +22,16 @@ to show the change in average POC, flux, and carbon budget
 Fig_Main_v03
 
 I change Fig 4 because I do not include anymore the extended carbon budget. Also,
-I do not plot anymore the carbon budget vs density, but only vs depth
+I do not plot anymore the carbon budget vs density, but only vs depth. Instead, 
+I plot the carbon budget of the second time window
+
+
+\
+Fig_Main_v04
+
+I do not plot anymore the carbon budget of the second time window. I use the 
+bbpPOC from Koestner et al. as well. I plot the carbon budget without 
+including the bbpPOC as well to test for differences
 
 
 \
