@@ -130,7 +130,7 @@ for i_profile in range (0,list_dates.size):
             y = np.log(PSD_depth)
             sel=~np.isinf(y);x=x[sel];y=y[sel]              # I exclude inf values
             (interpol, slpe_ci, _, signif, signif_label) = lin_fit(x,y)
-            #I extrapolate the concentration only if the fit is significant or the pvalue is elss than 0.05
+            #I extrapolate the concentration only if the fit is significant or the pvalue is less than 0.05
             if (signif>0)|(interpol.pvalue<=0.05):
                 ct_ok = ct_ok +1
                 PSD_extrapolated_depth_tmp = np.exp(PSD_extrapolated_bin_mean_log * interpol.slope + interpol.intercept)
@@ -168,7 +168,7 @@ from paruvpy import poc_cont_func_1_class
 #Time period during which I want to calculate the POC and flux and depth bins to average it
 ########################################################################################################################
 day0=datetime(2021, 4,13)        # starting date
-dayf=datetime(2021,8,19)        # final date
+dayf=datetime(2021, 7,31)        # final date
 day0_float = calendar.timegm(day0.timetuple())
 dayf_float = calendar.timegm(dayf.timetuple())
 ndays = (dayf - day0).days  # number of days
@@ -205,6 +205,7 @@ for i_PSD in range(0,PSD_columns_all.size):
 # I calculate the POC and Flux and plot them. For the POC, I add the bbp POC for comparison
 ########################################################################################################################
 bbp=np.array(data['bbp POC [mgC/m3]'][sel_filename][sel_dates])
+bbp_Koestner=np.array(data['bbp POC Koestner [mgC/m3]'][sel_filename][sel_dates])
 
 i_depth=0
 for i_depth in range(0,list_depths.size-1):
@@ -217,6 +218,8 @@ for i_depth in range(0,list_depths.size-1):
     PartConc_depth = np.mean(PartConc_depth,0)
     bbp_depth = np.mean(bbp [sel_depth])
     bbp_depth_std = np.std(bbp [sel_depth])
+    bbp_Koestner_depth = np.mean(bbp_Koestner [sel_depth])
+    bbp_Koestner_depth_std = np.std(bbp_Koestner [sel_depth])
 
     Flux=np.squeeze(np.zeros((1,PSD_columns_all.size)))
     POC=np.squeeze(np.zeros((1,PSD_columns_all.size)))
@@ -239,9 +242,11 @@ for i_depth in range(0,list_depths.size-1):
     plt.yscale('log')
     plt.xscale('log')
     plt.plot(PSD_all_bin_mean[b:-1], POC[b:-1], '--b.', label='UVP',linewidth=1)
-    plt.plot(PSD_all_bin_mean[a:b+1], POC[a:b+1], c='b', label='UVP\n(extrap.)')
-    plt.scatter(0.013, bbp_depth, label='bbp',c='red')
+    plt.plot(PSD_all_bin_mean[a:b+1], POC[a:b+1], c='b', label='UVP (extrap.)')
+    plt.scatter(0.013, bbp_depth, label='bbp Cetinic',c='red')
     plt.errorbar(0.013, bbp_depth, xerr=0.012,yerr=bbp_depth_std, capsize=5,c='red')
+    plt.scatter(0.013, bbp_Koestner_depth, label='bbp Koestner et al.',c='darkgoldenrod')
+    plt.errorbar(0.013, bbp_Koestner_depth, xerr=0.012,yerr=bbp_depth_std, capsize=5,c='darkgoldenrod')
     plt.xlabel('Size (mm)', fontsize=10)
     plt.ylabel('POC (mgC/m$^3$)', fontsize=8)
     plt.legend(fontsize=10)
