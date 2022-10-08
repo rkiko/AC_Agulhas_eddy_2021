@@ -245,7 +245,7 @@ dist_km=dist*111
 sel_insideEddy = dist_km <= radius_Vmax_4float
 
 dictionary_data = {"bbp_POC": bbp_POC,"bbp_POC_Koestner": bbp_POC_Koestner,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
-                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar" : Date_Num_bbp_calendar}
+                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar" : Date_Num_bbp_calendar,"temperature" : temp}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
