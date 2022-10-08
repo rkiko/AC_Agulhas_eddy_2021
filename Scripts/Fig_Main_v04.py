@@ -874,13 +874,13 @@ fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_0_102635,'r',linewidth=3,label='0—1026.35 kg/m$^3$ [0—MLD]')
 plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_0_102635 - Integrated_POC_mgC_m3_0_102635_std*0.5, Integrated_POC_mgC_m3_0_102635 + Integrated_POC_mgC_m3_0_102635_std*0.5,
-                  facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102635_600*10,'b',linewidth=3,label='1026.35—%0.2f kg/m$^3$ [MLD—600 m] ($\cdot$10)' % (isopycnal_600m))
 plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102635_600*10 - Integrated_POC_mgC_m3_102635_600_std*0.5*10, Integrated_POC_mgC_m3_102635_600*10 + Integrated_POC_mgC_m3_102635_600_std*0.5*10,
-                  facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nresp. rate')
+                  facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102682_600*10,'m',linewidth=3,label='1026.82—%0.2f kg/m$^3$ [200—600 m] ($\cdot$10)' % (isopycnal_600m))
 plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102682_600*10 - Integrated_POC_mgC_m3_102682_600_std*0.5*10, Integrated_POC_mgC_m3_102682_600*10 + Integrated_POC_mgC_m3_102682_600_std*0.5*10,
-                  facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nresp. rate')
+                  facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 # I set xticks
@@ -914,13 +914,13 @@ fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
 plt.plot(list_dates_Integrated_POC,Integrated_POC_Koestner_mgC_m3_0_102635,'r',linewidth=3,label='0—1026.35 kg/m$^3$ [0—MLD]')
 plt.fill_between(list_dates_Integrated_POC, Integrated_POC_Koestner_mgC_m3_0_102635 - Integrated_POC_Koestner_mgC_m3_0_102635_std*0.5, Integrated_POC_Koestner_mgC_m3_0_102635 + Integrated_POC_mgC_m3_0_102635_std*0.5,
-                  facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.plot(list_dates_Integrated_POC,Integrated_POC_Koestner_mgC_m3_102635_600*10,'b',linewidth=3,label='1026.35—%0.2f kg/m$^3$ [MLD—600 m] ($\cdot$10)' % (isopycnal_600m))
 plt.fill_between(list_dates_Integrated_POC, Integrated_POC_Koestner_mgC_m3_102635_600*10 - Integrated_POC_Koestner_mgC_m3_102635_600_std*0.5*10, Integrated_POC_Koestner_mgC_m3_102635_600*10 + Integrated_POC_Koestner_mgC_m3_102635_600_std*0.5*10,
-                  facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nresp. rate')
+                  facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.plot(list_dates_Integrated_POC,Integrated_POC_Koestner_mgC_m3_102682_600*10,'m',linewidth=3,label='1026.82—%0.2f kg/m$^3$ [200—600 m] ($\cdot$10)' % (isopycnal_600m))
 plt.fill_between(list_dates_Integrated_POC, Integrated_POC_Koestner_mgC_m3_102682_600*10 - Integrated_POC_Koestner_mgC_m3_102682_600_std*0.5*10, Integrated_POC_Koestner_mgC_m3_102682_600*10 + Integrated_POC_Koestner_mgC_m3_102682_600_std*0.5*10,
-                  facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nresp. rate')
+                  facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 # I set xticks
@@ -1664,7 +1664,8 @@ sel_insideEddy = data_dist_radius['sel_insideEddy']
 datenum_profiles = data_dist_radius['Datenum']
 sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
 
-list_dates=list_dates[sel_insideEddy[0:list_dates.size]]
+list_dates=list_dates[0:sel_insideEddy.size];list_dates=list_dates[sel_insideEddy]
+# list_dates=list_dates[sel_insideEddy[0:list_dates.size]]
 
 #######################################################################
 # I filter and interpolate the flux
@@ -1779,6 +1780,12 @@ filename_coriolis='6903095_Sprof_all.nc'
 import datetime,calendar
 from scipy.signal import savgol_filter
 from scipy.interpolate import griddata
+from paruvpy import bbpPOC_to_bbp_abundance
+from paruvpy import calculate_remin_func_abun
+from paruvpy import ESD_limits_to_ESD_middle
+import warnings
+warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
+warnings.filterwarnings("ignore", message="invalid value encountered in true_divide")
 import seawater as sw
 import gsw
 from lin_fit import lin_fit
@@ -1853,6 +1860,7 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     Date_Vec_bbp = data_an18['Date_Vec_bbp']
     depth_bbp = data_an18['depth_bbp']
     dens_bbp = data_an18['dens_bbp']
+    temp_bbp = data_an18['temperature']
     a_file.close()
 
     sel_dates = (Date_Num_bbp>=day0_datenum)&(Date_Num_bbp<=dayf_datenum)
@@ -1860,8 +1868,25 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     Date_Vec_bbp = Date_Vec_bbp[sel_dates,:]
     depth_bbp = depth_bbp[sel_dates,:]
     dens_bbp = dens_bbp[sel_dates,:]
+    temp_bbp = temp_bbp[sel_dates,:]
     bbp_POC = bbp_POC[sel_dates, :]
     bbp_POC_Koestner = bbp_POC_Koestner[sel_dates, :]
+    # I calculate the bbp abundance
+    sel=(bbp_POC==99999)&(bbp_POC_Koestner==99999)
+    bbp_abun_tmp=bbpPOC_to_bbp_abundance(bbp_POC[~sel])
+    bbp_abun=bbp_POC.copy()*0+99999;bbp_abun[~sel]=bbp_abun_tmp
+    bbp_abun_Koestner_tmp=bbpPOC_to_bbp_abundance(bbp_POC_Koestner[~sel])
+    bbp_abun_Koestner=bbp_POC.copy()*0+99999;bbp_abun_Koestner[~sel]=bbp_abun_Koestner_tmp
+    # I calculate the bbp PARR in nmol_l_h
+    esd_bbp = ESD_limits_to_ESD_middle(0.001, 0.025)
+    bbp_PARR_tmp = calculate_remin_func_abun(bbp_abun[~sel], esd_bbp, temp_bbp[~sel], kRemPoc=0.013)
+    bbp_PARR=bbp_POC.copy()*0+99999;bbp_PARR[~sel]=bbp_PARR_tmp
+    bbp_PARR_Koestner_tmp = calculate_remin_func_abun(bbp_abun_Koestner[~sel], esd_bbp, temp_bbp[~sel], kRemPoc=0.013)
+    bbp_PARR_Koestner=bbp_POC.copy()*0+99999;bbp_PARR_Koestner[~sel]=bbp_PARR_Koestner_tmp
+    del bbp_abun_tmp,bbp_abun_Koestner_tmp,bbp_abun,bbp_abun_Koestner,bbp_PARR_tmp,bbp_PARR_Koestner_tmp
+    # I convert the bpp PARR from nmol_l_h to micromol/kg/day
+    bbp_PARR[~sel] = bbp_PARR[~sel] / 1000 * 24 / (dens_bbp[~sel] / 1000)
+    bbp_PARR_Koestner[~sel] = bbp_PARR_Koestner[~sel] / 1000 * 24 / (dens_bbp[~sel] / 1000)
 
     # I convert the dates to float values (in seconds from 1970 1 1)
     Date_Num_bbp_calendar = Date_Num_bbp.copy()
@@ -1875,7 +1900,7 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     # Here I calculate the integrated POC (i.e., MiP+MaP+bbp). To do so, (i) I filter it with a savgol function, then (ii) I
     # interpolate it over a regular grid versus time and density. This step is necessary to have MiP+MaP+bbp at 600 m, because
     # some profiles only reach 400 m; (iii) I extract the mean MiP+MaP+bbp values between dens0 and densf and between day0 and
-    # dayf (I obtain a time series)
+    # dayf (I obtain a time series); (iv) I calculate the bbp PARR between dens0 and densf and between day0 and dayf
     ########################################################################################################################
 
     ##############################################
@@ -1885,6 +1910,8 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     MaP_filtered=np.array([]);dens_MaP_filtered=np.array([]);Date_Num_MaP_filtered=np.array([])
     bbp_filtered=np.array([]);dens_bbp_filtered=np.array([]);Date_Num_bbp_filtered=np.array([])
     bbp_Koestner_filtered=np.array([]);dens_bbp_Koestner_filtered=np.array([]);Date_Num_bbp_Koestner_filtered=np.array([])
+    bbp_PARR_filtered=np.array([]);dens_bbp_PARR_filtered=np.array([]);Date_Num_bbp_PARR_filtered=np.array([])
+    bbp_PARR_Koestner_filtered=np.array([]);dens_bbp_PARR_Koestner_filtered=np.array([]);Date_Num_bbp_PARR_Koestner_filtered=np.array([])
 
     i=0
     for i in range(0,list_dates.size):
@@ -1921,6 +1948,17 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
             bbp_filtered = np.concatenate((bbp_filtered, z))
             Date_Num_bbp_filtered = np.concatenate((Date_Num_bbp_filtered, np.tile(x,sum(sel2)) ))
             dens_bbp_filtered = np.concatenate((dens_bbp_filtered, y2))
+        #Cetinic PARR
+        z=bbp_PARR[i,:];y=dens_bbp[i,:];x = Date_Num_bbp_calendar[i]
+        z[z>100] = 99999
+        sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
+        sel3=z==0
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            z[sel3]=0
+            bbp_PARR_filtered = np.concatenate((bbp_PARR_filtered, z))
+            Date_Num_bbp_PARR_filtered = np.concatenate((Date_Num_bbp_PARR_filtered, np.tile(x,sum(sel2)) ))
+            dens_bbp_PARR_filtered = np.concatenate((dens_bbp_PARR_filtered, y2))
         #Koestner
         z=bbp_POC_Koestner[i,:];y=dens_bbp[i,:];x = Date_Num_bbp_calendar[i]
         z[z>400] = 99999
@@ -1932,6 +1970,17 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
             bbp_Koestner_filtered = np.concatenate((bbp_Koestner_filtered, z))
             Date_Num_bbp_Koestner_filtered = np.concatenate((Date_Num_bbp_Koestner_filtered, np.tile(x,sum(sel2)) ))
             dens_bbp_Koestner_filtered = np.concatenate((dens_bbp_Koestner_filtered, y2))
+        #Koestner PARR
+        z=bbp_PARR_Koestner[i,:];y=dens_bbp[i,:];x = Date_Num_bbp_calendar[i]
+        z[z>400] = 99999
+        sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y2=y[sel2]
+        sel3=z==0
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            z[sel3]=0
+            bbp_PARR_Koestner_filtered = np.concatenate((bbp_PARR_Koestner_filtered, z))
+            Date_Num_bbp_PARR_Koestner_filtered = np.concatenate((Date_Num_bbp_PARR_Koestner_filtered, np.tile(x,sum(sel2)) ))
+            dens_bbp_PARR_Koestner_filtered = np.concatenate((dens_bbp_PARR_Koestner_filtered, y2))
 
     # I define the x and y arrays for the MiP+MaP+bbp interpolation
     x_filtered = np.linspace(Date_Num_bbp_filtered.min(), Date_Num_bbp_filtered.max(), ndays)
@@ -1943,6 +1992,8 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     MaP_interp = griddata((Date_Num_MaP_filtered, dens_MaP_filtered), MaP_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     bbp_interp = griddata((Date_Num_bbp_filtered, dens_bbp_filtered), bbp_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     bbp_Koestner_interp = griddata((Date_Num_bbp_Koestner_filtered, dens_bbp_Koestner_filtered), bbp_Koestner_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    bbp_PARR_interp = griddata((Date_Num_bbp_PARR_filtered, dens_bbp_PARR_filtered), bbp_PARR_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    bbp_PARR_Koestner_interp = griddata((Date_Num_bbp_PARR_Koestner_filtered, dens_bbp_PARR_Koestner_filtered), bbp_PARR_Koestner_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
 
     ##############################################
@@ -1953,12 +2004,16 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     MaP_POC_dens0_densf=np.mean(MaP_interp[sel_dens0_densf,:],0)
     bbp_POC_dens0_densf=np.mean(bbp_interp[sel_dens0_densf,:],0)
     bbp_POC_Koestner_dens0_densf=np.mean(bbp_Koestner_interp[sel_dens0_densf,:],0)
+    bbp_PARR_dens0_densf=np.mean(bbp_PARR_interp[sel_dens0_densf,:])
+    bbp_PARR_Koestner_dens0_densf=np.mean(bbp_PARR_Koestner_interp[sel_dens0_densf,:])
 
     MiP_POC_dens0_densf_std = np.std(MiP_interp[sel_dens0_densf, :], 0)
     MiP_POC_extended_dens0_densf_std = np.std(MiP_extended_interp[sel_dens0_densf, :], 0)
     MaP_POC_dens0_densf_std = np.std(MaP_interp[sel_dens0_densf, :], 0)
     bbp_POC_dens0_densf_std = np.std(bbp_interp[sel_dens0_densf, :], 0)
     bbp_POC_Koestner_dens0_densf_std = np.std(bbp_Koestner_interp[sel_dens0_densf, :], 0)
+    bbp_PARR_dens0_densf_std = np.std(bbp_PARR_interp[sel_dens0_densf, :])
+    bbp_PARR_Koestner_dens0_densf_std = np.std(bbp_PARR_Koestner_interp[sel_dens0_densf, :])
 
     Integrated_POC_mgC_m3 = MiP_POC_dens0_densf + MaP_POC_dens0_densf + bbp_POC_dens0_densf
     Integrated_POC_extended_mgC_m3 = MiP_POC_extended_dens0_densf + MaP_POC_dens0_densf + bbp_POC_dens0_densf
@@ -2154,8 +2209,15 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
         slope_doxy = interpol.slope
         slope_ci_doxy = np.reshape(slpe_ci.copy(),(1,2))
 
-        O2_resp_mgC_m3_d=-slope_doxy.copy()*reference_isopycnal*Oxy2C*mol2gC/1000#*ndays*layer_thickness
-        O2_resp_mgC_m3_d_ci=-slope_ci_doxy.copy()*( np.tile(reference_isopycnal,(2,1)).T) *Oxy2C*mol2gC/1000#*ndays*layer_thickness
+        O2_resp_mgO_m3_d=-slope_doxy.copy()*reference_isopycnal*mol2gC/1000#*ndays*layer_thickness
+        O2_resp_mgO_m3_d_ci=-slope_ci_doxy.copy()*( np.tile(reference_isopycnal,(2,1)).T) *mol2gC/1000#*ndays*layer_thickness
+        Oxy2C_std = Oxy2C * 0.4
+        O2_resp_mgC_m3_d = O2_resp_mgO_m3_d*Oxy2C
+        #Since I have an uncertainty both on O2_resp_mgO_m3_d and on Oxy2C, I propagate the error to obtain the uncertainty on O2_resp_mgC_m3_d
+        O2_resp_mgO_m3_d_ci=abs(np.diff(O2_resp_mgO_m3_d_ci)[0][0]/2)
+        # O2_resp_mgO_m3_d_err = abs(Oxy2C_std/O2_resp_mgO_m3_d) + abs(O2_resp_mgO_m3_d_ci/Oxy2C)
+        O2_resp_mgO_m3_d_err = np.sqrt( Oxy2C**2*O2_resp_mgO_m3_d_ci**2 + Oxy2C_std**2*O2_resp_mgO_m3_d**2 )
+        O2_resp_mgC_m3_d_ci=np.ones((1,2));O2_resp_mgC_m3_d_ci[0,0]=O2_resp_mgC_m3_d-O2_resp_mgO_m3_d_err;O2_resp_mgC_m3_d_ci[0,1]=O2_resp_mgC_m3_d+O2_resp_mgO_m3_d_err
 
     else:
         O2_resp_mgC_m3_d=np.nan
@@ -2183,7 +2245,7 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
         # and densf
         PARR_isopycnal=np.array([]);#depth_PARR_tmp=np.array([]);dens_PARR_tmp=np.array([])
         i=0
-        for i in range(0,list_dates_PARR.size):
+        for i in range(0,doxy.shape[0]):
             # Here, for the i-th profile, I select the PARR, density and depth profiles of Ecopart data, excluding the nan values. I do the same for the bbp
             sel_PARR=Date_Num_PARR==list_dates_PARR[i]
             z_PARR=PARR_micromol_kg_day[sel_PARR];y_PARR=dens_PARR[sel_PARR];d_PARR=depth_PARR[sel_PARR]
@@ -2219,6 +2281,12 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
 
         POC_resp_mgC_m3_d_list[iRespi] = PARR_isopycnal.copy()*reference_isopycnal*Oxy2C*mol2gC/1000 # *ndays * layer_thickness
         POC_resp_mgC_m3_d_std_list[iRespi] = PARR_isopycnal_std.copy()*reference_isopycnal*Oxy2C*mol2gC/1000 # *ndays * layer_thickness
+
+    # I convert bbp to mgC_m3_d
+    bbp_PARR_dens0_densf = bbp_PARR_dens0_densf.copy() * reference_isopycnal * Oxy2C * mol2gC / 1000  # *ndays * layer_thickness
+    bbp_PARR_Koestner_dens0_densf = bbp_PARR_Koestner_dens0_densf.copy() * reference_isopycnal * Oxy2C * mol2gC / 1000  # *ndays * layer_thickness
+    bbp_PARR_dens0_densf_std = bbp_PARR_dens0_densf_std.copy() * reference_isopycnal * Oxy2C * mol2gC / 1000  # *ndays * layer_thickness
+    bbp_PARR_Koestner_dens0_densf_std = bbp_PARR_Koestner_dens0_densf_std.copy() * reference_isopycnal * Oxy2C * mol2gC / 1000  # *ndays * layer_thickness
 
     ########################################################################################################################
     # Here I calculate the carbon budget for depth0—depthf layer
@@ -2310,7 +2378,8 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
            Theoretical_Budget_noBBP_extended,Theoretical_Budget_noBBP_extended_std, \
            Theoretical_Budget_Koestner,Theoretical_Budget_Koestner_std, \
            Theoretical_Budget_Koestner_extended,Theoretical_Budget_Koestner_extended_std, \
-           POC_resp_mgC_m3_d_list,POC_resp_mgC_m3_d_std_list,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,list_Respi_types,n_profiles, \
+           POC_resp_mgC_m3_d_list,POC_resp_mgC_m3_d_std_list,bbp_PARR_dens0_densf,bbp_PARR_dens0_densf_std,\
+           bbp_PARR_Koestner_dens0_densf,bbp_PARR_Koestner_dens0_densf_std,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,list_Respi_types,n_profiles, \
            Delta_Integrated_POC, Delta_Integrated_POC_std, Delta_Integrated_POC_noBBP, Delta_Integrated_POC_noBBP_std, Delta_Integrated_POC_Koestner, Delta_Integrated_POC_Koestner_std, \
            Delta_flux, Delta_flux_std,Flux_dens0_mgC_m3_d,Flux_densf_mgC_m3_d, \
            depth_isopycnal,depth_isopycnal_down,depth_isopycnal_up,layer_thickness
@@ -2345,6 +2414,10 @@ Theoretical_Budget_Koestner_std_list = np.array([])
 Theoretical_Budget_Koestner_extended_std_list = np.array([])
 POC_resp_mgC_m3_d_list = np.array([])
 POC_resp_mgC_m3_d_std_list = np.array([])
+bbpPARR_mgC_m3_d_list = np.array([])
+bbpPARR_mgC_m3_d_std_list = np.array([])
+bbpPARR_Koestner_mgC_m3_d_list = np.array([])
+bbpPARR_Koestner_mgC_m3_d_std_list = np.array([])
 O2_resp_mgC_m3_d_list = np.array([])
 O2_resp_mgC_m3_d_ci_list = np.array([])
 depth_isopycnal_list = np.array([])
@@ -2357,7 +2430,7 @@ for dens0 in dens0_list:
     (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,
        Theoretical_Budget_noBBP,Theoretical_Budget_noBBP_std,Theoretical_Budget_noBBP_extended,Theoretical_Budget_noBBP_extended_std,
        Theoretical_Budget_Koestner,Theoretical_Budget_Koestner_std,Theoretical_Budget_Koestner_extended,Theoretical_Budget_Koestner_extended_std,
-       POC_resp_mgC_m3_d,POC_resp_mgC_m3_d_std,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,RespirationTypes,n_profiles,
+       POC_resp_mgC_m3_d,POC_resp_mgC_m3_d_std,bbpPARR_mgC_m3_d,bbpPARR_mgC_m3_d_std,bbpPARR_Koestner_mgC_m3_d,bbpPARR_Koestner_mgC_m3_d_std,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,RespirationTypes,n_profiles,
        _,_,_,_,_,_,_,_,_,_,depth_isopycnal,depth_isopycnal_down,depth_isopycnal_up,layer_thickness) = carbon_budget_calculation(dens0, densf, day0, dayf)
 
     Theoretical_Budget_list=np.append(Theoretical_Budget_list,Theoretical_Budget)
@@ -2374,6 +2447,10 @@ for dens0 in dens0_list:
     Theoretical_Budget_Koestner_extended_std_list=np.append(Theoretical_Budget_Koestner_extended_std_list,Theoretical_Budget_Koestner_extended_std)
     POC_resp_mgC_m3_d_list=np.append(POC_resp_mgC_m3_d_list,POC_resp_mgC_m3_d,axis=0)
     POC_resp_mgC_m3_d_std_list=np.append(POC_resp_mgC_m3_d_std_list,POC_resp_mgC_m3_d_std,axis=0)
+    bbpPARR_mgC_m3_d_list=np.append(bbpPARR_mgC_m3_d_list,bbpPARR_mgC_m3_d)
+    bbpPARR_mgC_m3_d_std_list=np.append(bbpPARR_mgC_m3_d_std_list,bbpPARR_mgC_m3_d_std)
+    bbpPARR_Koestner_mgC_m3_d_list=np.append(bbpPARR_Koestner_mgC_m3_d_list,bbpPARR_Koestner_mgC_m3_d)
+    bbpPARR_Koestner_mgC_m3_d_std_list=np.append(bbpPARR_Koestner_mgC_m3_d_std_list,bbpPARR_Koestner_mgC_m3_d_std)
     O2_resp_mgC_m3_d_list=np.append(O2_resp_mgC_m3_d_list,O2_resp_mgC_m3_d)
     O2_resp_mgC_m3_d_ci_list=np.append(O2_resp_mgC_m3_d_ci_list,O2_resp_mgC_m3_d_ci.reshape((2,)),axis=0)
     depth_isopycnal_list=np.append(depth_isopycnal_list,depth_isopycnal)
@@ -2400,19 +2477,19 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 0], O2_resp_mgC_m3_d_ci_list[:, 1], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
 for iResp in range(2,3):
-    plt.plot(POC_resp_mgC_m3_d_list[:,iResp], depth_isopycnal_list, c='b')
+    plt.plot(POC_resp_mgC_m3_d_list[:,iResp]+bbpPARR_mgC_m3_d_list, depth_isopycnal_list, c='b')
 
-plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp]-POC_resp_mgC_m3_d_std_list[:,iResp],
-                  POC_resp_mgC_m3_d_list[:,iResp]+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_mgC_m3_d_list-POC_resp_mgC_m3_d_std_list[:,iResp],
+                  POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_mgC_m3_d_list+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013d$^{-1}$;\nBelcher et al.)')
-plt.plot(POC_resp_mgC_m3_d_list[:, 0], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
-plt.plot(POC_resp_mgC_m3_d_list[:, 5], depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 0] + bbpPARR_mgC_m3_d_list, depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 5] + bbpPARR_mgC_m3_d_list, depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
 plt.plot(Theoretical_Budget_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_list - Theoretical_Budget_std_list, Theoretical_Budget_list + Theoretical_Budget_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
@@ -2449,7 +2526,7 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 0], O2_resp_mgC_m3_d_ci_list[:, 1], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
 for iResp in range(2,3):
     plt.plot(POC_resp_mgC_m3_d_list[:,iResp], depth_isopycnal_list, c='b')
 
@@ -2461,7 +2538,7 @@ plt.plot(POC_resp_mgC_m3_d_list[:, 5], depth_isopycnal_list, c='g',linestyle='da
 plt.plot(Theoretical_Budget_noBBP_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_noBBP_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_noBBP_list - Theoretical_Budget_noBBP_std_list, Theoretical_Budget_noBBP_list + Theoretical_Budget_noBBP_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
@@ -2500,17 +2577,17 @@ plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
 plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
 for iResp in range(2,3):
-    plt.plot(POC_resp_mgC_m3_d_list[:,iResp], depth_isopycnal_list, c='b')
+    plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='b')
 
-plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp]-POC_resp_mgC_m3_d_std_list[:,iResp],
-                  POC_resp_mgC_m3_d_list[:,iResp]+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list-POC_resp_mgC_m3_d_std_list[:,iResp],
+                  POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013d$^{-1}$;\nBelcher et al.)')
-plt.plot(POC_resp_mgC_m3_d_list[:, 0], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
-plt.plot(POC_resp_mgC_m3_d_list[:, 5], depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 0] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 5] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
 plt.plot(Theoretical_Budget_Koestner_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_Koestner_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_Koestner_list - Theoretical_Budget_Koestner_std_list, Theoretical_Budget_Koestner_list + Theoretical_Budget_Koestner_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
@@ -2547,18 +2624,18 @@ plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
 plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
 for iResp in range(9,10):
-    plt.plot(POC_resp_mgC_m3_d_list[:,iResp], depth_isopycnal_list, c='b')
+    plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_mgC_m3_d_list , depth_isopycnal_list, c='b')
 
-plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp]-POC_resp_mgC_m3_d_std_list[:,iResp],
-                  POC_resp_mgC_m3_d_list[:,iResp]+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_mgC_m3_d_list-POC_resp_mgC_m3_d_std_list[:,iResp],
+                  POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_mgC_m3_d_list+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013d$^{-1}$;\nBelcher et al.)')
 
-plt.plot(POC_resp_mgC_m3_d_list[:, 7], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
-plt.plot(POC_resp_mgC_m3_d_list[:, 12], depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 7] + bbpPARR_mgC_m3_d_list, depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 12] + bbpPARR_mgC_m3_d_list, depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
 plt.plot(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_extended_list - Theoretical_Budget_extended_std_list, Theoretical_Budget_extended_list + Theoretical_Budget_extended_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
@@ -2605,7 +2682,7 @@ plt.plot(POC_resp_mgC_m3_d_list[:, 12], depth_isopycnal_list, c='g',linestyle='d
 plt.plot(Theoretical_Budget_noBBP_extended_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_noBBP_extended_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_noBBP_extended_list - Theoretical_Budget_noBBP_extended_std_list, Theoretical_Budget_noBBP_extended_list + Theoretical_Budget_noBBP_extended_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
@@ -2630,7 +2707,7 @@ plt.savefig('../Plots/Fig_Main_v04/Supplementary/Suppl_CarbBudgetExtended_noBBP_
 plt.close()
 
 ########################################################################################################################
-######### Fig. Supplementary Extended size spectrum: with BBP from Cetinic
+######### Fig. Supplementary Extended size spectrum: with BBP from Koestner
 ########################################################################################################################
 idx1,idx2=0,38
 set_ylim_lower=depth_isopycnal_list[idx1]
@@ -2641,18 +2718,18 @@ plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
 plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
 for iResp in range(9,10):
-    plt.plot(POC_resp_mgC_m3_d_list[:,iResp], depth_isopycnal_list, c='b')
+    plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='b')
 
-plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp]-POC_resp_mgC_m3_d_std_list[:,iResp],
-                  POC_resp_mgC_m3_d_list[:,iResp]+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list-POC_resp_mgC_m3_d_std_list[:,iResp],
+                  POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list+POC_resp_mgC_m3_d_std_list[:,iResp], facecolor='b',
                   color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013d$^{-1}$;\nBelcher et al.)')
 
-plt.plot(POC_resp_mgC_m3_d_list[:, 7], depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
-plt.plot(POC_resp_mgC_m3_d_list[:, 12], depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 7] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='m',linestyle='dashed',label='PARR\n(Kalvelage\n/Iversen)')
+plt.plot(POC_resp_mgC_m3_d_list[:, 12] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='g',linestyle='dashed',label='PARR\n($k_{rem}$=0.1d$^{-1}$)')
 plt.plot(Theoretical_Budget_Koestner_extended_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_Koestner_extended_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_Koestner_extended_list - Theoretical_Budget_Koestner_extended_std_list, Theoretical_Budget_Koestner_extended_list + Theoretical_Budget_Koestner_extended_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
@@ -2679,7 +2756,7 @@ plt.close()
 #######################################################################
 # I save some values for the latex document
 #######################################################################
-
+# region I save some values for the latex document
 (Theoretical_Budget, Theoretical_Budget_std, Theoretical_Budget_extended, Theoretical_Budget_extended_std,
  POC_resp_mgC_m3_d, POC_resp_mgC_m3_d_std, O2_resp_mgC_m3_d, O2_resp_mgC_m3_d_ci, RespirationTypes, n_profiles,
  Delta_Integrated_POC, Delta_Integrated_POC_std, Delta_flux, Delta_flux_std,Flux_dens0_mgC_m3_d,Flux_densf_mgC_m3_d, depth_isopycnal,
@@ -2808,7 +2885,7 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 argument = 'Kiko2020_zooRR_up'
 arg_value=2.8*Oxy2C*mol2gC/1000
 write_latex_data(filename,argument,'%0.2f' % arg_value)
-
+# endregion
 
 
 ########################################################################################################################
@@ -2816,7 +2893,7 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 ######### SECOND TIME WINDOW
 ########################################################################################################################
 ########################################################################################################################
-
+# region Second time window
 #######################################################################
 # Parameters for the carbon budget calculation
 #######################################################################
@@ -2897,7 +2974,7 @@ plt.plot(POC_resp_mgC_m3_d_list[:, 5], depth_isopycnal_list, c='g',linestyle='da
 plt.plot(Theoretical_Budget_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_list - Theoretical_Budget_std_list, Theoretical_Budget_list + Theoretical_Budget_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
@@ -2945,7 +3022,7 @@ plt.plot(POC_resp_mgC_m3_d_list[:, 12], depth_isopycnal_list, c='g',linestyle='d
 plt.plot(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red')
 plt.scatter(Theoretical_Budget_extended_list, depth_isopycnal_list, c='red', s=5)
 plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_extended_list - Theoretical_Budget_extended_std_list, Theoretical_Budget_extended_list + Theoretical_Budget_extended_std_list,
-                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nresp. rate')
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
 
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
@@ -2969,6 +3046,7 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v04/Supplementary/Suppl_CarbBudgetExtended_TW2_v04.pdf' ,dpi=200)
 plt.close()
 
+# endregion
 # endregion
 
 
@@ -4111,9 +4189,9 @@ for a in RAWfilename:
 # I extract the data
 Date_Time=np.array(data['Date_Time'][sel_filename])
 depth=np.array(data['Depth [m]'][sel_filename])
-ic0 = 28                                          # Starting index of the columns containing the size classes for which UVP works, and that I use for the fit
-icf = 42                                          # End index of the columns containing the size classes for which UVP works, and that I use for the fit
-ice0 = 12                                         # Starting index of the columns containing the size classes for which UVP does not works, and for which I extrapolate the abundance
+ic0 = data.columns.get_loc('Part conc frac [#/l] (ESD: 0.102-0.128 mm)')        # Starting index of the columns containing the size classes for which UVP works, and that I use for the fit
+icf = data.columns.get_loc('Part conc frac [#/l] (ESD: 2.58-3.25 mm)')          # End index of the columns containing the size classes for which UVP works, and that I use for the fit
+ice0 = data.columns.get_loc('Part conc frac [#/l] (ESD: 0.0254-0.032 mm)')      # Starting index of the columns containing the size classes for which UVP does not works, and for which I extrapolate the abundance
 icef = ic0                                        # End index of the columns containing the size classes for which UVP does not works, and for which I extrapolate the abundance
 PSD_columns=data.columns[ic0:icf]                 # Column labels containing the size classes for which UVP works, and that I use for the fit
 PSD_columns_extrapolation=data.columns[ice0:icef] # Column labels containing the size classes for which UVP does not works, and for which I extrapolate the abundance
@@ -4250,7 +4328,7 @@ for i_PSD in range(0,PSD_columns_all.size):
     PSD_all_bin_mean[i_PSD] = (PSD_all_bin_end[i_PSD] + PSD_all_bin_start[i_PSD])*0.5
 
 ########################################################################################################################
-# I calculate the POC and Flux and plot them. For the POC, I add the bbp POC for comparison
+# I calculate the POC and plot it. I add the bbp POC for comparison
 ########################################################################################################################
 bbp=np.array(data['bbp POC [mgC/m3]'][sel_filename][filter_dates])
 bbp_Koestner=np.array(data['bbp POC Koestner [mgC/m3]'][sel_filename][filter_dates])
@@ -4280,8 +4358,8 @@ for i_depth in range(0,list_depths_plot.size-1):
     width, height = 0.75, 0.75
     set_ylim_lower, set_ylim_upper = 0.5*10**-3, 5*10 ** 3
     set_xlim_lower, set_xlim_upper = 0.0009, 2.7
-    a=11
-    b=16
+    a=0
+    b=5
     ##############
     #POC plot
     ##############
@@ -4291,9 +4369,9 @@ for i_depth in range(0,list_depths_plot.size-1):
     plt.xscale('log')
     plt.plot(PSD_all_bin_mean[b:-1], POC[b:-1], '--b.', label='UVP',linewidth=1)
     plt.plot(PSD_all_bin_mean[a:b+1], POC[a:b+1], c='b', label='UVP (extrap.)')
-    plt.scatter(0.013, bbp_depth, label='bbp Cetinic',c='red')
-    plt.errorbar(0.013, bbp_depth, xerr=0.012,yerr=bbp_depth_std, capsize=5,c='red')
-    plt.scatter(0.013, bbp_Koestner_depth, label='bbp Koestner et al.',c='darkgoldenrod')
+    # plt.scatter(0.013, bbp_depth, label='bbp Cetinic',c='red')
+    # plt.errorbar(0.013, bbp_depth, xerr=0.012,yerr=bbp_depth_std, capsize=5,c='red')
+    plt.scatter(0.013, bbp_Koestner_depth, label='b$_{bp}$POC',c='darkgoldenrod')
     plt.errorbar(0.013, bbp_Koestner_depth, xerr=0.012,yerr=bbp_depth_std, capsize=5,c='darkgoldenrod')
     plt.xlabel('Size (mm)', fontsize=10)
     plt.ylabel('POC (mgC/m$^3$)', fontsize=8)
@@ -4302,6 +4380,27 @@ for i_depth in range(0,list_depths_plot.size-1):
     plt.title('Depth: %d m' % depth_tmp, fontsize=10)#; R$^2$=%0.2f, Signif: %s' % (depth_tmp, interpol.rvalue ** 2, signif_label)
     plt.grid(color='k', linestyle='dashed', linewidth=0.5)
     plt.savefig('../Plots/Fig_Main_v04/Supplementary/ExtendedPSD/ExtendedPSD_%dm_v04.pdf' % (depth_tmp), dpi=200)
+    plt.close()
+    ##############
+    #POC plot normalised
+    ##############
+    fig = plt.figure(1, figsize=(3.5, 3.5))
+    ax = fig.add_axes([0.2, 0.15, width, height], xlim=(set_xlim_lower, set_xlim_upper), ylim=(set_ylim_lower, set_ylim_upper))
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.plot(PSD_all_bin_mean[b:-1], POC[b:-1]/PSD_all_bin_mean[b:-1], '--b.', label='UVP',linewidth=1)
+    plt.plot(PSD_all_bin_mean[a:b+1], POC[a:b+1]/PSD_all_bin_mean[a:b+1], c='b', label='UVP (extrap.)')
+    # plt.scatter(0.013, bbp_depth/0.024, label='bbp Cetinic',c='red')
+    # plt.errorbar(0.013, bbp_depth/0.024, xerr=0.012,yerr=bbp_depth_std, capsize=5,c='red')
+    plt.scatter(0.013, bbp_Koestner_depth/0.024, label='b$_{bp}$POC',c='darkgoldenrod')
+    plt.errorbar(0.013, bbp_Koestner_depth/0.024, xerr=0.012,yerr=bbp_depth_std, capsize=5,c='darkgoldenrod')
+    plt.xlabel('Size (mm)', fontsize=10)
+    plt.ylabel('Normalised POC (mgC/m$^3$/mm)', fontsize=8)
+    if i_depth==0:
+        plt.legend(fontsize=10)
+    plt.title('Depth: %d m' % depth_tmp, fontsize=10)#; R$^2$=%0.2f, Signif: %s' % (depth_tmp, interpol.rvalue ** 2, signif_label)
+    plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+    plt.savefig('../Plots/Fig_Main_v04/Supplementary/ExtendedPSD_Norm/ExtendedPSD_Norm_%dm_v04.pdf' % (depth_tmp), dpi=200)
     plt.close()
 
 
