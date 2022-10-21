@@ -31,7 +31,17 @@ Fig_Main_v04
 
 I do not plot anymore the carbon budget of the second time window. I use the 
 bbpPOC from Koestner et al. as well. I plot the carbon budget without 
-including the bbpPOC as well to test for differences
+including the bbpPOC as well to test for differences. I add the bbp PARR. I
+add the uncertainty in the conversion from oxy cons rate to carb cons rate.
+I fix a bug in the extended size spectrum calculation and plot
+
+
+\
+Fig_Main_v05
+
+For the carbon budget (bulk POC removal rate) I don't use anymore the POC 
+content at the beginning and the end of the time window considered, but I 
+obtain this values from a linear fit
 
 
 \
