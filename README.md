@@ -45,6 +45,17 @@ obtain this values from a linear fit
 
 
 \
+Fig_Main_v06
+
+For the carbon budget (bulk POC removal rate) I don't use anymore the POC 
+content at the beginning and the end of the time window considered, but I 
+obtain this values from the average of the POC content over n days. I move to
+the Supplementary the Fig. 4 calculated with Cetinic relationshipe (for bbp to
+POC) and without bbpPOC. Conversely, I move back as main figure the Fig. 4 with
+the extended size spectrum
+
+
+\
 an01
 
 First script to load Ecopart_mip_map_flux_data.tsv and plot the flux in the whole water column over time
