@@ -613,3 +613,13 @@ an71
 I calculate sink speed of spherical clay particles using Dioguardi function
 
 
+\
+an72
+
+I calculate the amount of POC subducted by eddy subduction and by 
+gravitational pump (i.e. flux) for different isopycnal bins, in that, for
+a given isopycnal bin I calculate its mean POC and I use it to estimate
+the amount of POC subducted. I also calculate the mean flux within the bin
+to estimate the amount of POC subducted due to gravitational pump.
+
+
