@@ -256,6 +256,13 @@ filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 argument = 'dist_float_centroid_mean'
 arg_value=np.mean(Distance_centroid[sel_insideEddy])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'mean_radius_0413_0731'
+i1=np.where(Date_Num_Eddy1==matlab_datenum(2021,4,13))[0][0];i2=np.where(Date_Num_Eddy1==matlab_datenum(2021,7,31))[0][0]
+arg_value=np.mean(radius_Vmax1[i1:i2+1])
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'mean_surf_eddycore_0413_0731_km2'
+arg_value=np.pi*(arg_value*1000)**2/10**6
+write_latex_data(filename,argument,'%d' % arg_value)
 
 # endregion
 
@@ -865,45 +872,45 @@ list_dates_Integrated_POC = x_filtered.copy()
 # Integrated_POC_Koestner_mgC_m3_0_MLD = MiP_MLD + MaP_MLD + bbp_Koestner_MLD
 # Integrated_POC_Koestner_mgC_m3_MLD_600 = MiP_outMLD + MaP_outMLD + bbp_Koestner_outMLD
 
-#######################################################################
-# I plot: Cetinic
-#######################################################################
-day_start_eddy_merging = datetime.datetime(2021,8,1)
-day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
-day_end_eddy_merging = datetime.datetime(2021,8,11)
-day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
-
-width, height = 0.8, 0.5
-set_ylim_lower, set_ylim_upper = min(Integrated_POC_mgC_m3_0_102635.min(),Integrated_POC_mgC_m3_102682_600.min()*10),max(Integrated_POC_mgC_m3_0_102635.max()+Integrated_POC_mgC_m3_0_102635_std.max(),Integrated_POC_mgC_m3_102635_600.max()*10,Integrated_POC_mgC_m3_102682_600.max()*10)*1.02
-
-fig = plt.figure(1, figsize=(13,4))
-ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
-plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_0_102635,'r',linewidth=3,label='0—1026.35 kg/m$^3$ [0—MLD]')
-plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_0_102635 - Integrated_POC_mgC_m3_0_102635_std, Integrated_POC_mgC_m3_0_102635 + Integrated_POC_mgC_m3_0_102635_std,
-                  facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nremov. rate')
-# plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102635_600*10,'b',linewidth=3,label='1026.35—%0.2f kg/m$^3$ [MLD—600 m] ($\cdot$10)' % (isopycnal_600m))
-# plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102635_600*10 - Integrated_POC_mgC_m3_102635_600_std*0.5*10, Integrated_POC_mgC_m3_102635_600*10 + Integrated_POC_mgC_m3_102635_600_std*0.5*10,
-#                   facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nremov. rate')
-plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102682_600*10,'m',linewidth=3,label='1026.82—%0.2f kg/m$^3$ [Eddy Core] ($\cdot$10)' % (isopycnal_600m))
-plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102682_600*10 - Integrated_POC_mgC_m3_102682_600_std*0.5*10, Integrated_POC_mgC_m3_102682_600*10 + Integrated_POC_mgC_m3_102682_600_std*0.5*10,
-                  facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nremov. rate')
-plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
-plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
-# I set xticks
-nxticks = 10
-xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
-xticklabels = []
-for i in xticks:
-    xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
-ax.set_xticks(xticks)
-ax.set_xticklabels(xticklabels)
-plt.xticks(rotation=90, fontsize=14)
-plt.legend(fontsize=12,ncol=2)
-plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
-ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
-plt.grid(color='k', linestyle='dashed', linewidth=0.5)
-plt.savefig('../Plots/Fig_Main_v06/Fig02e_Cetinic_v06.pdf' ,dpi=200)
-plt.close()
+# #######################################################################
+# # I plot: Cetinic
+# #######################################################################
+# day_start_eddy_merging = datetime.datetime(2021,8,1)
+# day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
+# day_end_eddy_merging = datetime.datetime(2021,8,11)
+# day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
+#
+# width, height = 0.8, 0.5
+# set_ylim_lower, set_ylim_upper = min(Integrated_POC_mgC_m3_0_102635.min(),Integrated_POC_mgC_m3_102682_600.min()*10),max(Integrated_POC_mgC_m3_0_102635.max()+Integrated_POC_mgC_m3_0_102635_std.max(),Integrated_POC_mgC_m3_102635_600.max()*10,Integrated_POC_mgC_m3_102682_600.max()*10)*1.02
+#
+# fig = plt.figure(1, figsize=(13,4))
+# ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
+# plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_0_102635,'r',linewidth=3,label='0—1026.35 kg/m$^3$ [0—MLD]')
+# plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_0_102635 - Integrated_POC_mgC_m3_0_102635_std, Integrated_POC_mgC_m3_0_102635 + Integrated_POC_mgC_m3_0_102635_std,
+#                   facecolor='r', color='r', alpha=0.2)#, label='Bulk POC\nremov. rate')
+# # plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102635_600*10,'b',linewidth=3,label='1026.35—%0.2f kg/m$^3$ [MLD—600 m] ($\cdot$10)' % (isopycnal_600m))
+# # plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102635_600*10 - Integrated_POC_mgC_m3_102635_600_std*0.5*10, Integrated_POC_mgC_m3_102635_600*10 + Integrated_POC_mgC_m3_102635_600_std*0.5*10,
+# #                   facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nremov. rate')
+# plt.plot(list_dates_Integrated_POC,Integrated_POC_mgC_m3_102682_600*10,'m',linewidth=3,label='1026.82—%0.2f kg/m$^3$ [Eddy Core] ($\cdot$10)' % (isopycnal_600m))
+# plt.fill_between(list_dates_Integrated_POC, Integrated_POC_mgC_m3_102682_600*10 - Integrated_POC_mgC_m3_102682_600_std*0.5*10, Integrated_POC_mgC_m3_102682_600*10 + Integrated_POC_mgC_m3_102682_600_std*0.5*10,
+#                   facecolor='m', color='m', alpha=0.2)#, label='Bulk POC\nremov. rate')
+# plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
+# plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
+# # I set xticks
+# nxticks = 10
+# xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
+# xticklabels = []
+# for i in xticks:
+#     xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
+# ax.set_xticks(xticks)
+# ax.set_xticklabels(xticklabels)
+# plt.xticks(rotation=90, fontsize=14)
+# plt.legend(fontsize=12,ncol=2)
+# plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
+# ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
+# plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+# plt.savefig('../Plots/Fig_Main_v06/Fig02e_Cetinic_v06.pdf' ,dpi=200)
+# plt.close()
 
 #######################################################################
 # I plot: Koestner
@@ -954,7 +961,7 @@ day_end_eddy_merging = datetime.datetime(2021,8,11)
 day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 
 width, height = 0.8, 0.5
-set_ylim_lower, set_ylim_upper = min(MiP_POC_0_102635.min()*10,MaP_POC_0_102635.min()*10,bbp_POC_0_102635.min()),max(MiP_POC_0_102635.max()*10+MiP_POC_0_102635_std.max()*10,MaP_POC_0_102635.max()*10+MaP_POC_0_102635_std.max()*10,bbp_POC_0_102635.max()+bbp_POC_0_102635_std.max())*1.02
+set_ylim_lower, set_ylim_upper = min(MiP_POC_0_102635.min()*10,MaP_POC_0_102635.min()*10,bbp_POC_0_102635.min()),max(MiP_POC_0_102635.max()*10+MiP_POC_0_102635_std.max()*10,MaP_POC_0_102635.max()*10+MaP_POC_0_102635_std.max()*10,bbp_POC_Koestner_0_102635.max()+bbp_POC_Koestner_0_102635_std.max())*1.02
 
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
@@ -966,8 +973,8 @@ plt.fill_between(list_dates_Integrated_POC, MiP_POC_0_102635*10 - MiP_POC_0_1026
 plt.plot(list_dates_Integrated_POC,MaP_POC_0_102635*10,'y',linewidth=3,label='MaP POC ($\cdot$10)')
 plt.fill_between(list_dates_Integrated_POC, MaP_POC_0_102635*10 - MaP_POC_0_102635_std*10, MaP_POC_0_102635*10 + MaP_POC_0_102635_std*10,
                   facecolor='y', color='y', alpha=0.2)#, label='Bulk POC\nremov. rate')
-plt.plot(list_dates_Integrated_POC,bbp_POC_0_102635,'b',linewidth=3,label='$b_{bp}$POC')
-plt.fill_between(list_dates_Integrated_POC, bbp_POC_0_102635 - bbp_POC_0_102635_std, bbp_POC_0_102635 + bbp_POC_0_102635_std,
+plt.plot(list_dates_Integrated_POC,bbp_POC_Koestner_0_102635,'b',linewidth=3,label='$b_{bp}$POC')
+plt.fill_between(list_dates_Integrated_POC, bbp_POC_Koestner_0_102635 - bbp_POC_Koestner_0_102635_std, bbp_POC_Koestner_0_102635 + bbp_POC_Koestner_0_102635_std,
                   facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
@@ -997,7 +1004,7 @@ day_end_eddy_merging = datetime.datetime(2021,8,11)
 day_end_eddy_merging = calendar.timegm(day_end_eddy_merging.timetuple())
 
 width, height = 0.8, 0.5
-set_ylim_lower, set_ylim_upper = min(MiP_POC_102682_600.min()*1,MaP_POC_102682_600.min()*1,bbp_POC_102682_600.min()),2.5#max(MiP_POC_102682_600.max()*1+MiP_POC_102682_600_std.max()*1,MaP_POC_102682_600.max()*1+MaP_POC_102682_600_std.max()*1,bbp_POC_102682_600.max()+bbp_POC_102682_600_std.max())*1.02
+set_ylim_lower, set_ylim_upper = min(MiP_POC_102682_600.min()*1,MaP_POC_102682_600.min()*1,bbp_POC_102682_600.min()),20#max(MiP_POC_102682_600.max()*1+MiP_POC_102682_600_std.max()*1,MaP_POC_102682_600.max()*1+MaP_POC_102682_600_std.max()*1,bbp_POC_102682_600.max()+bbp_POC_102682_600_std.max())*1.02
 
 fig = plt.figure(1, figsize=(13,4))
 ax = fig.add_axes([0.12, 0.4, width, height], ylim=(0, set_ylim_upper*1.1), xlim=(list_dates.min(), list_dates.max()))
@@ -1009,8 +1016,8 @@ plt.fill_between(list_dates_Integrated_POC, MiP_POC_102682_600*1 - MiP_POC_10268
 plt.plot(list_dates_Integrated_POC,MaP_POC_102682_600*1,'y',linewidth=3,label='MaP POC')
 plt.fill_between(list_dates_Integrated_POC, MaP_POC_102682_600*1 - MaP_POC_102682_600_std*1, MaP_POC_102682_600*1 + MaP_POC_102682_600_std*1,
                   facecolor='y', color='y', alpha=0.2)#, label='Bulk POC\nremov. rate')
-plt.plot(list_dates_Integrated_POC,bbp_POC_102682_600,'b',linewidth=3,label='$b_{bp}$POC')
-plt.fill_between(list_dates_Integrated_POC, bbp_POC_102682_600 - bbp_POC_102682_600_std, bbp_POC_102682_600 + bbp_POC_102682_600_std,
+plt.plot(list_dates_Integrated_POC,bbp_POC_Koestner_102682_600,'b',linewidth=3,label='$b_{bp}$POC')
+plt.fill_between(list_dates_Integrated_POC, bbp_POC_Koestner_102682_600 - bbp_POC_Koestner_102682_600_std, bbp_POC_Koestner_102682_600 + bbp_POC_Koestner_102682_600_std,
                   facecolor='b', color='b', alpha=0.2)#, label='Bulk POC\nremov. rate')
 plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
@@ -1038,37 +1045,55 @@ from write_latex_data import write_latex_data
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 i=67;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
 argument = 'PercentageBbp_102682_102724_0413to0731'
-arg_value=np.mean(bbp_POC_102682_600[0:i]/Integrated_POC_mgC_m3_102682_600[0:i])*100
-write_latex_data(filename,argument,'%d' % arg_value)
+arg_value=np.mean(bbp_POC_Koestner_102682_600[0:i])/np.mean(Integrated_POC_Koestner_mgC_m3_102682_600[0:i])*100
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'PercentageBbp_0_102635_0413to0731'
+arg_value=np.mean(bbp_POC_Koestner_0_102635[0:i])/np.mean(Integrated_POC_Koestner_mgC_m3_0_102635[0:i])*100
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'PercentageMiP_0_102635_0413to0731'
+arg_value=np.mean(MiP_POC_0_102635[0:i])/np.mean(Integrated_POC_Koestner_mgC_m3_0_102635[0:i])*100
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'PercentageMiP_102682_600_0413to0731'
+arg_value=np.mean(MiP_POC_102682_600[0:i])/np.mean(Integrated_POC_Koestner_mgC_m3_102682_600[0:i])*100
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'PercentageMaP_0_102635_0413to0731'
+arg_value=np.mean(MaP_POC_0_102635[0:i])/np.mean(Integrated_POC_Koestner_mgC_m3_0_102635[0:i])*100
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'PercentageMaP_102682_600_0413to0731'
+arg_value=np.mean(MaP_POC_102682_600[0:i])/np.mean(Integrated_POC_Koestner_mgC_m3_102682_600[0:i])*100
+write_latex_data(filename,argument,'%0.1f' % arg_value)
+argument = 'mean_Integrated_POC_Koestner_mgC_m3_102682_600_0413_0731'
+mean_Integrated_POC_Koestner_mgC_m3_102682_600_0413_0731=np.mean(MiP_interp[idx3:idx2,0:i]) + np.mean(MaP_interp[idx3:idx2,0:i]) + np.mean(bbp_Koestner_interp[idx3:idx2,0:i])
+write_latex_data(filename,argument,'%d' % mean_Integrated_POC_Koestner_mgC_m3_102682_600_0413_0731)
 i=49;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
 argument = 'POC_0_102635_0413to0703_value'
-arg_value=np.mean(Integrated_POC_mgC_m3_0_102635[i])
+arg_value=np.mean(Integrated_POC_Koestner_mgC_m3_0_102635[i])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
 argument = 'POC_0_102635_0413to0703_date'
 write_latex_data(filename,argument,'3 July')
 # Integrated_POC_mgC_m3_0_102635[49:58]
 i=53;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
 argument = 'POC_0_102635_10July'
-arg_value=np.mean(Integrated_POC_mgC_m3_0_102635[i])
+arg_value=np.mean(Integrated_POC_Koestner_mgC_m3_0_102635[i])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
 i=67;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
 argument = 'POC_0_102635_01August'
-arg_value=np.mean([Integrated_POC_mgC_m3_0_102635[i],Integrated_POC_mgC_m3_0_102635[i-1]])
+arg_value=np.mean([Integrated_POC_Koestner_mgC_m3_0_102635[i],Integrated_POC_Koestner_mgC_m3_0_102635[i-1]])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
 i=73;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
 argument = 'POC_0_102635_11August'
-arg_value=np.mean([Integrated_POC_mgC_m3_0_102635[i],Integrated_POC_mgC_m3_0_102635[i-1]])
+arg_value=np.mean([Integrated_POC_Koestner_mgC_m3_0_102635[i],Integrated_POC_Koestner_mgC_m3_0_102635[i-1]])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
 argument = 'POC_102682_102724_13April'
-arg_value=np.mean(Integrated_POC_mgC_m3_102682_600[0])
+arg_value=np.mean(Integrated_POC_Koestner_mgC_m3_102682_600[0])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 i=32;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
-Integrated_POC_mgC_m3_102682_600[26:34]
+Integrated_POC_Koestner_mgC_m3_102682_600[26:34]
 argument = 'POC_102682_102724_peak_date'
 write_latex_data(filename,argument,'5 June')
 
-Integrated_POC_mgC_m3_102682_600[64:74]
+Integrated_POC_Koestner_mgC_m3_102682_600[64:74]
 i=69;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
 argument = 'POC_102682_102724_date_start_increase'
 write_latex_data(filename,argument,'5 August')
@@ -1077,20 +1102,31 @@ i=73;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strf
 arg_value=datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B')
 write_latex_data(filename,argument,'%s' % arg_value)
 argument = 'POC_102682_102724_0812value'
-arg_value=np.mean(Integrated_POC_mgC_m3_102682_600[i])
+arg_value=np.mean(Integrated_POC_Koestner_mgC_m3_102682_600[i])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 i=60;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
-Integrated_POC_mgC_m3_102635_600[53:85]
+Integrated_POC_Koestner_mgC_m3_102635_600[53:85]
 argument = 'POC_102635_102724_0721date'
 write_latex_data(filename,argument,'21 July')
 argument = 'POC_102635_102724_0721value'
-arg_value=np.mean(Integrated_POC_mgC_m3_102635_600[i])
+arg_value=np.mean(Integrated_POC_Koestner_mgC_m3_102635_600[i])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
 i=82;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
 argument = 'POC_102635_102724_0826_value'
-arg_value=np.mean(Integrated_POC_mgC_m3_102635_600[i])
+arg_value=np.mean(Integrated_POC_Koestner_mgC_m3_102635_600[i])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+
+#######Carbon subducted by the eddy
+surfEddy_0413_0731_m2=18928197625.854225
+subducting_speed_Eddy1_0413_0731_md = 1.37
+Eddy_C_subrate = mean_Integrated_POC_Koestner_mgC_m3_102682_600_0413_0731*surfEddy_0413_0731_m2*subducting_speed_Eddy1_0413_0731_md/10**9
+argument = 'Eddy_C_subrate_tons_perPers_perDay'
+write_latex_data(filename,argument,'%0.1f' % Eddy_C_subrate)
+CO2_emitted_EU2019 = 6.8/365
+argument = 'nPeople_equivalentCO2emitted'
+argvalue = Eddy_C_subrate/CO2_emitted_EU2019
+write_latex_data(filename,argument,'%d' % argvalue)
 
 plt.plot(x_filtered,bbp_POC_0_102635,'.b-')
 
@@ -1483,6 +1519,7 @@ sel_insideEddy = data_dist_radius['sel_insideEddy']
 datenum_profiles = data_dist_radius['Datenum']
 sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
 
+list_dates=list_dates[0:183]
 list_dates=list_dates[sel_insideEddy[0:list_dates.size]]
 mld=mld[sel_insideEddy]
 mld_datenum=mld_datenum[sel_insideEddy]
@@ -1664,10 +1701,21 @@ i=73;print(matlab_datevec(x_filtered_datenum[i]).astype(int)) #Day in which flux
 argument = 'Flux_0812_eddy_core_up'
 arg_value=np.mean(Flux_depth0[i])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+i1=67;print(matlab_datevec(x_filtered_datenum[i1]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+i2=86;print(matlab_datevec(x_filtered_datenum[i2]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'Flux_August_eddy_core_up'
+arg_value=np.mean(Flux_depth0[i1:i2])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 i=44;print(matlab_datevec(mld_datenum0[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
 argument = 'Flux_0810_ML'
 arg_value=np.mean(Flux_MLD[i])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=39;print(matlab_datevec(mld_datenum0[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'MajorFlux_ML_start'
+write_latex_data(filename,argument,'26 July')
+i=53;print(matlab_datevec(mld_datenum0[i]).astype(int)) #Day in which flux at upper eddy core becomes larger than the one at lower eddy core
+argument = 'MajorFlux_ML_end'
+write_latex_data(filename,argument,'8 September')
 argument = 'FluxMiP_eddy_core_up_percentage'
 arg_value=np.mean(Flux_MiP_depth0/(Flux_MiP_depth0+Flux_MaP_depth0)*100)
 write_latex_data(filename,argument,'%d' % arg_value)
@@ -2633,6 +2681,7 @@ for i in range(0,nyticks):
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
 ax.text(-0.25, 1.075, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax.text(1.075, 1.06, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v06/Fig04A_Koestner_v06.pdf' ,dpi=200)
 plt.close()
@@ -2680,7 +2729,7 @@ for i in range(0,nyticks):
         yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels,fontsize=6)
-ax.text(-0.25, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+# ax.text(0.02, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v06/Fig04B_Koestner_v06.pdf' ,dpi=200)
 plt.close()
