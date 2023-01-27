@@ -258,10 +258,13 @@ arg_value=np.mean(Distance_centroid[sel_insideEddy])
 write_latex_data(filename,argument,'%0.1f' % arg_value)
 argument = 'mean_radius_0413_0731'
 i1=np.where(Date_Num_Eddy1==matlab_datenum(2021,4,13))[0][0];i2=np.where(Date_Num_Eddy1==matlab_datenum(2021,7,31))[0][0]
-arg_value=np.mean(radius_Vmax1[i1:i2+1])
-write_latex_data(filename,argument,'%0.1f' % arg_value)
+radius_mean=np.mean(radius_Vmax1[i1:i2+1]);radius_std=np.std(radius_Vmax1[i1:i2+1])
+write_latex_data(filename,argument,'%0.1f' % radius_mean)
 argument = 'mean_surf_eddycore_0413_0731_km2'
-arg_value=np.pi*(arg_value*1000)**2/10**6
+arg_value=np.pi*(radius_mean*1000)**2/10**6
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'std_surf_eddycore_0413_0731_km2'
+arg_value=2*np.pi*radius_mean*radius_std#np.pi*(radius_std*1000)**2/10**6
 write_latex_data(filename,argument,'%d' % arg_value)
 
 # endregion
