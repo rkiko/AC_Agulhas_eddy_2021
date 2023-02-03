@@ -11,7 +11,7 @@ if __name__ == '__main__':
     os.chdir(str(path_to_data))
 
     id_project = int(sys.argv[1])
-    filename = sys.argv[2]
+    filename_Download = sys.argv[2]
 
     user_ = getpass.getpass('Username (note, if you want to exit the script Download_particle_histogram, please write "e" as input:')
     if user_=='e':  print('exited from Download_particle_histogram_%d' % id_project);exit()
@@ -20,4 +20,4 @@ if __name__ == '__main__':
     mydb = ecopart_connect(user_, passwd)
     valid_projectid_list = '(%d)' % id_project
     df = read_particle_histogram_data_floats(valid_projectid_list, mydb)
-    df.to_csv('%s' % filename,sep='\t', index=False)
+    df.to_csv('%s' % filename_Download,sep='\t', index=False)
