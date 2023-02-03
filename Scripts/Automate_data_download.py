@@ -8,15 +8,15 @@ if __name__ == '__main__':
     path_to_scripts = Path('~/GIT/AC_Agulhas_eddy_2021/Scripts').expanduser()
     os.chdir(str(path_to_scripts))
     home = str(Path.home())
-    sys.path.insert(0, "%s/GIT/Lagrangian_uvp/Scripts" % home)
-    id_project = 356
+    #sys.path.insert(0, "%s/GIT/Lagrangian_uvp/Scripts" % home)
+    id_project = 647
     filename0 = 'Ecopart'
 
     filename_Download = '%s_histogram_data_raw_%d.tsv' % (filename0, id_project)
     os.system("python Download_particle_histogram.py %d %s" % (id_project, filename_Download))
     print('Download of project id %d finished, starting conversion of raw data' % id_project)
 
-    id_BGCArgo=6903095
+    id_BGCArgo=6903096
     os.system("python Download_BGC_variables.py %d" % id_BGCArgo)
     print('Download of BGC Argo data for float %d finished ' % id_BGCArgo)
 
