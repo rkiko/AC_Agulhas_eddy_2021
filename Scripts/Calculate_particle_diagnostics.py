@@ -68,7 +68,7 @@ if __name__ == '__main__':
     # Here I define the list of columns which I save: I take all the columns in which I have the mip, the map, the flux.
     # or the respiration rates
     ####################################################################################################################
-    list_columns = ["RAWfilename", "Latitude", "Longitude", "Date_Time", "Pressure [dbar]",
+    list_columns = ["RAWfilename", "Profile","Latitude", "Longitude", "Date_Time", "Pressure [dbar]",
                     "Vol [L] (sampled for this depth bin)"]
                     #, "MiP_abun", "MaP_abun", "Mip_POC_cont_mgC_m3",
                     # "Map_POC_cont_mgC_m3", "Flux_mgC_m2", "Respi_nmolO2_l_h", "Respi_Iversen_nmolO2_l_h",
