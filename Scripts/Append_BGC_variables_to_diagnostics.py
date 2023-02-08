@@ -13,8 +13,9 @@ if __name__ == '__main__':
     os.chdir(str(path_to_data))
 
     filename_diagnostics = sys.argv[1]
+    id_BGCArgo = str(sys.argv[2])
     df = pd.read_csv(filename_diagnostics, sep='\t')
-    df = include_Coriolis_data(df)
+    df = include_Coriolis_data(df,id_BGCArgo)
     df.to_csv(filename_diagnostics, sep='\t', index=False)
 
 

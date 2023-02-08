@@ -13,10 +13,11 @@ if __name__ == '__main__':
     path_to_data = Path('~/GIT/AC_Agulhas_eddy_2021/Data').expanduser()
     os.chdir(str(path_to_data))
 
-    filename_diagnostics = sys.argv[1]
-    df = pd.read_csv(filename_diagnostics, sep='\t')
-    df = include_Coriolis_data(df)
+    filename_processed = sys.argv[1]
+    id_BGCArgo = str(sys.argv[2])
+    df = pd.read_csv(filename_processed, sep='\t')
+    df = include_Coriolis_data(df,id_BGCArgo)
     df = calculate_diffPSD_slope_func(df)
-    df.to_csv(filename_diagnostics, sep='\t', index=False)
+    df.to_csv(filename_processed, sep='\t', index=False)
 
 
