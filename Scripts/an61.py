@@ -66,6 +66,7 @@ a_file.close()
 list_distances=[radius_Vmax_floatDays.max(),40,30,20]
 width, height = 0.65, 0.65
 
+distance_limit=list_distances[0]
 for distance_limit in list_distances:
     fig = plt.figure(1, figsize=(3, 3))
     ax = fig.add_axes([0.25, 0.2, width, height], ylim=(3, 8), xlim=(34.3, 35))
@@ -91,6 +92,7 @@ for distance_limit in list_distances:
         Date_Num_tmp = np.tile(Date_Num_float[i], x.size)
         plt.figure(2)
         plot2=plt.scatter(x,y,c=Date_Num_tmp,s=0.01,vmin=Date_Num_float.min(),vmax=Date_Num_float[59])
+        print('%0.3f' % np.interp(4.5,y,x))
 
     plt.figure(1)
     cbar = plt.colorbar(plot1)

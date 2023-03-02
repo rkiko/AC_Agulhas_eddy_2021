@@ -170,6 +170,7 @@ for i_isop in range(0,reference_isopycnal_list.size):
         plot2 = plt.scatter(dist_float_eddy_km_tmp, doxy_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
         plt.figure(3)
         plot3 = plt.scatter(dist_float_eddy_km_tmp, cons_temp_tmp, c=Date_Num_float_tmp,s=5,vmin=Date_Num.min(),vmax=day_end_timeseries)
+        # print('%d, cons temp: %0.3f' % (i,cons_temp_tmp))
 
 
     # I add last details
