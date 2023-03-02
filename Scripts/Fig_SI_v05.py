@@ -739,6 +739,17 @@ i=73;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
 argument = 'bbp_0812_eddy_core'
 arg_value=np.mean(bbpPOC_eddy_core[i])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=4;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'tempEC_0420to0812'
+arg_value=np.mean(temp_eddy_core[i:73])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'tempEC_0420to0812_std'
+arg_value=np.std(temp_eddy_core[i:73])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=x_parameter.size-1;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'tempEC_0923'
+arg_value=np.mean(temp_eddy_core[i])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 
 

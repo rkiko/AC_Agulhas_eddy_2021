@@ -2555,7 +2555,7 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
            bbp_PARR_Koestner_dens0_densf,bbp_PARR_Koestner_dens0_densf_std,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,list_Respi_types,n_profiles, \
            Delta_Integrated_POC, Delta_Integrated_POC_std, Delta_Integrated_POC_noBBP, Delta_Integrated_POC_noBBP_std, Delta_Integrated_POC_Koestner, Delta_Integrated_POC_Koestner_std, \
            Delta_flux, Delta_flux_std,Flux_dens0_mgC_m3_d,Flux_densf_mgC_m3_d, \
-           depth_isopycnal,depth_isopycnal_down,depth_isopycnal_up,layer_thickness
+           depth_isopycnal,depth_isopycnal_down,depth_isopycnal_up,layer_thickness,MiP_POC_dens0_densf,MiP_POC_extended_dens0_densf,MaP_POC_dens0_densf,bbp_POC_Koestner_dens0_densf
 # endregion
 #######################################################################
 # Parameters for the carbon budget calculation
@@ -2604,7 +2604,7 @@ for dens0 in dens0_list:
        Theoretical_Budget_noBBP,Theoretical_Budget_noBBP_std,Theoretical_Budget_noBBP_extended,Theoretical_Budget_noBBP_extended_std,
        Theoretical_Budget_Koestner,Theoretical_Budget_Koestner_std,Theoretical_Budget_Koestner_extended,Theoretical_Budget_Koestner_extended_std,
        POC_resp_mgC_m3_d,POC_resp_mgC_m3_d_std,bbpPARR_mgC_m3_d,bbpPARR_mgC_m3_d_std,bbpPARR_Koestner_mgC_m3_d,bbpPARR_Koestner_mgC_m3_d_std,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,RespirationTypes,n_profiles,
-       _,_,_,_,_,_,_,_,_,_,depth_isopycnal,depth_isopycnal_down,depth_isopycnal_up,layer_thickness) = carbon_budget_calculation(dens0, densf, day0, dayf)
+       _,_,_,_,_,_,_,_,_,_,depth_isopycnal,depth_isopycnal_down,depth_isopycnal_up,layer_thickness,_,_,_,_) = carbon_budget_calculation(dens0, densf, day0, dayf)
 
     Theoretical_Budget_list=np.append(Theoretical_Budget_list,Theoretical_Budget)
     Theoretical_Budget_extended_list=np.append(Theoretical_Budget_extended_list,Theoretical_Budget_extended)
@@ -2942,54 +2942,74 @@ plt.close()
  bbpPARR_mgC_m3_d, bbpPARR_mgC_m3_d_std, bbpPARR_Koestner_mgC_m3_d,bbpPARR_Koestner_mgC_m3_d_std, O2_resp_mgC_m3_d, O2_resp_mgC_m3_d_ci, RespirationTypes,
  n_profiles, Delta_Integrated_POC, Delta_Integrated_POC_std,  Delta_Integrated_POC_noBBP, Delta_Integrated_POC_noBBP_std, Delta_Integrated_POC_Koestner,
  Delta_Integrated_POC_Koestner_std,Delta_flux, Delta_flux_std,Flux_dens0_mgC_m3_d,Flux_densf_mgC_m3_d, depth_isopycnal,
- depth_isopycnal_down, depth_isopycnal_up, layer_thickness) = carbon_budget_calculation(dens_eddy_core_up, dens_eddy_core_down, day0, dayf)
+ depth_isopycnal_down, depth_isopycnal_up, layer_thickness,MiP_POC_dens0_densf,
+ MiP_POC_extended_dens0_densf,MaP_POC_dens0_densf,bbp_POC_Koestner_dens0_densf) = carbon_budget_calculation(dens_eddy_core_up, dens_eddy_core_down, day0, dayf)
 
 from write_latex_data import write_latex_data
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 #These values are extracted from the bulk POC and PARR calculated in the eddy core considering only one unique layer
 argument = 'Flux_0413to0731_eddy_core_up'
 arg_value=Flux_dens0_mgC_m3_d
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'Flux_0413to0731_eddy_core_down'
 arg_value=Flux_densf_mgC_m3_d
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'Flux_0413to0731eddy_core_difference'
 arg_value=abs((Flux_dens0_mgC_m3_d-Flux_densf_mgC_m3_d))
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'Flux_0413to0731eddy_core_difference_std'
 arg_value=abs(Delta_flux_std)
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'Integrated_POC_0413to0731difference'
 arg_value=abs(Delta_Integrated_POC_Koestner)
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'Integrated_POC_0413to0731difference_std'
 arg_value=abs(Delta_Integrated_POC_Koestner_std)
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'bulkPOC_0413to0731_eddycore'
 arg_value=Theoretical_Budget_Koestner
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'bulkPOC_0413to0731_eddycore_std'
 arg_value=Theoretical_Budget_Koestner_std
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
+argument = 'bulkPOC_0413to0731_eddycore_extended'
+arg_value=Theoretical_Budget_Koestner_extended
+write_latex_data(filename,argument,'%0.3f' % arg_value)
+argument = 'bulkPOC_0413to0731_eddycore_extended_std'
+arg_value=Theoretical_Budget_Koestner_extended_std
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'PARR_0413to0731_eddycore'
 arg_value=POC_resp_mgC_m3_d[2] + bbpPARR_Koestner_mgC_m3_d
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'PARR_0413to0731_eddycore_std'
 arg_value=np.sqrt(POC_resp_mgC_m3_d_std[2]**2+bbpPARR_Koestner_mgC_m3_d_std**2)
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
+argument = 'PARR_0413to0731_eddycore_extended'
+arg_value=POC_resp_mgC_m3_d[9] + bbpPARR_Koestner_mgC_m3_d
+write_latex_data(filename,argument,'%0.3f' % arg_value)
+argument = 'PARR_0413to0731_eddycore_extended_std'
+arg_value=np.sqrt(POC_resp_mgC_m3_d_std[9]**2+bbpPARR_Koestner_mgC_m3_d_std**2)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'PARR_0413to0731_eddycore_bbp_contribution'
 arg_value=bbpPARR_Koestner_mgC_m3_d / (POC_resp_mgC_m3_d[2] + bbpPARR_Koestner_mgC_m3_d) *100
 write_latex_data(filename,argument,'%d' % arg_value)
+mipmap=np.nanmean(MiP_POC_dens0_densf)+np.nanmean(MaP_POC_dens0_densf)
+mip_extended_only=np.nanmean(MiP_POC_extended_dens0_densf)-np.nanmean(MiP_POC_dens0_densf)
+bbppoc=np.nanmean(bbp_POC_Koestner_dens0_densf)
+argument = 'MiPextendedOnlyToMipMap_ratio_EC'
+arg_value=np.round(mip_extended_only/mipmap)
+write_latex_data(filename,argument,'%d' % arg_value)
+
 # I calculate the oxygen cons rate as the mean of the oxygen cons rate values obtained in the eddy core
 argument = 'OxyCR_0413to0731_eddycore'
 # arg_value=O2_resp_mgC_m3_d
 sel_eddycore = (depth_isopycnal_list>200)&(depth_isopycnal_list<600)
 arg_value=np.mean(O2_resp_mgC_m3_d_list[sel_eddycore])
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'OxyCR_0413to0731_eddycore_std'
 # arg_value=abs(np.diff(O2_resp_mgC_m3_d_ci)[0][0]/2)
 arg_value=np.mean(O2_resp_mgC_m3_d_ci_list[sel_eddycore, 1] - O2_resp_mgC_m3_d_ci_list[sel_eddycore, 0])*0.5
-write_latex_data(filename,argument,'%0.4f' % arg_value)
+write_latex_data(filename,argument,'%0.3f' % arg_value)
 
 #These values are extracted from the bulk POC and PARR calculated for different layers within the eddy core
 sel = (dens0_list+dens_thickness*0.5)>=dens_eddy_core_up
