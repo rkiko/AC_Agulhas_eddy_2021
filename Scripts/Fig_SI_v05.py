@@ -727,18 +727,6 @@ i=92;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
 argument = 'doxy_0912_eddy_core'
 arg_value=np.mean(doxy_eddy_core[i])
 write_latex_data(filename,argument,'%d' % arg_value)
-i=10;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
-argument = 'bbp_April_eddy_core'
-arg_value=np.mean(bbpPOC_eddy_core[0:i+1])
-write_latex_data(filename,argument,'%0.2f' % arg_value)
-i=48;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
-argument = 'bbp_0701to0923_eddy_core'
-arg_value=np.mean(bbpPOC_eddy_core[i:])
-write_latex_data(filename,argument,'%0.2f' % arg_value)
-i=73;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
-argument = 'bbp_0812_eddy_core'
-arg_value=np.mean(bbpPOC_eddy_core[i])
-write_latex_data(filename,argument,'%0.2f' % arg_value)
 i=4;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
 argument = 'tempEC_0420to0812'
 arg_value=np.mean(temp_eddy_core[i:73])
@@ -750,7 +738,23 @@ i=x_parameter.size-1;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1
 argument = 'tempEC_0923'
 arg_value=np.mean(temp_eddy_core[i])
 write_latex_data(filename,argument,'%0.2f' % arg_value)
-
+i=73;print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'bbp_0413to0812_ML'
+arg_value=np.mean(bbpPOC_Koestner_mld[0:i+1])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bbp_0413to0812_ML_std'
+arg_value=np.std(bbpPOC_Koestner_mld[0:i+1])
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+i=np.where(bbpPOC_Koestner_mld==bbpPOC_Koestner_mld.min())[0][0];print(matlab_datevec(x_parameter[i]+matlab_datenum(1950,1,1)).astype(int))
+argument = 'bbp_0909_ML'
+arg_value=bbpPOC_Koestner_mld[i]
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bbp_0413to0923_eddy_core'
+arg_value=np.mean(bbpPOC_Koestner_eddy_core)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
+argument = 'bbp_0413to0923_eddy_core_std'
+arg_value=np.std(bbpPOC_Koestner_eddy_core)
+write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 
 # endregion

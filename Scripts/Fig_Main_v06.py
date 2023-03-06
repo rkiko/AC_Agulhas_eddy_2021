@@ -102,8 +102,10 @@ def resize_colobar(event):
 anom_meanE_meanOut1=chl_inside_mean1-chl_outside_mean1
 anom_meanE_meanOut2=chl_inside_mean2-chl_outside_mean2
 chl_max_plot=0.6
-set_xlim_lower, set_xlim_upper = 4,18.5
-set_ylim_lower, set_ylim_upper = -37,-30.5
+# set_xlim_lower, set_xlim_upper = 4,18.5
+# set_ylim_lower, set_ylim_upper = -37,-30.5
+set_xlim_lower, set_xlim_upper = 4,22 # For the larger plot
+set_ylim_lower, set_ylim_upper = -38,-30.5 # For the larger plot
 fig = plt.figure(1, figsize=(12, 8))
 ax = plt.axes(projection=cartopy.crs.PlateCarree())
 ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', edgecolor='face', facecolor='grey'))
@@ -113,7 +115,12 @@ ax.scatter(0, 0, c=0, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenr
 ax.plot(0, 0, 'k-',linewidth=2.5, label='BGC float trajectory')  # cmap='Blues_r')
 plot1 = ax.scatter(lonEddy1, latEddy1, c=anom_meanE_meanOut1, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5,zorder=2)  # cmap='Blues_r')
 plot4 = ax.scatter(lonEddy2, latEddy2, c=anom_meanE_meanOut2, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenrod',linewidth=0.5,zorder=2)  # cmap='Blues_r')
-plot3 = ax.scatter(lon_float_outside, lat_float_outside, c='k',marker='x', s=100,zorder=12)  # cmap='Blues_r')
+plot3 = ax.scatter(lon_float_outside, lat_float_outside, c='red',marker='x', s=100,zorder=50)  # cmap='Blues_r')
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.9,edgecolor='gray')
+ax.text(17.5,-31.5,'Cape\nColumbine',horizontalalignment='center',color='gray', bbox=props)
+ax.plot([17.5,17.844],[-31.5,-32.8244],color='gray')
+ax.text(20,-32.5,'South\nAfrica',color='white',fontsize=14.5,horizontalalignment='center')
+# region
 ax.plot(lon_float, lat_float, 'k', alpha=0.9,zorder=15,linewidth=2.5)
 plot2 = plt.scatter(0, 0, c=chl_inside_mean1[25],cmap='Greens', vmin=0, vmax=chl_max_plot, s=1)
 a = plot2.to_rgba(chl_inside_mean1[25])
@@ -162,11 +169,11 @@ ax.set_xlabel('Longitude', fontsize=15)
 ax.set_ylabel('Latitude', fontsize=15)
 gl.right_labels = False
 gl.top_labels = False
-ax.legend(fontsize=15)#,ncol=2)
+ax.legend(fontsize=14.5,ncol=2,loc='lower right')
 
 plt.savefig('../Plots/Fig_Main_v06/Fig01_v06.pdf',dpi=200)
 plt.close()
-
+# endregion
 # endregion
 
 ########################################################################################################################

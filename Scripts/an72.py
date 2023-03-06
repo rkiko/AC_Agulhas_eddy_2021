@@ -469,7 +469,7 @@ plt.gca().invert_yaxis()
 #     yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_list,dens0_list) ))
 # ax.set_yticks(yticks)
 # ax.set_yticklabels(yticklabels,fontsize=6)
-# ax.text(-0.25, 1.075, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax.text(-0.15, 1.005, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 # ax.text(1.075, 1.06, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an72/POC_sequestered_extended_an72.pdf' ,dpi=200)
