@@ -415,7 +415,7 @@ plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenr
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(depth_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
 plt.ylabel('Depth (m)', fontsize=fs)
-plt.xlabel('POC sequestration rate (tons C/d)', fontsize=fs)
+plt.xlabel('POC export rate (tons C/d)', fontsize=fs)
 plt.legend(fontsize=7)
 plt.gca().invert_yaxis()
 # #I set yticks
@@ -456,7 +456,7 @@ plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenr
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(depth_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
 plt.ylabel('Depth (m)', fontsize=fs)
-plt.xlabel('POC sequestration rate (tons C/d)', fontsize=fs)
+plt.xlabel('POC export rate (tons C/d)', fontsize=fs)
 plt.legend(fontsize=7)
 plt.gca().invert_yaxis()
 # #I set yticks
@@ -496,7 +496,7 @@ plt.xlim(0,1000)
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 # plt.ylabel('Dens (kg/m$^3$)', fontsize=fs)
-plt.xlabel('POC sequestration rate (tons C/d)', fontsize=fs)
+plt.xlabel('POC export rate (tons C/d)', fontsize=fs)
 plt.legend(fontsize=7)
 plt.gca().invert_yaxis()
 # #I set yticks
