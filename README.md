@@ -623,3 +623,10 @@ the amount of POC subducted. I also calculate the mean flux within the bin
 to estimate the amount of POC subducted due to gravitational pump.
 
 
+\
+an73
+
+I try to estimate the amount of carbon exported due to the fulle eddy
+core subduction pump in the four main upwelling systems
+
+
