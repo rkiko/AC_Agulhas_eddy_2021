@@ -69,7 +69,7 @@ i=i+1;print("FECSP in the Peru upwelling system: %0.3e PgC/year" % (POC_subducte
 print("***********************************************************************************")
 print("This results in a total of: %0.3e PgC/year by FECSP in all EBUS by cyclones" % (POC_subducted_EBUS_tonsC_year_totTOT/10**9) )
 print("***********************************************************************************")
-print("For comparison, the eddy subduction pump estimate of Boy et al (2019 ) is 0.09-2.0 PgC/year")
+print("For comparison, the eddy subduction pump estimate of Boyd et al (2019 ) is 0.09-2.0 PgC/year")
 # endregion
 
 
