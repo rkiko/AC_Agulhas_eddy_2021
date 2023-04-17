@@ -58,6 +58,18 @@ POC_subducted_EBUS_tonsC_year_by1cyclone = POC_subducted_EBUS_tonsC_day_by1cyclo
 #I sum up over all the subsurface intensifie cyclones
 POC_subducted_EBUS_tonsC_year_tot = POC_subducted_EBUS_tonsC_year_by1cyclone * N_subsurf_cyclones_perYear
 POC_subducted_EBUS_tonsC_year_totTOT=np.sum(POC_subducted_EBUS_tonsC_year_tot)
+#I print the output
+print("***********************************************************************************")
+print("Estimation of full eddy core subduction pump (FECSP) in the 4 EBUS due to cyclones:")
+print("***********************************************************************************");i=-1
+i=i+1;print("FECSP in the Benguela upwelling system: %0.3e PgC/year" % (POC_subducted_EBUS_tonsC_year_tot[i]/10**9) )
+i=i+1;print("FECSP in the Canary upwelling system: %0.3e PgC/year" % (POC_subducted_EBUS_tonsC_year_tot[i]/10**9) )
+i=i+1;print("FECSP in the California upwelling system: %0.3e PgC/year" % (POC_subducted_EBUS_tonsC_year_tot[i]/10**9) )
+i=i+1;print("FECSP in the Peru upwelling system: %0.3e PgC/year" % (POC_subducted_EBUS_tonsC_year_tot[i]/10**9) )
+print("***********************************************************************************")
+print("This results in a total of: %0.3e PgC/year by FECSP in all EBUS by cyclones" % (POC_subducted_EBUS_tonsC_year_totTOT/10**9) )
+print("***********************************************************************************")
+print("For comparison, the eddy subduction pump estimate of Boy et al (2019 ) is 0.09-2.0 PgC/year")
 # endregion
 
 
