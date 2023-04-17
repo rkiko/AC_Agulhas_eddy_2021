@@ -2659,7 +2659,7 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
 for iResp in range(2,3):
     plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='b')
 
@@ -2707,7 +2707,7 @@ fig = plt.figure(2, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
 for iResp in range(9,10):
     plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='b')
 
@@ -2756,7 +2756,7 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 0], O2_resp_mgC_m3_d_ci_list[:, 1], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 0], O2_resp_mgC_m3_d_ci_list[:, 1], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
 for iResp in range(2,3):
     plt.plot(POC_resp_mgC_m3_d_list[:,iResp]+bbpPARR_mgC_m3_d_list, depth_isopycnal_list, c='b')
 
@@ -2805,7 +2805,7 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 0], O2_resp_mgC_m3_d_ci_list[:, 1], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 0], O2_resp_mgC_m3_d_ci_list[:, 1], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
 for iResp in range(2,3):
     plt.plot(POC_resp_mgC_m3_d_list[:,iResp], depth_isopycnal_list, c='b')
 
@@ -2852,7 +2852,7 @@ fig = plt.figure(2, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
 for iResp in range(9,10):
     plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_mgC_m3_d_list , depth_isopycnal_list, c='b')
 
@@ -2899,7 +2899,7 @@ fig = plt.figure(2, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
-plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$')
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
 for iResp in range(9,10):
     plt.plot(POC_resp_mgC_m3_d_list[:,iResp], depth_isopycnal_list, c='b')
 
