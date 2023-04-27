@@ -395,11 +395,13 @@ dens_eddy_core_down = 1027.2397618090454 #calculated at step 4 of Fig. 3a
 #######################################################################
 # I extract the flux at 100m to calculate the Martin curve which I add to the plot for comparison
 #######################################################################
-
+dens0=1026.1;densf = dens0 + dens_thickness
 (POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std,
  POC_subducted_npBBP_tonsC_day, POC_subducted_npBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
  POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
 
+Martin_tonsC_day=POC_BGP_tonsC_day*(depth_list/100)**(-0.858)
+Martin_extended_tonsC_day=POC_BGP_extended_tonsC_day*(depth_list/100)**(-0.858)
 #######################################################################
 #region Plots
 ########################################################################################################################
@@ -414,10 +416,12 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(POC_subducted_tonsC_day_list,depth_list, 'r')
 plt.scatter(POC_subducted_tonsC_day_list,depth_list, c='red',s=5)
-plt.fill_betweenx(depth_list, POC_subducted_tonsC_day_list-POC_subducted_tonsC_day_std_list, POC_subducted_tonsC_day_list+POC_subducted_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FESP')
+plt.fill_betweenx(depth_list, POC_subducted_tonsC_day_list-POC_subducted_tonsC_day_std_list, POC_subducted_tonsC_day_list+POC_subducted_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FECSP')
 plt.plot(POC_BGP_tonsC_day_list,depth_list, 'b')
 plt.scatter(POC_BGP_tonsC_day_list,depth_list, c='b',s=5)
 plt.fill_betweenx(depth_list, POC_BGP_tonsC_day_list-POC_BGP_tonsC_day_std_list, POC_BGP_tonsC_day_list+POC_BGP_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
+plt.plot(Martin_tonsC_day,depth_list, 'k--',label='Martin')
+# plt.fill_betweenx(depth_list, POC_BGP_tonsC_day_list-POC_BGP_tonsC_day_std_list, POC_BGP_tonsC_day_list+POC_BGP_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
 plt.xlim(0,1000)
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
@@ -455,10 +459,12 @@ fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
 plt.plot(POC_subducted_extended_tonsC_day_list,depth_list, 'r')
 plt.scatter(POC_subducted_extended_tonsC_day_list,depth_list, c='red',s=5)
-plt.fill_betweenx(depth_list, POC_subducted_extended_tonsC_day_list-POC_subducted_extended_tonsC_day_std_list, POC_subducted_extended_tonsC_day_list+POC_subducted_extended_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FESP')
+plt.fill_betweenx(depth_list, POC_subducted_extended_tonsC_day_list-POC_subducted_extended_tonsC_day_std_list, POC_subducted_extended_tonsC_day_list+POC_subducted_extended_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FECSP')
 plt.plot(POC_BGP_extended_tonsC_day_list,depth_list, 'b')
 plt.scatter(POC_BGP_extended_tonsC_day_list,depth_list, c='b',s=5)
 plt.fill_betweenx(depth_list, POC_BGP_extended_tonsC_day_list-POC_BGP_extended_tonsC_day_std_list, POC_BGP_extended_tonsC_day_list+POC_BGP_extended_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
+plt.plot(Martin_extended_tonsC_day,depth_list, 'k--',label='Martin')
+# plt.fill_betweenx(depth_list, POC_BGP_tonsC_day_list-POC_BGP_tonsC_day_std_list, POC_BGP_tonsC_day_list+POC_BGP_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
 plt.xlim(0,1000)
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
@@ -585,17 +591,17 @@ for depth_tmp in depth2write:
     BGP_std = np.interp(depth_tmp,depth_list,POC_BGP_extended_tonsC_day_std_list)
     write_latex_data(filename,argument,'%d' % BGP_std )
     argument = 'POC_subducted_extended_0413to0731_%dm_tonsC_day' % (depth_tmp)
-    FESP = np.interp(depth_tmp,depth_list,POC_subducted_extended_tonsC_day_list)
-    write_latex_data(filename,argument,'%d' %  FESP)
+    FECSP = np.interp(depth_tmp,depth_list,POC_subducted_extended_tonsC_day_list)
+    write_latex_data(filename,argument,'%d' %  FECSP)
     argument = 'POC_subducted_extended_std_0413to0731_%dm_tonsC_day' % (depth_tmp)
     FESP_std = np.interp(depth_tmp,depth_list,POC_subducted_extended_tonsC_day_std_list)
     write_latex_data(filename,argument,'%d' %  FESP_std)
     argument = 'Tot_POC_export_extended_0413to0731_%dm_tonsC_day' % (depth_tmp)
-    write_latex_data(filename,argument,'%d' %  np.round(FESP+BGP))
+    write_latex_data(filename,argument,'%d' %  np.round(FECSP+BGP))
     argument = 'Tot_POC_export_extended_std_0413to0731_%dm_tonsC_day' % (depth_tmp)
     write_latex_data(filename,argument,'%d' %  np.round(np.sqrt(FESP_std**2+BGP_std**2)))
     argument = 'Ratio_POC_subduction2BGP_extended_0413to0731_%dm_tonsC_day' % (depth_tmp)
-    write_latex_data(filename, argument, '%d' % np.round(FESP/BGP*100))
+    write_latex_data(filename, argument, '%d' % np.round(FECSP/BGP*100))
 
 # endregion
 #######################################################################
