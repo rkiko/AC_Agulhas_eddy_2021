@@ -600,6 +600,8 @@ for depth_tmp in depth2write:
     write_latex_data(filename,argument,'%d' %  np.round(FECSP+BGP))
     argument = 'Tot_POC_export_extended_std_0413to0731_%dm_tonsC_day' % (depth_tmp)
     write_latex_data(filename,argument,'%d' %  np.round(np.sqrt(FESP_std**2+BGP_std**2)))
+    argument = 'Martin_export_extended_std_0413to0731_%dm_tonsC_day' % (depth_tmp)
+    write_latex_data(filename,argument,'%d' %  np.round( POC_BGP_extended_tonsC_day*(depth_tmp/100)**(-0.858) ))
     argument = 'Ratio_POC_subduction2BGP_extended_0413to0731_%dm_tonsC_day' % (depth_tmp)
     write_latex_data(filename, argument, '%d' % np.round(FECSP/BGP*100))
 

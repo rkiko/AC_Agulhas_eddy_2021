@@ -223,3 +223,5 @@ bbp_0413to0812_ML_std = 3.88
 bbp_0909_ML = 47.93
 bbp_0413to0923_eddy_core = 4.72
 bbp_0413to0923_eddy_core_std = 2.57
+Martin_export_extended_std_0413to0731_200m_tonsC_day = 252
+Martin_export_extended_std_0413to0731_450m_tonsC_day = 126
