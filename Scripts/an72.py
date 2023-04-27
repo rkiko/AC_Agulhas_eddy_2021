@@ -319,8 +319,8 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     POC_subducted_tonsC_day_std = np.sqrt(Integrated_POC_Koestner_mgC_m3_std**2 * sink_speed**2 * surface_eddy_mean**2 + Integrated_POC_Koestner_mgC_m3**2 * sink_speed_std**2 * surface_eddy_mean**2+ Integrated_POC_Koestner_mgC_m3**2 * sink_speed**2 * surface_eddy_std**2)/10**9
     POC_subducted_extended_tonsC_day = Integrated_POC_Koestner_extended_mgC_m3 * sink_speed * surface_eddy_mean/10**9
     POC_subducted_extended_tonsC_day_std = np.sqrt(Integrated_POC_Koestner_extended_mgC_m3_std**2 * sink_speed**2 * surface_eddy_mean**2 + Integrated_POC_Koestner_extended_mgC_m3**2 * sink_speed_std**2 * surface_eddy_mean**2+ Integrated_POC_Koestner_extended_mgC_m3**2 * sink_speed**2 * surface_eddy_std**2)/10**9
-    POC_subducted_npBBP_tonsC_day = Integrated_POC_noBBP_mgC_m3 * sink_speed * surface_eddy_mean/10**9
-    POC_subducted_npBBP_tonsC_day_std = np.sqrt(Integrated_POC_noBBP_mgC_m3_std**2 * sink_speed**2 * surface_eddy_mean**2 + Integrated_POC_noBBP_mgC_m3**2 * sink_speed_std**2 * surface_eddy_mean**2+ Integrated_POC_noBBP_mgC_m3**2 * sink_speed**2 * surface_eddy_std**2)/10**9
+    POC_subducted_noBBP_tonsC_day = Integrated_POC_noBBP_mgC_m3 * sink_speed * surface_eddy_mean/10**9
+    POC_subducted_noBBP_tonsC_day_std = np.sqrt(Integrated_POC_noBBP_mgC_m3_std**2 * sink_speed**2 * surface_eddy_mean**2 + Integrated_POC_noBBP_mgC_m3**2 * sink_speed_std**2 * surface_eddy_mean**2+ Integrated_POC_noBBP_mgC_m3**2 * sink_speed**2 * surface_eddy_std**2)/10**9
 
     ########################################################################################################################
     # Here I calculate the POC subducted due to gravitational pump (i.e. flux)
@@ -331,7 +331,7 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     POC_BGP_extended_tonsC_day_std = np.sqrt(Flux_extended_std**2 * surface_eddy_mean**2 + Flux_extended_mean**2 * surface_eddy_std**2)/10**9
     ############### I return the data
     return POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std, \
-           POC_subducted_npBBP_tonsC_day, POC_subducted_npBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std, \
+           POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std, \
            POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean
 # endregion
 #######################################################################
@@ -354,8 +354,8 @@ POC_subducted_tonsC_day_list = np.array([])
 POC_subducted_tonsC_day_std_list = np.array([])
 POC_subducted_extended_tonsC_day_list = np.array([])
 POC_subducted_extended_tonsC_day_std_list = np.array([])
-POC_subducted_npBBP_tonsC_day_list = np.array([])
-POC_subducted_npBBP_tonsC_day_std_list = np.array([])
+POC_subducted_noBBP_tonsC_day_list = np.array([])
+POC_subducted_noBBP_tonsC_day_std_list = np.array([])
 POC_BGP_tonsC_day_list = np.array([])
 POC_BGP_tonsC_day_std_list = np.array([])
 POC_BGP_extended_tonsC_day_list = np.array([])
@@ -371,15 +371,15 @@ for dens0 in dens0_list:
     print('Loop %d out of %d' %(ct,dens0_list.size))
     densf = dens0 + dens_thickness
     (POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std,
-     POC_subducted_npBBP_tonsC_day, POC_subducted_npBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
+     POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
      POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
 
     POC_subducted_tonsC_day_list=np.append(POC_subducted_tonsC_day_list,POC_subducted_tonsC_day)
     POC_subducted_tonsC_day_std_list=np.append(POC_subducted_tonsC_day_std_list,POC_subducted_tonsC_day_std)
     POC_subducted_extended_tonsC_day_list=np.append(POC_subducted_extended_tonsC_day_list,POC_subducted_extended_tonsC_day)
     POC_subducted_extended_tonsC_day_std_list=np.append(POC_subducted_extended_tonsC_day_std_list,POC_subducted_extended_tonsC_day_std)
-    POC_subducted_npBBP_tonsC_day_list=np.append(POC_subducted_npBBP_tonsC_day_list,POC_subducted_npBBP_tonsC_day)
-    POC_subducted_npBBP_tonsC_day_std_list=np.append(POC_subducted_npBBP_tonsC_day_std_list,POC_subducted_npBBP_tonsC_day_std)
+    POC_subducted_noBBP_tonsC_day_list=np.append(POC_subducted_noBBP_tonsC_day_list,POC_subducted_noBBP_tonsC_day)
+    POC_subducted_noBBP_tonsC_day_std_list=np.append(POC_subducted_noBBP_tonsC_day_std_list,POC_subducted_noBBP_tonsC_day_std)
     POC_BGP_tonsC_day_list=np.append(POC_BGP_tonsC_day_list,POC_BGP_tonsC_day)
     POC_BGP_tonsC_day_std_list=np.append(POC_BGP_tonsC_day_std_list,POC_BGP_tonsC_day_std)
     POC_BGP_extended_tonsC_day_list=np.append(POC_BGP_extended_tonsC_day_list,POC_BGP_extended_tonsC_day)
@@ -397,7 +397,7 @@ dens_eddy_core_down = 1027.2397618090454 #calculated at step 4 of Fig. 3a
 #######################################################################
 dens0=1026.1;densf = dens0 + dens_thickness
 (POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std,
- POC_subducted_npBBP_tonsC_day, POC_subducted_npBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
+ POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
  POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
 
 Martin_tonsC_day=POC_BGP_tonsC_day*(depth_list/100)**(-0.858)
@@ -500,12 +500,12 @@ fs=10
 width, height = 0.72, 0.8
 fig = plt.figure(1, figsize=(3.5, 3.5))
 ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
-plt.plot(POC_subducted_npBBP_tonsC_day_list,depth_list, 'r')
-plt.scatter(POC_subducted_npBBP_tonsC_day_list,depth_list, c='red',s=5)
-plt.fill_betweenx(depth_list, POC_subducted_npBBP_tonsC_day_list-POC_subducted_npBBP_tonsC_day_std_list, POC_subducted_npBBP_tonsC_day_list+POC_subducted_npBBP_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='Subducted')
+plt.plot(POC_subducted_noBBP_tonsC_day_list,depth_list, 'r')
+plt.scatter(POC_subducted_noBBP_tonsC_day_list,depth_list, c='red',s=5)
+plt.fill_betweenx(depth_list, POC_subducted_noBBP_tonsC_day_list-POC_subducted_noBBP_tonsC_day_std_list, POC_subducted_noBBP_tonsC_day_list+POC_subducted_noBBP_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FECSP')
 plt.plot(POC_BGP_tonsC_day_list,depth_list, 'b')
 plt.scatter(POC_BGP_tonsC_day_list,depth_list, c='b',s=5)
-plt.fill_betweenx(depth_list, POC_BGP_tonsC_day_list-POC_BGP_tonsC_day_std_list, POC_BGP_tonsC_day_list+POC_BGP_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='Gravitational pump')
+plt.fill_betweenx(depth_list, POC_BGP_tonsC_day_list-POC_BGP_tonsC_day_std_list, POC_BGP_tonsC_day_list+POC_BGP_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
 plt.xlim(0,1000)
 plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
 plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
