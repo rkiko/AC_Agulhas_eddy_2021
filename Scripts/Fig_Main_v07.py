@@ -2692,7 +2692,7 @@ for i in range(0,nyticks):
 ax[0].set_yticks(yticks)
 ax[0].set_yticklabels(yticklabels,fontsize=6)
 ax[0].text(0, .075, 'b', fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
-# ax.text(1.075, 1.06, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax[0].text(1.07, 1.05, 'b', transform=ax[0].transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 ax[0].grid(color='k', linestyle='dashed', linewidth=0.5)
 ax[1].plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
 ax[1].scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
@@ -2719,7 +2719,7 @@ ax[1].invert_yaxis()
 #I set yticks
 ax[1].set_yticks(yticks)
 ax[1].set_yticklabels(yticklabels,fontsize=6)
-# ax.text(0.02, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax[1].text(1.07, 1.05, 'c', transform=ax[1].transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
 ax[1].grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v07/Fig04B_Koestner_v07.pdf' ,dpi=200)
 plt.close()
