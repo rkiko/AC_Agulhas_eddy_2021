@@ -393,6 +393,14 @@ dens_eddy_core_up = 1026.82
 dens_eddy_core_down = 1027.2397618090454 #calculated at step 4 of Fig. 3a
 
 #######################################################################
+# I extract the flux at 100m to calculate the Martin curve which I add to the plot for comparison
+#######################################################################
+
+(POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std,
+ POC_subducted_npBBP_tonsC_day, POC_subducted_npBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
+ POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
+
+#######################################################################
 #region Plots
 ########################################################################################################################
 ######### Fig.: with BBP from Koestner
