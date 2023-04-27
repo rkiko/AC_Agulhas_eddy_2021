@@ -54,6 +54,13 @@ the Supplementary the Fig. 4 calculated with Cetinic relationshipe (for bbp to
 POC) and without bbpPOC. Conversely, I move back as main figure the Fig. 4 with
 the extended size spectrum
 
+\
+Fig_Main_v07
+
+I reduce the size of Fig. 4 (bulk POC removal rate, Parr and oxygen consumption
+rate) as I now put them one over the other. I remove the krem of Iversen from
+the main figure and I left it for the supplementary material.
+
 
 \
 an01
