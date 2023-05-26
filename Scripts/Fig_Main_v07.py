@@ -1312,7 +1312,8 @@ sel_insideEddy = data_dist_radius['sel_insideEddy']
 datenum_profiles = data_dist_radius['Datenum']
 sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
 
-list_dates=list_dates[sel_insideEddy[0:list_dates.size]]
+list_dates=list_dates[0:sel_insideEddy.size]
+list_dates=list_dates[sel_insideEddy]
 Date_Num_bbp=Date_Num_bbp[sel_insideEddy]
 Date_Num_bbp_calendar=Date_Num_bbp_calendar[sel_insideEddy]
 depth_bbp=depth_bbp[sel_insideEddy]
@@ -1397,6 +1398,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     parameter_plot=parameter_interp
     parameter_plot[parameter_plot<0]=0
     parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
+    if ipar==0: MiP_POC = parameter_plot.copy()
+    if ipar==1: MaP_POC = parameter_plot.copy()
     ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, parameter_plot)
     plt.gca().invert_yaxis()
     plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w',linestyles='dashed')
@@ -1422,7 +1425,33 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     plt.savefig('../Plots/Fig_Main_v07/Fig02%s_v07.pdf' % (parameter_panellabel_list[ipar]),dpi=200)
     plt.close()
 
-
+fig = plt.figure(1, figsize=(12,8))
+ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num_filtered.min(), Date_Num_filtered.max()))
+parameter_plot=parameter_interp
+parameter_plot[parameter_plot<0]=0
+parameter_plot[parameter_plot>max_parameter_list[ipar]]=max_parameter_list[ipar]
+ax_1 = plot2 = plt.contourf(x_filtered, y_filtered, MiP_POC+MaP_POC)
+plt.gca().invert_yaxis()
+plt.vlines(day_start_eddy_merging,ymin=0,ymax=600,color='w',linestyles='dashed')
+plt.vlines(day_end_eddy_merging,ymin=0,ymax=600,color='w',linestyles='dashed')
+# I draw colorbar
+cbar = plt.colorbar(plot2)
+cbar.ax.get_yticklabels()
+cbar.ax.set_ylabel('Total POC (mgC $m^{-3}$)', fontsize=18)
+plt.ylabel('Depth (m)', fontsize=18)
+#I set xticks
+nxticks=10
+xticks=np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),nxticks)
+xticklabels=[]
+for i in xticks:
+    xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
+ax.set_xticks(xticks)
+ax.set_xticklabels(xticklabels)
+plt.xticks(rotation=90,fontsize=12)
+# I add the grid
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an74/Total_MiPMaP_POC_v07.pdf',dpi=200)
+plt.close()
 # endregion
 
 
