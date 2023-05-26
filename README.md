@@ -55,6 +55,12 @@ POC) and without bbpPOC. Conversely, I move back as main figure the Fig. 4 with
 the extended size spectrum
 
 \
+Fig_Main_v06
+
+For the carbon budget, I remove the krem of Iversen and shorten the legend 
+captions
+
+\
 Fig_Main_v07
 
 I reduce the size of Fig. 4 (bulk POC removal rate, Parr and oxygen consumption
