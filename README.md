@@ -637,3 +637,10 @@ I try to estimate the amount of carbon exported due to the fulle eddy
 core subduction pump in the four main upwelling systems
 
 
+\
+an74
+
+I remake figure 1 for a presentation, excluding the trajectory of the eddy 2
+and the chlorophyll anomaly
+
+
