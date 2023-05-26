@@ -112,7 +112,7 @@ ax.add_feature(cartopy.feature.NaturalEarthFeature('physical', 'land', '10m', ed
 ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
 ax.scatter(0, 0, c=0, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5, label='Eddy trajectory')  # cmap='Blues_r')
 ax.plot(0, 0, 'k-',linewidth=2.5, label='BGC float trajectory')  # cmap='Blues_r')
-plot1 = ax.scatter(lonEddy1, latEddy1, c=anom_meanE_meanOut1, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5,zorder=2)  # cmap='Blues_r')
+plot1 = ax.scatter(lonEddy1, latEddy1, c='white', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5,zorder=2)  # cmap='Blues_r')
 # plot4 = ax.scatter(lonEddy2, latEddy2, c=anom_meanE_meanOut2, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenrod',linewidth=0.5,zorder=2)  # cmap='Blues_r')
 plot3 = ax.scatter(lon_float_outside, lat_float_outside, c='red',marker='x', s=100,zorder=50)  # cmap='Blues_r')
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.9,edgecolor='gray')
@@ -124,13 +124,6 @@ ax.plot(lon_float, lat_float, 'k', alpha=0.9,zorder=15,linewidth=2.5)
 plot2 = plt.scatter(0, 0, c=chl_inside_mean1[25],cmap='Greens', vmin=0, vmax=chl_max_plot, s=1)
 a = plot2.to_rgba(chl_inside_mean1[25])
 i=0
-
-divider = make_axes_locatable(ax)
-ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
-fig.add_axes(ax_cb)
-cbar = plt.colorbar(plot1,cax=ax_cb)
-
-cbar.ax.set_ylabel('Chlorophyll anomaly (mg/m$^3$)', fontsize=18)
 gl = ax.gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True, linestyle='--', alpha=0.5)
 gl.xlabel_style = {'fontsize': 15}
 gl.ylabel_style = {'fontsize': 15}
