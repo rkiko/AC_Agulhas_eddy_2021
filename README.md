@@ -650,3 +650,9 @@ I remake figure 1 for a presentation, excluding the trajectory of the eddy 2
 and the chlorophyll anomaly
 
 
+\
+an75
+
+I study how PARR changes when changing the q10 in remineralization_funcs in 
+paruvpy
+
