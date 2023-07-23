@@ -2208,3 +2208,188 @@ plt.savefig('../Plots/Fig_Main_v07/Supplementary/BulkOxyPARR_b_v07.pdf' ,dpi=200
 plt.close()
 #endregion
 #endregion
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+######### SUPPLEMENTARY FIG ISOPYCNALS VS DISTANCE FROM EDDY CENTER
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+#region Supplementary Fig. isopycnal vs distance from eddy center
+import numpy as np
+import pandas as pd
+import os,sys
+import netCDF4 as nc
+import pickle
+import matplotlib.pyplot as plt
+from pathlib import Path
+home = str(Path.home())
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+filename_coriolis='6903095_Sprof_all.nc'
+########
+import datetime,calendar
+import seawater as sw
+import gsw
+from lin_fit import lin_fit
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+############### Parameters
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+day0=datetime.datetime(2021,4,13)        # starting date for the carbon budget calculation
+dayf=datetime.datetime(2021,7,31)        # starting date for the carbon budget calculation
+
+ndays = (dayf - day0).days  # number of days
+delta_dens_flux = 0.025     # around of the density which I consider when extracting the flux
+day0_float = calendar.timegm(day0.timetuple())
+dayf_float = calendar.timegm(dayf.timetuple())
+day0_datenum = matlab_datenum(day0.year,day0.month,day0.day,day0.hour,day0.minute,day0.second)
+dayf_datenum = matlab_datenum(dayf.year,dayf.month,dayf.day,dayf.hour,dayf.minute,dayf.second)
+dens00=1026.3                   # starting isopycnal
+dens_thickness=0.05             # thickness of the layer considered (in kg/m3)
+delta_dens=0.025                 # every time I do a loop, how much I do increase depth0
+densff=1027.5                   # final isopycnal investigated
+
+dens0_list=np.r_[dens00:densff-dens_thickness+0.01:delta_dens]
+
+# I load float distance from eddy1 centroid
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+Date_Num_float = data_dist_radius['Datenum']
+Distance_centroid = data_dist_radius['Distance_Centroid']
+sel_time=(Date_Num_float>=matlab_datenum(day0.year,day0.month,day0.day))&(Date_Num_float<matlab_datenum(dayf.year,dayf.month,dayf.day))
+#I calculate whether the distance to the eddy center decrease or increase significantly over time
+(_, _, _, signif, signif_label) = lin_fit(Date_Num_float[sel_time], Distance_centroid[sel_time]);sl = ''
+if signif == 0: sl = 'not'
+print('Distance of float from eddy center is %s correlated with time' % (sl))
+
+############### I load float data
+filename='6903095_Sprof_all.nc'
+ds = nc.Dataset('%s/%s' % (storedir,filename))
+
+lon=np.array(ds.variables['LONGITUDE'])
+lat=np.array(ds.variables['LATITUDE'])
+Date_Num=np.array(ds.variables['JULD'])
+temp=np.array(ds.variables['TEMP_ADJUSTED'])
+pres=np.array(ds.variables['PRES_ADJUSTED'])
+psal=np.array(ds.variables['PSAL_ADJUSTED'])
+doxy=np.array(ds.variables['DOXY_ADJUSTED'])
+
+i=0;DateVec=np.zeros((Date_Num.size,6)).astype(int)
+for i in range(0,Date_Num.size):
+    DateVec[i,:]=matlab_datevec(Date_Num[i]+matlab_datenum(1950,1,1))
+
+#If adjusted values are not available yet, I take the non adjusted ones
+if np.sum(temp==99999)==temp.size:
+    print('Taking non adjusted temperature')
+    temp = np.array(ds.variables['TEMP'])
+    temp_qc = np.array(ds.variables['TEMP_QC'])
+if np.sum(pres==99999)==pres.size:
+    print('Taking non adjusted pressure')
+    pres = np.array(ds.variables['PRES'])
+    pres_qc = np.array(ds.variables['PRES_QC'])
+if np.sum(psal==99999)==psal.size:
+    print('Taking non adjusted salinity')
+    psal = np.array(ds.variables['PSAL'])
+    psal_qc = np.array(ds.variables['PSAL_QC'])
+if np.sum(doxy==99999)==doxy.size:
+    print('Taking non adjusted oxygen')
+    doxy = np.array(ds.variables['DOXY'])
+    doxy_qc = np.array(ds.variables['DOXY_QC'])
+
+#I tranform the pressure to depth
+mask_depth=pres!=99999 #I select only valid values
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_depth]
+pres_tmp=pres[mask_depth]
+depth_tmp=sw.eos80.dpth(pres_tmp, lat_tmp)
+depth=np.ones(temp.shape)*99999
+depth[mask_depth]=depth_tmp
+
+#I compute the potential density: for that, I need absolute salinity and conservative temperature, so I transform
+#salinity and temperature first
+mask_dens=np.logical_and(pres!=99999,temp!=99999,psal!=99999) # I exclude the points with value = 99999
+lat_tmp=np.tile(lat,[pres.shape[1],1]).T
+lon_tmp=np.tile(lon,[pres.shape[1],1]).T
+lat_tmp=lat_tmp[mask_dens]
+lon_tmp=lon_tmp[mask_dens]
+pres_tmp=pres[mask_dens]
+psal_tmp=psal[mask_dens]
+temp_tmp=temp[mask_dens]
+abs_psal_tmp=gsw.SA_from_SP(psal_tmp, pres_tmp, lon_tmp, lat_tmp) # I compute absolute salinity
+cons_tmp=gsw.CT_from_t(abs_psal_tmp, temp_tmp, pres_tmp)          # I compute conservative temperature
+dens_tmp=gsw.density.sigma0(abs_psal_tmp, cons_tmp)
+dens=np.ones(temp.shape)*99999
+dens[mask_dens]=dens_tmp+1000
+Date_Num_limit=np.array([Date_Num.min(),Date_Num.min()+ndays]) #print(date_reference + datetime.timedelta(days=Date_Num.min()+127))
+
+dens0=dens0_list[0];dict={}
+for dens0 in dens0_list:
+    densf = dens0 + dens_thickness
+    reference_isopycnal=(dens0+densf)*0.5
+    reference_isopycnal_down=dens0
+    reference_isopycnal_up=densf
+    depth_isopycnal_tmp=np.array([]);Distance_centroid_tmp=np.array([])
+    Date_Num_isopycnal=np.array([])
+    i=0
+    for i in range(0,doxy.shape[0]):
+        #Here, for the i-th profile, I select the oxygen, density and depth profiles of Coriolis data, excluding the nan values
+        sel = (doxy[i, :] != 99999) & (dens[i, :] != 99999)
+        z=doxy[i,sel];y=dens[i,sel];d=depth[i,sel]
+
+        # Here I proceed only if the date is inside the Date_Num_limit fixed
+        if Date_Num_limit[0] <= Date_Num[i] <= Date_Num_limit[1]:
+
+            # Here I extract the oxygen along the isopycnal
+            sel_layer = (y >= reference_isopycnal_down) & (y < reference_isopycnal_up)
+            if np.sum(sel_layer) > 0:  # If sel_layer has some True values, then I take as the doxy of this isopycnal the mean of the doxy values in correspondence with these layers
+                depth_isopycnal_tmp2 = d[sel_layer]
+                Date_Num_isopycnal = np.append(Date_Num_isopycnal, Date_Num[i])
+                depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, np.mean(depth_isopycnal_tmp2) )
+                Distance_centroid_tmp = np.append(Distance_centroid_tmp, Distance_centroid[i] )
+            else:  # If no values are found, then it could be that (if delta_rho is very small) the range reference_isopycnal_down–reference_isopycnal_up falls totally between two isopycnal layers: In that case, I extrapolate the oxygen concentration at that depth
+                depth_isopycnal_tmp2 = np.array([])
+                for iy in range(0, y.size - 1):
+                    if y[iy] <= reference_isopycnal < y[iy + 1]:
+                        dist = (reference_isopycnal - y[iy]) / (y[iy + 1] - y[iy])
+                        d_tmp = d[iy] + (d[iy + 1] - d[iy]) * dist
+                        depth_isopycnal_tmp2 = np.append(depth_isopycnal_tmp2, d_tmp)
+                        Date_Num_isopycnal = np.append(Date_Num_isopycnal, Date_Num[i])
+                if depth_isopycnal_tmp2.size > 0:
+                    depth_isopycnal_tmp = np.append(depth_isopycnal_tmp, np.mean(depth_isopycnal_tmp2))
+                    Distance_centroid_tmp = np.append(Distance_centroid_tmp, Distance_centroid[i])
+
+    dict['depth%0.2f_%0.2fkgm3' % (dens0,densf)] = depth_isopycnal_tmp
+    dict['Dist%0.2f_%0.2fkgm3' % (dens0,densf)] = Distance_centroid_tmp
+
+#region I plot
+dens0_list_plot=np.r_[1026.8:1027.25:0.1];dens0=dens0_list_plot[0]
+fig, ax = plt.subplots(1,dens0_list_plot.size, figsize=(3*dens0_list_plot.size, 3), sharey=True)
+# plt.subplots_adjust(hspace=0.05)
+width, height = 0.72/dens0_list_plot.size, 0.7
+ct=0
+for dens0 in dens0_list_plot:
+    densf = dens0 + dens_thickness
+    reference_isopycnal = (dens0 + densf) * 0.5
+    x=dict['depth%0.2f_%0.2fkgm3' % (dens0,densf)]
+    y=dict['Dist%0.2f_%0.2fkgm3' % (dens0,densf)]
+    (_,_,_,signif,signif_label) = lin_fit(x,y);sl=''
+    if signif==0: sl='not'
+    ax[ct].set_position([0.12+width*ct*1.1, 0.18, width, height])
+    ax[ct].plot(x,y,'.',label='%0.2fkg m$^{-3}$; fit: %s significant' % (reference_isopycnal,sl))
+    ax[ct].grid(color='k', linestyle='dashed', linewidth=0.5)
+    ax[ct].set_title('%0.2fkg m$^{-3}$\nLinear fit: %s significant' % (reference_isopycnal,sl),fontsize=9)
+    ax[ct].set_xlabel('Depth [m]',fontsize=8)
+    ct=ct+1
+
+ax[0].set_ylabel('Distance from eddy center [km]',fontsize=8)
+plt.savefig('../Plots/Fig_Main_v07/Supplementary/IsopycnalDepth_vs_DistFromEddyCenter_v07.pdf' ,dpi=200)
+plt.close()
+#endregion
+#endregion

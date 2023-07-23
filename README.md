@@ -656,3 +656,10 @@ an75
 I study how PARR changes when changing the q10 in remineralization_funcs in 
 paruvpy
 
+
+\
+an76
+
+I calculate the mean distance between two consecutive profiles of the float, and
+the vertical resolution
+
