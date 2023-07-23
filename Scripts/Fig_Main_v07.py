@@ -7,6 +7,7 @@
 ########################################################################################################################
 ########################################################################################################################
 # region Fig.1
+#region import
 import numpy as np
 import pandas as pd
 import os,sys
@@ -25,6 +26,9 @@ filename_coriolis='6903095_Sprof_all.nc'
 import datetime
 import cartopy
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+#endregion
 
 #######################################################################
 # Loading Data
@@ -160,8 +164,8 @@ ax_cb2 = divider.new_horizontal(size="5%", pad=1, axes_class=plt.Axes)
 fig.add_axes(ax_cb2)
 cbar2 = plt.colorbar(plot2,cax=ax_cb2)
 
-cbar.ax.set_ylabel('Chlorophyll anomaly (mg/m$^3$)', fontsize=18)
-cbar2.ax.set_ylabel('Chlorophyll inside eddy (mg/m$^3$)', fontsize=18)
+cbar.ax.set_ylabel('Chlorophyll anomaly (mg/m$^3$)', fontsize=13)
+cbar2.ax.set_ylabel('Chlorophyll inside eddy (mg/m$^3$)', fontsize=13)
 gl = ax.gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True, linestyle='--', alpha=0.5)
 gl.xlabel_style = {'fontsize': 15}
 gl.ylabel_style = {'fontsize': 15}
@@ -238,7 +242,7 @@ plt.plot(Date_Num_Eddy1,radius_Vmax1,'b',label='Eddy radius')
 plt.scatter(Date_Num_float,Distance_centroid,c='k',label='Float—eddy centroid distance',marker='*')
 plt.scatter(Date_Num_float[~sel_insideEddy],Distance_centroid[~sel_insideEddy],label='Profiles excluded',marker='o', facecolors='none', edgecolors='r',s=60)
 # I set xticks
-nxticks = 10
+nxticks = 10;fs=16
 xticks = np.linspace(Date_Num_float[0], day_end_timeseries, nxticks)
 xticklabels = []
 for i in xticks:
@@ -246,11 +250,12 @@ for i in xticks:
     xticklabels.append(datetime.datetime(tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5]).strftime('%d %B'))
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
-plt.xticks(rotation=90, fontsize=14)
+plt.xticks(rotation=45, fontsize=fs,ha='right')
+plt.yticks(fontsize=fs)
 # plt.legend(fontsize=12)
-plt.ylabel('Radius (km)', fontsize=15)
+plt.ylabel('Radius/\nDistance (km)', fontsize=fs)
 ax.text(-0.075, 1.05, 'a', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
-ax.legend(fontsize=15,ncol=3)
+ax.legend(fontsize=fs,ncol=3)
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v07/Fig02a_v07.pdf',dpi=200)
 plt.close()
@@ -283,6 +288,7 @@ write_latex_data(filename,argument,'%d' % arg_value)
 ######### Fig. 02b,c,d,f
 ########################################################################################################################
 # region Fig. 02b,c,d,f
+# region import
 import numpy as np
 import pandas as pd
 import os,sys
@@ -303,7 +309,8 @@ import seawater as sw
 import gsw
 from scipy.signal import savgol_filter
 from scipy.interpolate import griddata
-
+#endregion
+#region processing and analysing
 #Here I define the time at which I want to finish the time series in the plot
 day_end_timeseries=np.array([2021,9,24])
 day_end_timeseries=matlab_datenum(day_end_timeseries)
@@ -452,7 +459,7 @@ critical_depth=data_an45['critical_depth']
 critical_depth_datenum=data_an45['critical_depth_datenum']
 critical_depth_datenum = critical_depth_datenum[~np.isnan(critical_depth)]
 critical_depth = critical_depth[~np.isnan(critical_depth)]
-
+#endregion
 #######################################################################
 # I plot
 #######################################################################
@@ -533,10 +540,11 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     # draw colorbar
     cbar = plt.colorbar(plot2)
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
+    cbar.ax.tick_params(labelsize=fs)
     plt.ylabel('Depth (m)', fontsize=18)
     #plt.title('%smm' % NP_sizeclass, fontsize=18)
     #I set xticks
-    nxticks=10
+    nxticks=10;fs=14
     xticks=np.linspace(Date_Num.min(),Date_Num.max(),nxticks)
     xticklabels=[]
     for i in xticks:
@@ -544,7 +552,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
         xticklabels.append(date_time_obj.strftime('%d %B'))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
-    plt.xticks(rotation=90,fontsize=12)
+    plt.xticks(rotation=45,fontsize=fs,ha='right')
+    plt.yticks(fontsize=fs)
     # I add the panel label
     ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
     # I add the grid
@@ -566,7 +575,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 ######### Fig. 02e
 ########################################################################################################################
 # region Fig. 02e
-
+# region import
 import numpy as np
 import pandas as pd
 import os,sys
@@ -585,7 +594,8 @@ filename_coriolis='6903095_Sprof_all.nc'
 import datetime,calendar
 from scipy.signal import savgol_filter
 from scipy.interpolate import griddata
-
+#endregion
+#region processing and analysing
 #Here I define the time at which I want to start and end the time series in the plot
 day_start_timeseries=np.array([2021,4,13])
 day_start_timeseries=matlab_datenum(day_start_timeseries)
@@ -921,7 +931,7 @@ list_dates_Integrated_POC = x_filtered.copy()
 # plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 # plt.savefig('../Plots/Fig_Main_v07/Fig02e_Cetinic_v07.pdf' ,dpi=200)
 # plt.close()
-
+#endregion
 #######################################################################
 # I plot: Koestner
 #######################################################################
@@ -947,15 +957,16 @@ plt.fill_between(list_dates_Integrated_POC, Integrated_POC_Koestner_mgC_m3_10268
 plt.vlines(day_start_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 plt.vlines(day_end_eddy_merging, ymin=0, ymax=600, color='k',linestyles='dashed',linewidth=3)
 # I set xticks
-nxticks = 10
+nxticks = 10;fs=16
 xticks = np.linspace(list_dates.min(), list_dates.max(), nxticks)
 xticklabels = []
 for i in xticks:
     xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
 ax.set_xticks(xticks)
 ax.set_xticklabels(xticklabels)
-plt.xticks(rotation=90, fontsize=14)
-plt.legend(fontsize=12,ncol=2)
+plt.xticks(rotation=45, fontsize=fs,ha='right')
+plt.yticks( fontsize=fs)
+plt.legend(fontsize=fs,ncol=2)
 plt.ylabel('Average POC (mgC/m$^3$)', fontsize=15)
 ax.text(-0.075, 1.05, 'e', transform=ax.transAxes,fontsize=34, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
@@ -1008,6 +1019,7 @@ plt.close()
 #######################################################################
 # Supplementary Fig: time series of bbp, MiP, and MaP POC in the Eddy Core
 #######################################################################
+#region Supplementary Fig: time series of bbp, MiP, and MaP POC in the Eddy Core
 day_start_eddy_merging = datetime.datetime(2021,8,1)
 day_start_eddy_merging = calendar.timegm(day_start_eddy_merging.timetuple())
 day_end_eddy_merging = datetime.datetime(2021,8,11)
@@ -1047,10 +1059,11 @@ ax.text(-0.075, 1.05, 'b', transform=ax.transAxes,fontsize=34, fontweight='bold'
 plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/Fig_Main_v07/Supplementary/MiPMaPbbpPOC_Koestner_EC_v07.pdf' ,dpi=200)
 plt.close()
-
+# endregion
 #######################################################################
 # I save values for the latex document
 #######################################################################
+#region I save values for the latex document
 from write_latex_data import write_latex_data
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 i=67;print(datetime.datetime.utcfromtimestamp(list_dates_Integrated_POC[i]).strftime('%d %B'))
@@ -1143,12 +1156,14 @@ plt.plot(x_filtered,bbp_POC_0_102635,'.b-')
 
 
 # endregion
+# endregion
 
 
 ########################################################################################################################
 ######### Fig. 02g,h
 ########################################################################################################################
 # region Fig. 02g,h
+# region import
 import numpy as np
 import pandas as pd
 import os,sys
@@ -1170,7 +1185,8 @@ import gsw
 from scipy.signal import savgol_filter
 from scipy.interpolate import griddata
 import calendar
-
+#endregion
+#region processing and analysing
 #Here I define the time at which I want to finish the time series in the plot
 # day_end_timeseries=datetime.datetime(2021,9,24)
 # day_end_timeseries = calendar.timegm(day_end_timeseries.timetuple())
@@ -1319,7 +1335,7 @@ Date_Num_bbp_calendar=Date_Num_bbp_calendar[sel_insideEddy]
 depth_bbp=depth_bbp[sel_insideEddy]
 temp=temp[sel_insideEddy]
 bbp_POC=bbp_POC[sel_insideEddy,:]
-
+#endregion
 #######################################################################
 # I plot
 #######################################################################
@@ -1337,6 +1353,7 @@ MiP_POC_0_200=np.array([]);MiP_POC_200_600=np.array([])
 MaP_POC_0_200=np.array([]);MaP_POC_200_600=np.array([])
 bbp_POC_0_200=np.array([]);bbp_POC_200_600=np.array([])
 for ipar in range(0,parameter_ylabel_list.__len__()):
+    #region processing anad analysing
     if ipar == 0: parameter=MiP_POC.copy()
     elif ipar == 1: parameter=MaP_POC.copy()
     elif ipar == 2: parameter=bbp_POC.copy()
@@ -1391,6 +1408,7 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
 
     if ipar == 2: continue
 
+    #endregion
     width, height = 0.8, 0.7
     set_ylim_lower, set_ylim_upper = depth_filtered.min(),600
     fig = plt.figure(1, figsize=(12,8))
@@ -1408,16 +1426,18 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     cbar = plt.colorbar(plot2)
     cbar.ax.get_yticklabels()
     cbar.ax.set_ylabel(parameter_ylabel_list[ipar], fontsize=18)
+    cbar.ax.tick_params(labelsize=fs)
     plt.ylabel('Depth (m)', fontsize=18)
     #I set xticks
-    nxticks=10
+    nxticks=10;fs=14
     xticks=np.linspace(Date_Num_filtered.min(),Date_Num_filtered.max(),nxticks)
     xticklabels=[]
     for i in xticks:
         xticklabels.append(datetime.datetime.utcfromtimestamp(i).strftime('%d %B'))
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels)
-    plt.xticks(rotation=90,fontsize=12)
+    plt.xticks(rotation=45,fontsize=fs,ha='right')
+    plt.yticks(fontsize=fs)
     # I add the panel label
     ax.text(-0.05, 1.05, parameter_panellabel_list[ipar], transform=ax.transAxes,fontsize=24, fontweight='bold', va='top', ha='right') # ,fontfamily='helvetica'
     # I add the grid
