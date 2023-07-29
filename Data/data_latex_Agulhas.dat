@@ -238,3 +238,4 @@ Flux_extended_0413to0731_eddy_core_up = 0.030
 Flux_extended_0413to0731_eddy_core_down = 0.072
 Flux_extended_0413to0731eddy_core_difference_std = 0.030
 PARR_0413to0731_eddycore_bbp_contribution_extended = 56
+MiPextendedOnlyToBbp_ratio_EC = 1.4
