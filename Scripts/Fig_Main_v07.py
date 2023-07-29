@@ -3133,6 +3133,7 @@ from write_latex_data import write_latex_data
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 
 # I calculate the oxygen cons rate, PARR, and BulkPOC as the mean of the oxygen cons rate or PARR or BulkPOC values
+#region I calculate the oxygen cons rate, PARR, and BulkPOC as the mean of the oxygen cons rate or PARR or BulkPOC values
 # obtained in the eddy core
 sel_eddycore = (depth_isopycnal_list>200)&(depth_isopycnal_list<600)
 # arg_value=O2_resp_mgC_m3_d
@@ -3188,7 +3189,7 @@ print('Initial POC : %0.3f±%0.3f. Final POC: %0.3f±%0.3f. DeltaPOC: %0.3f±%0.
       %(np.mean(pocie[sel_eddycore])*ndays,np.mean(pocies[sel_eddycore])*ndays,np.mean(pocfe[sel_eddycore])*ndays,np.mean(pocfes[sel_eddycore])*ndays,-np.mean(dpoce[sel_eddycore])*ndays,np.mean(dpoces[sel_eddycore])*ndays,-np.mean(dpoce[sel_eddycore]),np.mean(dpoces[sel_eddycore])))
 print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
       %(np.mean(Theoretical_Budget_Koestner_extended_list[sel_eddycore]),np.mean(Theoretical_Budget_Koestner_extended_std_list[sel_eddycore]),PARR_0413to0731_eddycore_extended,PARR_0413to0731_eddycore_extended_std,OxyCR_0413to0731_eddycore,OxyCR_0413to0731_eddycore_std))
-
+#endregion
 #I compare extended bulk, ext parr, and oxy cons below 320m
 #region I compare extended bulk, ext parr, and oxy cons below 320m
 sel_320 = (depth_isopycnal_list>320)&(depth_isopycnal_list<600)
@@ -3335,6 +3336,9 @@ bbppoc=np.nanmean(bbp_POC_Koestner_dens0_densf)
 argument = 'MiPextendedOnlyToMipMap_ratio_EC'
 arg_value=np.round(mip_extended_only/mipmap)
 write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'MiPextendedOnlyToBbp_ratio_EC'
+arg_value=mip_extended_only/bbppoc
+write_latex_data(filename,argument,'%0.1f' % arg_value)
 
 #(Supplementary stuff) These values are extracted from the bulk POC and PARR calculated for different layers within the eddy core
 sel = (dens0_list+dens_thickness*0.5)>=dens_eddy_core_up
