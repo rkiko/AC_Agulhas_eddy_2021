@@ -1990,6 +1990,7 @@ from paruvpy import ESD_limits_to_ESD_middle
 import warnings
 warnings.filterwarnings("ignore", message="divide by zero encountered in true_divide")
 warnings.filterwarnings("ignore", message="invalid value encountered in true_divide")
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import seawater as sw
 import gsw
 from lin_fit import lin_fit
@@ -2050,8 +2051,10 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     depth=np.array(data['Depth [m]'][sel_filename])
     dens=np.array(data['Potential density [kg/m3]'][sel_filename])
     Flux=np.array(data['Flux_mgC_m2'][sel_filename])
+    Flux_Clements=np.array(data['Flux_Clements_mgC_m2'][sel_filename])
     # Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
     Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
+    Flux_Clements_extended=np.array(data['Flux_Clements_mgC_m2_from0.0254sizeclass'][sel_filename])
     # Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
     MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
     MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
@@ -2256,10 +2259,13 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     ##############################################
     # Step 1 and 2, filter and interpolation
     Flux_filtered=np.array([]);dens_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([])
+    Flux_Clements_filtered=np.array([]);dens_Flux_Clements_filtered=np.array([]);Date_Num_Flux_Clements_filtered=np.array([])
     Flux_extended_filtered=np.array([]);dens_Flux_extended_filtered=np.array([]);Date_Num_Flux_extended_filtered=np.array([])
+    Flux_Clements_extended_filtered=np.array([]);dens_Flux_Clements_extended_filtered=np.array([]);Date_Num_Flux_Clements_extended_filtered=np.array([])
     i=0
     for i in range(0,list_dates.size):
         sel=Date_Num==list_dates[i]
+        #Flux
         z=Flux[sel];x=Date_Num[sel];y=dens[sel]
         sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
@@ -2267,6 +2273,15 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
             Flux_filtered = np.concatenate((Flux_filtered, z))
             Date_Num_Flux_filtered = np.concatenate((Date_Num_Flux_filtered, x2))
             dens_Flux_filtered = np.concatenate((dens_Flux_filtered, y2))
+        #Flux_Clements
+        z=Flux_Clements[sel];x=Date_Num[sel];y=dens[sel]
+        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            Flux_Clements_filtered = np.concatenate((Flux_Clements_filtered, z))
+            Date_Num_Flux_Clements_filtered = np.concatenate((Date_Num_Flux_Clements_filtered, x2))
+            dens_Flux_Clements_filtered = np.concatenate((dens_Flux_Clements_filtered, y2))
+        #Flux extended
         z=Flux_extended[sel];x=Date_Num[sel];y=dens[sel]
         sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
         if sum(sel2) > 0:
@@ -2274,6 +2289,14 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
             Flux_extended_filtered = np.concatenate((Flux_extended_filtered, z))
             Date_Num_Flux_extended_filtered = np.concatenate((Date_Num_Flux_extended_filtered, x2))
             dens_Flux_extended_filtered = np.concatenate((dens_Flux_extended_filtered, y2))
+        #Flux_Clements extended
+        z=Flux_Clements_extended[sel];x=Date_Num[sel];y=dens[sel]
+        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            Flux_Clements_extended_filtered = np.concatenate((Flux_Clements_extended_filtered, z))
+            Date_Num_Flux_Clements_extended_filtered = np.concatenate((Date_Num_Flux_Clements_extended_filtered, x2))
+            dens_Flux_Clements_extended_filtered = np.concatenate((dens_Flux_Clements_extended_filtered, y2))
 
     # I define the x and y arrays for the Flux interpolation
     x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
@@ -2281,7 +2304,9 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     x_filtered_g, y_filtered_g = np.meshgrid(x_filtered, y_filtered)
     # I interpolate
     Flux_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_Clements_interp = griddata((Date_Num_Flux_Clements_filtered, dens_Flux_Clements_filtered), Flux_Clements_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     Flux_extended_interp = griddata((Date_Num_Flux_extended_filtered, dens_Flux_extended_filtered), Flux_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_Clements_extended_interp = griddata((Date_Num_Flux_Clements_extended_filtered, dens_Flux_Clements_extended_filtered), Flux_Clements_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
 
     ##############################################
@@ -2289,11 +2314,15 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
 
     sel_layer = (np.abs(y_filtered) >= dens0-delta_dens_flux) & (np.abs(y_filtered) < dens0+delta_dens_flux)
     Flux_dens0 = np.mean(Flux_interp[sel_layer,:],axis=0)
+    Flux_Clements_dens0 = np.mean(Flux_Clements_interp[sel_layer,:],axis=0)
     Flux_extended_dens0 = np.mean(Flux_extended_interp[sel_layer, :], axis=0)
+    Flux_Clements_extended_dens0 = np.mean(Flux_Clements_extended_interp[sel_layer, :], axis=0)
 
     sel_layer = (np.abs(y_filtered) >= densf - delta_dens_flux) & (np.abs(y_filtered) < densf + delta_dens_flux)
     Flux_densf = np.mean(Flux_interp[sel_layer,:],axis=0)
+    Flux_Clements_densf = np.mean(Flux_Clements_interp[sel_layer,:],axis=0)
     Flux_extended_densf = np.mean(Flux_extended_interp[sel_layer,:],axis=0)
+    Flux_Clements_extended_densf = np.mean(Flux_Clements_extended_interp[sel_layer,:],axis=0)
 
 
     ########################################################################################################################
@@ -2575,30 +2604,48 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     Flux_densf_mgC_m3_d = np.mean(Flux_densf) / layer_thickness # * ndays
     Flux_densf_mgC_m3_d_std = np.std(Flux_densf) / layer_thickness # * ndays
 
+    Flux_Clements_dens0_mgC_m3_d = np.mean(Flux_Clements_dens0) / layer_thickness # * ndays
+    Flux_Clements_dens0_mgC_m3_d_std = np.std(Flux_Clements_dens0) / layer_thickness # * ndays
+    Flux_Clements_densf_mgC_m3_d = np.mean(Flux_Clements_densf) / layer_thickness # * ndays
+    Flux_Clements_densf_mgC_m3_d_std = np.std(Flux_Clements_densf) / layer_thickness # * ndays
+
     Flux_extended_dens0_mgC_m3_d = np.mean(Flux_extended_dens0) / layer_thickness # * ndays
     Flux_extended_dens0_mgC_m3_d_std = np.std(Flux_extended_dens0) / layer_thickness # * ndays
     Flux_extended_densf_mgC_m3_d = np.mean(Flux_extended_densf) / layer_thickness # * ndays
     Flux_extended_densf_mgC_m3_d_std = np.std(Flux_extended_densf) / layer_thickness # * ndays
 
+    Flux_Clements_extended_dens0_mgC_m3_d = np.mean(Flux_Clements_extended_dens0) / layer_thickness # * ndays
+    Flux_Clements_extended_dens0_mgC_m3_d_std = np.std(Flux_Clements_extended_dens0) / layer_thickness # * ndays
+    Flux_Clements_extended_densf_mgC_m3_d = np.mean(Flux_Clements_extended_densf) / layer_thickness # * ndays
+    Flux_Clements_extended_densf_mgC_m3_d_std = np.std(Flux_Clements_extended_densf) / layer_thickness # * ndays
+
     Delta_flux = Flux_dens0_mgC_m3_d - Flux_densf_mgC_m3_d
+    Delta_Flux_Clements = Flux_Clements_dens0_mgC_m3_d - Flux_Clements_densf_mgC_m3_d
     Delta_flux_extended = Flux_extended_dens0_mgC_m3_d - Flux_extended_densf_mgC_m3_d
+    Delta_Flux_Clements_extended = Flux_Clements_extended_dens0_mgC_m3_d - Flux_Clements_extended_densf_mgC_m3_d
 
     Delta_flux_std = np.sqrt( Flux_dens0_mgC_m3_d_std**2 + Flux_densf_mgC_m3_d_std**2 )
+    Delta_Flux_Clements_std = np.sqrt( Flux_Clements_dens0_mgC_m3_d_std**2 + Flux_Clements_densf_mgC_m3_d_std**2 )
     Delta_flux_extended_std = np.sqrt( Flux_extended_dens0_mgC_m3_d_std**2 + Flux_extended_densf_mgC_m3_d_std**2 )
+    Delta_Flux_Clements_extended_std = np.sqrt( Flux_Clements_extended_dens0_mgC_m3_d_std**2 + Flux_Clements_extended_densf_mgC_m3_d_std**2 )
 
     Theoretical_Budget = Delta_flux - Delta_Integrated_POC
     Theoretical_Budget_extended = Delta_flux_extended - Delta_Integrated_POC_extended
     Theoretical_Budget_noBBP = Delta_flux - Delta_Integrated_POC_noBBP
     Theoretical_Budget_noBBP_extended = Delta_flux_extended - Delta_Integrated_POC_noBBP_extended
     Theoretical_Budget_Koestner = Delta_flux - Delta_Integrated_POC_Koestner
+    Theoretical_Budget_Koestner_Clements = Delta_Flux_Clements - Delta_Integrated_POC_Koestner
     Theoretical_Budget_Koestner_extended = Delta_flux_extended - Delta_Integrated_POC_Koestner_extended
+    Theoretical_Budget_Koestner_Clements_extended = Delta_Flux_Clements_extended - Delta_Integrated_POC_Koestner_extended
 
     Theoretical_Budget_std = np.sqrt( Delta_flux_std**2 + Delta_Integrated_POC_std**2 )
     Theoretical_Budget_extended_std = np.sqrt( Delta_flux_extended_std**2 + Delta_Integrated_POC_extended_std**2 )
     Theoretical_Budget_noBBP_std = np.sqrt( Delta_flux_std**2 + Delta_Integrated_POC_noBBP_std**2 )
     Theoretical_Budget_noBBP_extended_std = np.sqrt( Delta_flux_extended_std**2 + Delta_Integrated_POC_noBBP_extended_std**2 )
     Theoretical_Budget_Koestner_std = np.sqrt( Delta_flux_std**2 + Delta_Integrated_POC_Koestner_std**2 )
+    Theoretical_Budget_Koestner_Clements_std = np.sqrt( Delta_Flux_Clements_std**2 + Delta_Integrated_POC_Koestner_std**2 )
     Theoretical_Budget_Koestner_extended_std = np.sqrt( Delta_flux_extended_std**2 + Delta_Integrated_POC_Koestner_extended_std**2 )
+    Theoretical_Budget_Koestner_Clements_extended_std = np.sqrt( Delta_Flux_Clements_extended_std**2 + Delta_Integrated_POC_Koestner_extended_std**2 )
 
 
     ############### I return the data
@@ -2608,6 +2655,8 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
            Theoretical_Budget_noBBP_extended,Theoretical_Budget_noBBP_extended_std, \
            Theoretical_Budget_Koestner,Theoretical_Budget_Koestner_std, \
            Theoretical_Budget_Koestner_extended,Theoretical_Budget_Koestner_extended_std, \
+           Theoretical_Budget_Koestner_Clements,Theoretical_Budget_Koestner_Clements_std, \
+           Theoretical_Budget_Koestner_Clements_extended,Theoretical_Budget_Koestner_Clements_extended_std, \
            POC_resp_mgC_m3_d_list,POC_resp_mgC_m3_d_std_list,bbp_PARR_dens0_densf,bbp_PARR_dens0_densf_std,\
            bbp_PARR_Koestner_dens0_densf,bbp_PARR_Koestner_dens0_densf_std,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,list_Respi_types,n_profiles, \
            Integrated_POC_Koestner_day0_mgC_m3_d,  Integrated_POC_Koestner_day0_mgC_m3_d_std, Integrated_POC_Koestner_dayf_mgC_m3_d, Integrated_POC_Koestner_dayf_mgC_m3_d_std,\
@@ -2647,6 +2696,10 @@ Theoretical_Budget_Koestner_list = np.array([])
 Theoretical_Budget_Koestner_extended_list = np.array([])
 Theoretical_Budget_Koestner_std_list = np.array([])
 Theoretical_Budget_Koestner_extended_std_list = np.array([])
+Theoretical_Budget_Koestner_Clements_list = np.array([])
+Theoretical_Budget_Koestner_Clements_extended_list = np.array([])
+Theoretical_Budget_Koestner_Clements_std_list = np.array([])
+Theoretical_Budget_Koestner_Clements_extended_std_list = np.array([])
 POC_resp_mgC_m3_d_list = np.array([])
 POC_resp_mgC_m3_d_std_list = np.array([])
 bbpPARR_mgC_m3_d_list = np.array([])
@@ -2689,6 +2742,7 @@ for dens0 in dens0_list:
     (Theoretical_Budget,Theoretical_Budget_std,Theoretical_Budget_extended,Theoretical_Budget_extended_std,
        Theoretical_Budget_noBBP,Theoretical_Budget_noBBP_std,Theoretical_Budget_noBBP_extended,Theoretical_Budget_noBBP_extended_std,
        Theoretical_Budget_Koestner,Theoretical_Budget_Koestner_std,Theoretical_Budget_Koestner_extended,Theoretical_Budget_Koestner_extended_std,
+       Theoretical_Budget_Koestner_Clements,Theoretical_Budget_Koestner_Clements_std,Theoretical_Budget_Koestner_Clements_extended,Theoretical_Budget_Koestner_Clements_extended_std,
        POC_resp_mgC_m3_d,POC_resp_mgC_m3_d_std,bbpPARR_mgC_m3_d,bbpPARR_mgC_m3_d_std,bbpPARR_Koestner_mgC_m3_d,bbpPARR_Koestner_mgC_m3_d_std,O2_resp_mgC_m3_d,O2_resp_mgC_m3_d_ci,RespirationTypes,n_profiles,
        poci0, pocis0, pocf0, pocfs0,_,_,_,_,dpoc0, dpocs0,pocie0, pocies0, pocfe0, pocfes0,dpoce0, dpoces0,
        df0, dfs0, fin0, fins0, fout0, fouts0, dfe0, dfes0, fine0, fines0, foute0, foutes0,depth_isopycnal,depth_isopycnal_down,
@@ -2706,6 +2760,10 @@ for dens0 in dens0_list:
     Theoretical_Budget_Koestner_extended_list=np.append(Theoretical_Budget_Koestner_extended_list,Theoretical_Budget_Koestner_extended)
     Theoretical_Budget_Koestner_std_list=np.append(Theoretical_Budget_Koestner_std_list,Theoretical_Budget_Koestner_std)
     Theoretical_Budget_Koestner_extended_std_list=np.append(Theoretical_Budget_Koestner_extended_std_list,Theoretical_Budget_Koestner_extended_std)
+    Theoretical_Budget_Koestner_Clements_list=np.append(Theoretical_Budget_Koestner_Clements_list,Theoretical_Budget_Koestner_Clements)
+    Theoretical_Budget_Koestner_Clements_extended_list=np.append(Theoretical_Budget_Koestner_Clements_extended_list,Theoretical_Budget_Koestner_Clements_extended)
+    Theoretical_Budget_Koestner_Clements_std_list=np.append(Theoretical_Budget_Koestner_Clements_std_list,Theoretical_Budget_Koestner_Clements_std)
+    Theoretical_Budget_Koestner_Clements_extended_std_list=np.append(Theoretical_Budget_Koestner_Clements_extended_std_list,Theoretical_Budget_Koestner_Clements_extended_std)
     POC_resp_mgC_m3_d_list=np.append(POC_resp_mgC_m3_d_list,POC_resp_mgC_m3_d,axis=0)
     POC_resp_mgC_m3_d_std_list=np.append(POC_resp_mgC_m3_d_std_list,POC_resp_mgC_m3_d_std,axis=0)
     bbpPARR_mgC_m3_d_list=np.append(bbpPARR_mgC_m3_d_list,bbpPARR_mgC_m3_d)
@@ -2928,6 +2986,99 @@ plt.savefig('../Plots/Fig_Main_v07/Fig04B_Koestner_v07.pdf' ,dpi=200)
 plt.close()
 
 ########################################################################################################################
+######### Supplementary Fig. 04C: with BBP from Koestner and POC flux from Clements
+########################################################################################################################
+idx1,idx2=0,38
+set_ylim_lower=depth_isopycnal_list[idx1]
+set_ylim_upper=depth_isopycnal_list[idx2]
+fs=10
+width, height = 0.72, 0.8
+fig = plt.figure(1, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
+plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
+for iResp in range(2,3):
+    plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='b')
+
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list-np.sqrt(POC_resp_mgC_m3_d_std_list[:,iResp]**2+bbpPARR_Koestner_mgC_m3_d_std_list**2),
+                  POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list+np.sqrt(POC_resp_mgC_m3_d_std_list[:,iResp]**2+bbpPARR_Koestner_mgC_m3_d_std_list**2), facecolor='b',
+                  color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013d$^{-1}$;\nBelcher et al.)')
+plt.plot(Theoretical_Budget_Koestner_Clements_list, depth_isopycnal_list, c='red')
+plt.scatter(Theoretical_Budget_Koestner_Clements_list, depth_isopycnal_list, c='red', s=5)
+plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_Koestner_Clements_list - Theoretical_Budget_Koestner_Clements_std_list, Theoretical_Budget_Koestner_Clements_list + Theoretical_Budget_Koestner_Clements_std_list,
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
+plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
+plt.xlim(-0.05,2.5)
+# plt.ylabel('Dens (kg/m$^3$)', fontsize=fs)
+plt.xlabel('Carbon Consumption Rate (mgC/m$^3$/d)', fontsize=fs)
+plt.legend(fontsize=7)
+plt.gca().invert_yaxis()
+#I set yticks
+nyticks=6
+yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
+yticks_down=np.linspace(depth_isopycnal_down_list[idx1], depth_isopycnal_down_list[idx2],nyticks)
+yticks_up=np.linspace(depth_isopycnal_up_list[idx1], depth_isopycnal_up_list[idx2],nyticks)
+yticklabels=[]
+for i in range(0,nyticks):
+    yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
+ax.set_yticks(yticks)
+ax.set_yticklabels(yticklabels,fontsize=6)
+ax.text(-0.25, 1.075, 'c', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+ax.text(1.075, 1.06, 'd', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/Fig_Main_v07/Supplementary/Fig04C_Koestner_Clements_v07.pdf' ,dpi=200)
+plt.close()
+
+
+########################################################################################################################
+######### Supplementary Fig. 4D: Extended size spectrum with BBP from Koestner and POC flux from Clements
+########################################################################################################################
+idx1,idx2=0,38
+set_ylim_lower=depth_isopycnal_list[idx1]
+set_ylim_upper=depth_isopycnal_list[idx2]
+fig = plt.figure(2, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+plt.plot(O2_resp_mgC_m3_d_list,depth_isopycnal_list, 'k')
+plt.scatter(O2_resp_mgC_m3_d_list,depth_isopycnal_list, c='black',s=5)
+plt.fill_betweenx(depth_isopycnal_list, O2_resp_mgC_m3_d_ci_list[:, 1], O2_resp_mgC_m3_d_ci_list[:, 0], facecolor='b',color='gray', alpha=0.5, label='O$_2$ cons. rate')
+for iResp in range(9,10):
+    plt.plot(POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list, depth_isopycnal_list, c='b')
+
+plt.fill_betweenx(depth_isopycnal_list, POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list-np.sqrt(POC_resp_mgC_m3_d_std_list[:,iResp]**2+bbpPARR_Koestner_mgC_m3_d_std_list**2),
+                  POC_resp_mgC_m3_d_list[:,iResp] + bbpPARR_Koestner_mgC_m3_d_list+np.sqrt(POC_resp_mgC_m3_d_std_list[:,iResp]**2+bbpPARR_Koestner_mgC_m3_d_std_list**2), facecolor='b',
+                  color='b', alpha=0.5, label='PARR\n($k_{rem}$=0.013d$^{-1}$;\nBelcher et al.)')
+
+plt.plot(Theoretical_Budget_Koestner_Clements_extended_list, depth_isopycnal_list, c='red')
+plt.scatter(Theoretical_Budget_Koestner_Clements_extended_list, depth_isopycnal_list, c='red', s=5)
+plt.fill_betweenx(depth_isopycnal_list, Theoretical_Budget_Koestner_Clements_extended_list - Theoretical_Budget_Koestner_Clements_extended_std_list, Theoretical_Budget_Koestner_Clements_extended_list + Theoretical_Budget_Koestner_Clements_extended_std_list,
+                  facecolor='r', color='r', alpha=0.5, label='Bulk POC\nremov. rate')
+
+plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(depth_isopycnal_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
+plt.xlim(-0.05,2.5)
+plt.xlabel('Carbon Consumption Rate (mgC/m$^3$/d)', fontsize=fs)
+plt.legend(fontsize=7)
+plt.gca().invert_yaxis()
+#I set yticks
+nyticks=6
+yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
+yticks_down=np.linspace(depth_isopycnal_down_list[idx1], depth_isopycnal_down_list[idx2],nyticks)
+yticks_up=np.linspace(depth_isopycnal_up_list[idx1], depth_isopycnal_up_list[idx2],nyticks)
+yticklabels=[]
+for i in range(0,nyticks):
+        yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_isopycnal_list,dens0_list) ))
+ax.set_yticks(yticks)
+ax.set_yticklabels(yticklabels,fontsize=6)
+# ax.text(0.02, 1.075, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/Fig_Main_v07/Supplementary/Fig04D_Koestner_Clements_v07.pdf' ,dpi=200)
+plt.close()
+
+########################################################################################################################
 ######### Supplementary Fig. 04A: with BBP from Cetinic
 ########################################################################################################################
 idx1,idx2=0,38
@@ -3132,7 +3283,6 @@ import scipy.stats
 from write_latex_data import write_latex_data
 filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 
-# I calculate the oxygen cons rate, PARR, and BulkPOC as the mean of the oxygen cons rate or PARR or BulkPOC values
 #region I calculate the oxygen cons rate, PARR, and BulkPOC as the mean of the oxygen cons rate or PARR or BulkPOC values
 # obtained in the eddy core
 sel_eddycore = (depth_isopycnal_list>200)&(depth_isopycnal_list<600)
@@ -3190,7 +3340,7 @@ print('Initial POC : %0.3f±%0.3f. Final POC: %0.3f±%0.3f. DeltaPOC: %0.3f±%0.
 print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
       %(np.mean(Theoretical_Budget_Koestner_extended_list[sel_eddycore]),np.mean(Theoretical_Budget_Koestner_extended_std_list[sel_eddycore]),PARR_0413to0731_eddycore_extended,PARR_0413to0731_eddycore_extended_std,OxyCR_0413to0731_eddycore,OxyCR_0413to0731_eddycore_std))
 #endregion
-#I compare extended bulk, ext parr, and oxy cons below 320m
+
 #region I compare extended bulk, ext parr, and oxy cons below 320m
 sel_320 = (depth_isopycnal_list>320)&(depth_isopycnal_list<600)
 bulk320 = np.mean(Theoretical_Budget_Koestner_extended_list[sel_320])
@@ -3261,6 +3411,31 @@ print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
 
 #endregion
 
+#region I compare bulk POC by Koestener and by Koestner + Clements in the eddy core
+#Before doing the t test, I verify that they are normally distributes (they are)
+sel_200 = (depth_isopycnal_list>200)&(depth_isopycnal_list<600);n_el=sum(sel_200)
+tbk=np.mean(Theoretical_Budget_Koestner_list[sel_200])
+tbks=np.mean(Theoretical_Budget_Koestner_std_list[sel_200])
+tbkc=np.mean(Theoretical_Budget_Koestner_Clements_list[sel_200])
+tbkcs=np.mean(Theoretical_Budget_Koestner_Clements_std_list[sel_200])
+tbke=np.mean(Theoretical_Budget_Koestner_extended_list[sel_200])
+tbkes=np.mean(Theoretical_Budget_Koestner_extended_std_list[sel_200])
+tbkce=np.mean(Theoretical_Budget_Koestner_Clements_extended_list[sel_200])
+tbkces=np.mean(Theoretical_Budget_Koestner_Clements_extended_std_list[sel_200])
+shapiro(Theoretical_Budget_Koestner_list[sel_200]) #it is gaussian
+shapiro(Theoretical_Budget_Koestner_Clements_list[sel_200]) #it is gaussian
+shapiro(Theoretical_Budget_Koestner_extended_list[sel_200]) #it is gaussian
+shapiro(Theoretical_Budget_Koestner_Clements_extended_list[sel_200]) #it is gaussian
+#I do the t test
+tkc=np.abs( (tbk-tbkc)/np.sqrt( tbks**2/n_el+tbkcs**2/n_el ) )
+tkce=np.abs( (tbke-tbkce)/np.sqrt( tbkes**2/n_el+tbkces**2/n_el ) )
+t_ref=scipy.stats.t.ppf(.95, n_el*2-2)#,lower.tail = FALSE)
+str_mean_tkc='no';str_mean_tkce='no'
+if (tkc<t_ref):   str_mean_tkc='yes'
+if (tkce<t_ref):   str_mean_tkce='yes'
+
+#endregion
+
 #These values are from literature
 Oxy2C = 0.89                # to convert from mol of oxygen to mol of carbon
 mol2gC = 12.0107            # to convert from mol of carbon to grams of carbon
@@ -3274,7 +3449,8 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 #(old stuff) I extract bulk POC and PARR values calculated in the eddy core considering only one unique layer
 (Theoretical_Budget, Theoretical_Budget_std, Theoretical_Budget_extended, Theoretical_Budget_extended_std,Theoretical_Budget_noBBP,Theoretical_Budget_noBBP_std,
  Theoretical_Budget_noBBP_extended,Theoretical_Budget_noBBP_extended_std,Theoretical_Budget_Koestner, Theoretical_Budget_Koestner_std,
- Theoretical_Budget_Koestner_extended,Theoretical_Budget_Koestner_extended_std,POC_resp_mgC_m3_d, POC_resp_mgC_m3_d_std,
+ Theoretical_Budget_Koestner_extended,Theoretical_Budget_Koestner_extended_std,Theoretical_Budget_Koestner_Clements, Theoretical_Budget_Koestner_Clements_std,
+ Theoretical_Budget_Koestner_Clements_extended,Theoretical_Budget_Koestner_Clements_extended_std,POC_resp_mgC_m3_d, POC_resp_mgC_m3_d_std,
  bbpPARR_mgC_m3_d, bbpPARR_mgC_m3_d_std, bbpPARR_Koestner_mgC_m3_d,bbpPARR_Koestner_mgC_m3_d_std, O2_resp_mgC_m3_d, O2_resp_mgC_m3_d_ci, RespirationTypes, n_profiles,
  Integrated_POC_Koestner_day0_mgC_m3_d,  Integrated_POC_Koestner_day0_mgC_m3_d_std, Integrated_POC_Koestner_dayf_mgC_m3_d, Integrated_POC_Koestner_dayf_mgC_m3_d_std,
  Delta_Integrated_POC, Delta_Integrated_POC_std,  Delta_Integrated_POC_noBBP, Delta_Integrated_POC_noBBP_std, Delta_Integrated_POC_Koestner, Delta_Integrated_POC_Koestner_std,
