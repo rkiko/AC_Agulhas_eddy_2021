@@ -106,6 +106,7 @@ def resize_colobar(event):
 anom_meanE_meanOut1=chl_inside_mean1-chl_outside_mean1
 anom_meanE_meanOut2=chl_inside_mean2-chl_outside_mean2
 chl_max_plot=0.6
+ndays=1 #every how many days I plot the eddy trajectory
 # set_xlim_lower, set_xlim_upper = 4,18.5
 # set_ylim_lower, set_ylim_upper = -37,-30.5
 set_xlim_lower, set_xlim_upper = 4,22 # For the larger plot
@@ -117,8 +118,8 @@ ax.set_extent([set_xlim_lower, set_xlim_upper, set_ylim_lower, set_ylim_upper])
 ax.scatter(0, 0, c=0, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5, label='Eddy 1 trajectory')  # cmap='Blues_r')
 ax.scatter(0, 0, c=0, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenrod',linewidth=0.5, label='Eddy 2 trajectory')  # cmap='Blues_r')
 ax.plot(0, 0, 'k-',linewidth=2.5, label='BGC float trajectory')  # cmap='Blues_r')
-plot1 = ax.scatter(lonEddy1, latEddy1, c=anom_meanE_meanOut1, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5,zorder=2)  # cmap='Blues_r')
-plot4 = ax.scatter(lonEddy2, latEddy2, c=anom_meanE_meanOut2, cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenrod',linewidth=0.5,zorder=2)  # cmap='Blues_r')
+plot1 = ax.scatter(lonEddy1[0::ndays], latEddy1[0::ndays], c=anom_meanE_meanOut1[0::ndays], cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='gray',linewidth=0.5,zorder=2)  # cmap='Blues_r')
+plot4 = ax.scatter(lonEddy2[0::ndays], latEddy2[0::ndays], c=anom_meanE_meanOut2[0::ndays], cmap='RdBu_r', vmin=-0.2, vmax=0.2,s=70,edgecolor='goldenrod',linewidth=0.5,zorder=2)  # cmap='Blues_r')
 plot3 = ax.scatter(lon_float_outside, lat_float_outside, c='red',marker='x', s=100,zorder=50)  # cmap='Blues_r')
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.9,edgecolor='gray')
 ax.text(17.5,-31.5,'Cape\nColumbine',horizontalalignment='center',color='gray', bbox=props)
@@ -175,7 +176,7 @@ gl.right_labels = False
 gl.top_labels = False
 ax.legend(fontsize=14.5,ncol=2,loc='lower right')
 
-plt.savefig('../Plots/Fig_Main_v07/Fig01_v07.pdf',dpi=200)
+plt.savefig('../Plots/Fig_Main_v07/Fig01_v07c.pdf',dpi=200)
 plt.close()
 # endregion
 # endregion
