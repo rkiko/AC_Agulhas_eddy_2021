@@ -241,11 +241,11 @@ critical_depth=data_an45['critical_depth']
 critical_depth_1=data_an45['critical_depth_1']
 critical_depth_2=data_an45['critical_depth_2']
 critical_depth_datenum=data_an45['critical_depth_datenum']
-critical_depth_datenum_1 = critical_depth_datenum[~np.isnan(critical_depth_1)]
+# critical_depth_datenum_1 = critical_depth_datenum[~np.isnan(critical_depth_1)]
 critical_depth_datenum_2 = critical_depth_datenum[~np.isnan(critical_depth_2)]
 critical_depth_datenum = critical_depth_datenum[~np.isnan(critical_depth)]
 critical_depth = critical_depth[~np.isnan(critical_depth)]
-critical_depth_1 = critical_depth_1[~np.isnan(critical_depth_1)]
+# critical_depth_1 = critical_depth_1[~np.isnan(critical_depth_1)]
 critical_depth_2 = critical_depth_2[~np.isnan(critical_depth_2)]
 
 #######################################################################
@@ -308,7 +308,8 @@ for ipar in range(0,parameter_ylabel_list.__len__()):
     ax = fig.add_axes([0.12, 0.2, width, height], ylim=(set_ylim_lower, set_ylim_upper), xlim=(Date_Num.min(), Date_Num.max()))
     ax_1 = plot2 = plt.contourf(x_parameter,y1_parameter, parameter_interp_depth)
     plt.plot(critical_depth_datenum,critical_depth,'w');plt.plot(critical_depth_datenum,critical_depth,'w.')
-    # plt.plot(critical_depth_datenum_1,critical_depth_1,'w--')#;plt.plot(critical_depth_datenum_1,critical_depth_1,'w.')
+    plt.plot(critical_depth_datenum,critical_depth_1,'w--')#;plt.plot(critical_depth_datenum_1,critical_depth_1,'w.')
+    plt.plot(critical_depth_datenum,critical_depth+ np.abs(critical_depth_1-critical_depth),'w--')#;plt.plot(critical_depth_datenum_1,critical_depth_1,'w.')
     # plt.plot(critical_depth_datenum_2,critical_depth_2,'w--')#;plt.plot(critical_depth_datenum_2,critical_depth_2,'w.')
     plt.vlines(day_start_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')
     plt.vlines(day_end_eddy_merging, ymin=ax.get_ylim()[1], ymax=ax.get_ylim()[0], color='w')

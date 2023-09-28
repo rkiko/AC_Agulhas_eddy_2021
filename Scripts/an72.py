@@ -489,6 +489,34 @@ plt.grid(color='k', linestyle='dashed', linewidth=0.5)
 plt.savefig('../Plots/an72/POC_sequestered_extended_an72.pdf' ,dpi=200)
 plt.close()
 
+# region I save the data as netcdf
+filename_save = '../Data/Fig_05.nc'
+try:
+    ncfile.close()
+except:
+    pass
+    os.system('rm -f %s' % filename_save)
+    ncfile = nc.Dataset(filename_save, mode='w', format='NETCDF4')
+
+N_points_date = ncfile.createDimension('N_points', depth_list.size)
+
+Depth = ncfile.createVariable('Depth', np.float32, ('N_points'), zlib=True)
+FECSP = ncfile.createVariable('FECSP', np.float32, ('N_points'), zlib=True)
+FECSP_std = ncfile.createVariable('FECSP_std', np.float32, ('N_points'), zlib=True)
+BGP = ncfile.createVariable('BGP', np.float32, ('N_points'), zlib=True)
+BGP_std = ncfile.createVariable('BGP_std', np.float32, ('N_points'), zlib=True)
+Martin = ncfile.createVariable('Martin', np.float32, ('N_points'), zlib=True)
+
+Depth[:] = depth_list
+FECSP[:] = POC_subducted_extended_tonsC_day_list
+FECSP_std[:] = POC_subducted_extended_tonsC_day_std_list
+BGP[:] = POC_BGP_extended_tonsC_day_list
+BGP_std[:] = POC_BGP_extended_tonsC_day_std_list
+Martin[:] = Martin_extended_tonsC_day
+
+ncfile.close()
+# endregion
+
 
 ########################################################################################################################
 ######### Supplementary Fig. 04A: without BBP

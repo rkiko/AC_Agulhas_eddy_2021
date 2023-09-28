@@ -78,6 +78,9 @@ day_end_timeseries=matlab_datenum(day_end_timeseries)
 filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
 data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
 sel_insideEddy = data_dist_radius['sel_insideEddy']
+if (sel_insideEddy.size<Date_Num_float.size):
+    npoints_lacking = Date_Num_float.size - sel_insideEddy.size
+    sel_insideEddy=np.append(sel_insideEddy,np.zeros(npoints_lacking,))
 sel_insideEddy = (Date_Num_float<=day_end_timeseries)&(sel_insideEddy==1)
 
 lon_float_outside = lon_float[(Date_Num_float<=day_end_timeseries)&(~sel_insideEddy)]
@@ -106,7 +109,7 @@ def resize_colobar(event):
 anom_meanE_meanOut1=chl_inside_mean1-chl_outside_mean1
 anom_meanE_meanOut2=chl_inside_mean2-chl_outside_mean2
 chl_max_plot=0.6
-ndays=1 #every how many days I plot the eddy trajectory
+ndays=4 #every how many days I plot the eddy trajectory
 # set_xlim_lower, set_xlim_upper = 4,18.5
 # set_ylim_lower, set_ylim_upper = -37,-30.5
 set_xlim_lower, set_xlim_upper = 4,22 # For the larger plot
@@ -176,7 +179,7 @@ gl.right_labels = False
 gl.top_labels = False
 ax.legend(fontsize=14.5,ncol=2,loc='lower right')
 
-plt.savefig('../Plots/Fig_Main_v07/Fig01_v07c.pdf',dpi=200)
+plt.savefig('../Plots/Fig_Main_v07/Fig01_v07.pdf',dpi=200)
 plt.close()
 # endregion
 # endregion
@@ -421,6 +424,10 @@ data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
 
 sel_insideEddy = data_dist_radius['sel_insideEddy']
 datenum_profiles = data_dist_radius['Datenum']
+if (sel_insideEddy.size<lon.size):
+    npoints_lacking = lon.size - sel_insideEddy.size
+    sel_insideEddy=np.append(sel_insideEddy,np.zeros(npoints_lacking,))
+    datenum_profiles=np.append(datenum_profiles,10**99*np.ones(npoints_lacking,))
 sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
 
 lon=lon[sel_insideEddy]

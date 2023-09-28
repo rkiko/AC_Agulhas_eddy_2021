@@ -67,6 +67,11 @@ I reduce the size of Fig. 4 (bulk POC removal rate, Parr and oxygen consumption
 rate) as I now put them one over the other. I remove the krem of Iversen from
 the main figure and I left it for the supplementary material.
 
+\
+Fig_Main_v08
+
+As V07, but I use the most updated data
+
 
 \
 an01
