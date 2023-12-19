@@ -16,6 +16,7 @@
 # status = httpdl(server, request, uncompress=True)
 #
 import argparse
+import hashlib
 import os
 import re
 import sys
@@ -30,6 +31,7 @@ from urllib.parse import urlparse
 from pathlib import Path
 
 DEFAULT_CHUNK_SIZE = 131072
+BLOCKSIZE = 65536
 
 # requests session object used to keep connections around
 obpgSession = None
@@ -78,7 +80,7 @@ def httpdl(server, request, localpath='.', outputfilename=None, ntries=5,
             ofile = localpath / outputfilename
             modified_since = get_file_time(ofile)
         else:
-            rpath = Path(request.rstrip()) #.name
+            rpath = Path(request.rstrip())
             if 'requested_files' in request:
                 rpath = Path(request.rstrip().split('?')[0])
             ofile = localpath / rpath.name
@@ -99,7 +101,7 @@ def httpdl(server, request, localpath='.', outputfilename=None, ntries=5,
         else:
             if not Path.exists(localpath):
                 os.umask(0o02)
-                Path.mkdir(localpath, mode=0o2775)
+                Path.mkdir(localpath, mode=0o2775, parents=True)
 
             if not outputfilename:
                 cd = req.headers.get('Content-Disposition')
@@ -187,7 +189,20 @@ def get_file_time(localFile):
 
     return ftime
 
-def retrieveURL(request,localpath='.', uncompress=False, verbose=0,force_download=False, appkey=False):
+def compare_checksum(filepath,checksum):
+    hasher = hashlib.sha1()
+    with open(filepath, 'rb') as afile:
+        buf = afile.read(BLOCKSIZE)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = afile.read(BLOCKSIZE)
+    
+    if hasher.hexdigest() == checksum:
+        return False
+    else:
+        return True
+
+def retrieveURL(request,localpath='.', uncompress=False, verbose=0,force_download=False, appkey=False, checksum=False):
     if args.verbose:
         print("Retrieving %s" % request.rstrip())
 
@@ -209,8 +224,16 @@ def retrieveURL(request,localpath='.', uncompress=False, verbose=0,force_downloa
     if parsedRequest.query:
         netpath = netpath + joiner + parsedRequest.query
 
-    return httpdl(server, netpath, localpath=localpath, uncompress=uncompress, verbose=verbose,force_download=force_download)
+    status = httpdl(server, netpath, localpath=localpath, uncompress=uncompress, verbose=verbose,force_download=force_download)
+    
+    if checksum and not uncompress:
+        cksumURL = 'https://'+server + '/checkdata/' + parsedRequest.path
+        dnldfile = localpath / parsedRequest.path
+        if compare_checksum(dnldfile,requests.get(cksumURL).text):
+            print("The file %s failed checksum test" % parsedRequest.path)
+            status = 1
 
+    return status
 
 if __name__ == "__main__":
     # parse command line
@@ -242,6 +265,10 @@ NOTE: For authentication, a valid .netrc file in the user home ($HOME) directory
     parser.add_argument('--uncompress',action="store_true",
                         help='uncompress the retrieved files (if compressed)',
                         default=False)
+    parser.add_argument('--checksum',action="store_true",
+                        help='compare retrieved file checksum; cannot be used with --uncompress',
+                        default=False)
+    parser.add_argument('--failed',help='filename to contain list of files that failed to be retrieved')
     parser.add_argument('--appkey',help='value of the users application key')
     parser.add_argument('--force',action='store_true',
                         help='force download even if file already exists locally',
@@ -253,7 +280,7 @@ NOTE: For authentication, a valid .netrc file in the user home ($HOME) directory
     if args.http_manifest:
         status = retrieveURL(args.http_manifest,verbose=args.verbose,force_download=True,appkey=args.appkey)
         if status:
-            print("Whoops...problem retrieving %s (received status %d)" % (args.http_manifest,status))
+            print("There was a problem retrieving %s (received status %d)" % (args.http_manifest,status))
             sys.exit("Bailing out...")
         else:
             with open('http_manifest.txt') as flist:
@@ -270,18 +297,34 @@ NOTE: For authentication, a valid .netrc file in the user home ($HOME) directory
         parser.print_usage()
         sys.exit("Please provide a filename (or list file) to retrieve")
 
+    if args.uncompress and args.checksum:
+        parser.print_usage()
+        sys.exit("--uncompress is incompatible with --checksum")
+
     outpath = Path.resolve(Path.expanduser(Path(os.path.expandvars(args.odir))))
 
     if args.verbose:
         print("Output directory: %s" % outpath)
 
+    failed = None
+    if args.failed:
+        failed = open(args.failed, 'w')
+
     for request in filelist:
         status = retrieveURL(request,localpath=outpath, uncompress=args.uncompress,
                              verbose=args.verbose,force_download=args.force,
-                             appkey=args.appkey)
+                             appkey=args.appkey,checksum=args.checksum)
         if status:
             if status == 304:
                 if args.verbose:
                     print("%s is not newer than local copy, skipping download" % request)
             else:
-                print("Whoops...problem retrieving %s (received status %d)" % (request,status))
+                print("There was a problem retrieving %s (received status %d)" % (request,status))
+                if failed:
+                    failed.write(request)
+                    failed.write("\n")
+
+    if failed:
+        failed.close()
+    
+
