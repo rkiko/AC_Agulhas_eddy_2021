@@ -2,6 +2,8 @@ import scipy.stats
 import numpy as np
 
 def lin_fit(x,y):
+    sel = ~(np.isnan(x) | np.isnan(y))
+    x = x[sel];y = y[sel]
     result = scipy.stats.linregress(x, y)
     tinv = lambda p, df: abs(scipy.stats.t.ppf(p/2, df))
     ts = tinv(0.05, len(x)-2)
