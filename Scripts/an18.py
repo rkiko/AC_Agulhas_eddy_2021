@@ -104,8 +104,11 @@ dens_bbp[mask_dens] = dens_tmp + 1000
 #######################################################################
 from oceanpy import bbp700toPOC
 from oceanpy import bbp700toPOC_Koestner
+from oceanpy import bbp700_Briggs2020filter
 bbp_POC=bbp700.copy()*0+99999
 bbp_POC_Koestner=bbp700.copy()*0+99999
+bbp_POC_noBriggsFilter=bbp700.copy()*0+99999
+bbp_POC_Koestner_noBriggsFilter=bbp700.copy()*0+99999
 i=0
 for i in range(0,bbp700.shape[0]):
     bbp700tmp=bbp700[i,:]
@@ -113,7 +116,8 @@ for i in range(0,bbp700.shape[0]):
     temp_tmp=temp[i,:]
     chl_tmp=chl[i,:]
     # I exclude nan values
-    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)&(chl_tmp!=99999)
+    sel0 = (depth_tmp != 99999) & (temp_tmp != 99999) & (chl_tmp != 99999)
+    sel = (bbp700tmp != 99999) & sel0
     bbp700tmp=bbp700tmp[sel]
     depth_tmp=depth_tmp[sel]
     temp_tmp=temp_tmp[sel]
@@ -121,10 +125,21 @@ for i in range(0,bbp700.shape[0]):
     # I convert to small POC (sPOC) and I set to 0 values <0
     sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
     sPOC_tmp[sPOC_tmp<0]=0
-    bbp_POC[i,sel]=sPOC_tmp
+    bbp_POC_noBriggsFilter[i,sel]=sPOC_tmp
     sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl_tmp)
     sPOC_tmp[np.isnan(sPOC_tmp)]=0
-    bbp_POC_Koestner[i,sel]=sPOC_tmp
+    bbp_POC_Koestner_noBriggsFilter[i,sel]=sPOC_tmp
+    # I convert to small POC (sPOC) and I set to 0 values <0 but before I remove spikes using the filtering function of Briggs
+    bbp700tmp = bbp700[i, :]
+    bbp700tmp=bbp700_Briggs2020filter(bbp700tmp)
+    sel = (bbp700tmp != 99999) & sel0
+    bbp700tmp = bbp700tmp[sel]
+    sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
+    sPOC_tmp[sPOC_tmp < 0] = 0
+    bbp_POC[i, sel] = sPOC_tmp
+    sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl_tmp)
+    sPOC_tmp[np.isnan(sPOC_tmp)] = 0
+    bbp_POC_Koestner[i, sel] = sPOC_tmp
 
 #######################################################################
 # I convert the bbp dates to float values (in seconds from 1970 1 1)
@@ -244,8 +259,9 @@ dist_km=dist*111
 #######################################################################
 sel_insideEddy = dist_km <= radius_Vmax_4float
 
-dictionary_data = {"bbp_POC": bbp_POC,"bbp_POC_Koestner": bbp_POC_Koestner,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
-                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar" : Date_Num_bbp_calendar,"temperature" : temp}
+dictionary_data = {"bbp_POC": bbp_POC,"bbp_POC_Koestner": bbp_POC_Koestner,"bbp_POC_noBriggsFilter": bbp_POC_noBriggsFilter,"bbp_POC_Koestner_noBriggsFilter": bbp_POC_Koestner_noBriggsFilter,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
+                   "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar" : Date_Num_bbp_calendar,"temperature" : temp,
+                    "dens_bbp": dens_bbp}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
@@ -255,8 +271,10 @@ list_dates=list_dates[sel_insideEddy]
 # lat=lat[sel_insideEddy]
 Date_Num_bbp=Date_Num_bbp[sel_insideEddy]
 Date_Num_bbp_calendar=Date_Num_bbp_calendar[sel_insideEddy]
+Date_Vec=Date_Vec[sel_insideEddy]
 # Date_Time=Date_Time[sel_insideEddy]
 depth_bbp=depth_bbp[sel_insideEddy]
+dens_bbp=dens_bbp[sel_insideEddy]
 temp=temp[sel_insideEddy]
 # pressure=pressure[sel_insideEddy]
 # Flux=Flux[sel_insideEddy]
@@ -265,6 +283,9 @@ temp=temp[sel_insideEddy]
 # MaP_abund=MaP_abund[sel_insideEddy]
 # MaP_POC=MaP_POC[sel_insideEddy]
 bbp_POC=bbp_POC[sel_insideEddy,:]
+bbp_POC_noBriggsFilter=bbp_POC_noBriggsFilter[sel_insideEddy,:]
+bbp_POC_Koestner=bbp_POC_Koestner[sel_insideEddy,:]
+bbp_POC_Koestner_noBriggsFilter=bbp_POC_Koestner_noBriggsFilter[sel_insideEddy,:]
 
 #######################################################################
 # I calculate the mixed layer depth
@@ -755,20 +776,20 @@ argument = 'Integrated_POC_0620_0413difference'
 arg_value = (POC_200_600_int[0]-POC_200_600_int[41])*400
 # write_latex_data(filename,argument,'%d' % arg_value) #I don't save it anymore cos I use an53
 
-a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
-data_an18 = pickle.load(a_file)
-bbp_POC = data_an18['bbp_POC']
-bbp_POC_Koestner = data_an18['bbp_POC_Koestner']
-sel_insideEddy = data_an18['sel_insideEddy']
-Date_Num_bbp = data_an18['Date_Num_bbp']
-Date_Vec_bbp = data_an18['Date_Vec_bbp']
-Date_Num_bbp_calendar = data_an18['Date_Num_bbp_calendar']
-depth_bbp = data_an18['depth_bbp']
-a_file.close()
+# a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
+# data_an18 = pickle.load(a_file)
+# bbp_POC = data_an18['bbp_POC']
+# bbp_POC_Koestner = data_an18['bbp_POC_Koestner']
+# sel_insideEddy = data_an18['sel_insideEddy']
+# Date_Num_bbp = data_an18['Date_Num_bbp']
+# Date_Vec_bbp = data_an18['Date_Vec_bbp']
+# Date_Num_bbp_calendar = data_an18['Date_Num_bbp_calendar']
+# depth_bbp = data_an18['depth_bbp']
+# a_file.close()
 
-dictionary_data = {"bbp_POC": bbp_POC,"bbp_POC_Koestner": bbp_POC_Koestner,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
+dictionary_data = {"bbp_POC": bbp_POC,"bbp_POC_Koestner": bbp_POC_Koestner,"bbp_POC_noBriggsFilter": bbp_POC_noBriggsFilter,"bbp_POC_Koestner_noBriggsFilter": bbp_POC_Koestner_noBriggsFilter,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
                    "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar": Date_Num_bbp_calendar,
-                   "Integrated_POC_0620_0413difference": arg_value, "dens_bbp": dens_bbp}
+                   "Integrated_POC_0620_0413difference": arg_value, "dens_bbp": dens_bbp,"temperature" : temp}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()
@@ -876,21 +897,21 @@ for ipar in range(3,parameter_ylabel_list.__len__()):
 
 
 
-a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
-data_an18 = pickle.load(a_file)
-bbp_POC = data_an18['bbp_POC']
-sel_insideEddy = data_an18['sel_insideEddy']
-Date_Num_bbp = data_an18['Date_Num_bbp']
-Date_Vec_bbp = data_an18['Date_Vec_bbp']
-depth_bbp = data_an18['depth_bbp']
-Date_Num_bbp_calendar = data_an18['Date_Num_bbp_calendar']
-Integrated_POC_0620_0413difference = data_an18['Integrated_POC_0620_0413difference']
-dens_bbp = data_an18['dens_bbp']
-a_file.close()
+# a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
+# data_an18 = pickle.load(a_file)
+# bbp_POC = data_an18['bbp_POC']
+# sel_insideEddy = data_an18['sel_insideEddy']
+# Date_Num_bbp = data_an18['Date_Num_bbp']
+# Date_Vec_bbp = data_an18['Date_Vec_bbp']
+# depth_bbp = data_an18['depth_bbp']
+# Date_Num_bbp_calendar = data_an18['Date_Num_bbp_calendar']
+# Integrated_POC_0620_0413difference = data_an18['Integrated_POC_0620_0413difference']
+# dens_bbp = data_an18['dens_bbp']
+# a_file.close()
 
-dictionary_data = {"bbp_POC": bbp_POC,"bbp_POC_Koestner": bbp_POC_Koestner,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
+dictionary_data = {"bbp_POC": bbp_POC,"bbp_POC_Koestner": bbp_POC_Koestner,"bbp_POC_noBriggsFilter": bbp_POC_noBriggsFilter,"bbp_POC_Koestner_noBriggsFilter": bbp_POC_Koestner_noBriggsFilter,"sel_insideEddy": sel_insideEddy,"Date_Num_bbp": Date_Num_bbp,
                    "Date_Vec_bbp": Date_Vec,"depth_bbp": depth_bbp,"Date_Num_bbp_calendar": Date_Num_bbp_calendar,
-                   "Integrated_POC_0620_0413difference": Integrated_POC_0620_0413difference, "dens_bbp": dens_bbp}
+                   "Integrated_POC_0620_0413difference": Integrated_POC_0620_0413difference, "dens_bbp": dens_bbp,"temperature" : temp}
 a_file = open("%s/an18/data_an18.pkl" % storedir, "wb")
 pickle.dump(dictionary_data, a_file)
 a_file.close()

@@ -76,8 +76,10 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     depth=np.array(data['Depth [m]'][sel_filename])
     dens=np.array(data['Potential density [kg/m3]'][sel_filename])
     Flux=np.array(data['Flux_mgC_m2'][sel_filename])
+    Flux_Clements=np.array(data['Flux_Clements_mgC_m2'][sel_filename])
     # Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
     Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
+    Flux_Clements_extended=np.array(data['Flux_Clements_mgC_m2_from0.0254sizeclass'][sel_filename])
     # Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
     MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
     MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
@@ -244,6 +246,8 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     # Step 1 and 2, filter and interpolation
     Flux_filtered=np.array([]);dens_Flux_filtered=np.array([]);depth_Flux_filtered=np.array([]);Date_Num_Flux_filtered=np.array([])
     Flux_extended_filtered=np.array([]);dens_Flux_extended_filtered=np.array([]);Date_Num_Flux_extended_filtered=np.array([])
+    Flux_Clements_filtered=np.array([]);dens_Flux_Clements_filtered=np.array([]);depth_Flux_Clements_filtered=np.array([]);Date_Num_Flux_Clements_filtered=np.array([])
+    Flux_Clements_extended_filtered=np.array([]);dens_Flux_Clements_extended_filtered=np.array([]);Date_Num_Flux_Clements_extended_filtered=np.array([])
     i=0
     for i in range(0,list_dates.size):
         sel=Date_Num==list_dates[i]
@@ -262,6 +266,21 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
             Flux_extended_filtered = np.concatenate((Flux_extended_filtered, z))
             Date_Num_Flux_extended_filtered = np.concatenate((Date_Num_Flux_extended_filtered, x2))
             dens_Flux_extended_filtered = np.concatenate((dens_Flux_extended_filtered, y2))
+        z=Flux_Clements[sel];x=Date_Num[sel];y=dens[sel];d=depth[sel]
+        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2];d2=d[sel2]
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            Flux_Clements_filtered = np.concatenate((Flux_Clements_filtered, z))
+            Date_Num_Flux_Clements_filtered = np.concatenate((Date_Num_Flux_Clements_filtered, x2))
+            dens_Flux_Clements_filtered = np.concatenate((dens_Flux_Clements_filtered, y2))
+            depth_Flux_Clements_filtered = np.concatenate((depth_Flux_Clements_filtered, d2))
+        z=Flux_Clements_extended[sel];x=Date_Num[sel];y=dens[sel]
+        sel2=~np.isnan(z);z=z[sel2];x2=x[sel2];y2=y[sel2]
+        if sum(sel2) > 0:
+            z = savgol_filter(z, 5, 1)
+            Flux_Clements_extended_filtered = np.concatenate((Flux_Clements_extended_filtered, z))
+            Date_Num_Flux_Clements_extended_filtered = np.concatenate((Date_Num_Flux_Clements_extended_filtered, x2))
+            dens_Flux_Clements_extended_filtered = np.concatenate((dens_Flux_Clements_extended_filtered, y2))
 
     # I define the x and y arrays for the Flux interpolation
     x_filtered = np.linspace(Date_Num_Flux_filtered.min(), Date_Num_Flux_filtered.max(), 100)
@@ -270,6 +289,8 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     # I interpolate
     Flux_interp = griddata((Date_Num_Flux_filtered, dens_Flux_filtered), Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     Flux_extended_interp = griddata((Date_Num_Flux_extended_filtered, dens_Flux_extended_filtered), Flux_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_Clements_interp = griddata((Date_Num_Flux_Clements_filtered, dens_Flux_Clements_filtered), Flux_Clements_filtered,(x_filtered_g, y_filtered_g), method="nearest")
+    Flux_Clements_extended_interp = griddata((Date_Num_Flux_Clements_extended_filtered, dens_Flux_Clements_extended_filtered), Flux_Clements_extended_filtered,(x_filtered_g, y_filtered_g), method="nearest")
     Depth_interp = griddata((Date_Num_Flux_extended_filtered, dens_Flux_extended_filtered), depth_Flux_filtered,(x_filtered_g, y_filtered_g), method="nearest")
 
 
@@ -280,6 +301,10 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     Flux_extended_mean = np.mean(np.mean(Flux_extended_interp[sel_dens0_densf, :], axis=0))
     Flux_std = np.std(np.mean(Flux_interp[sel_dens0_densf,:],axis=0))
     Flux_extended_std = np.std(np.mean(Flux_extended_interp[sel_dens0_densf, :], axis=0))
+    Flux_Clements_mean = np.mean(np.mean(Flux_Clements_interp[sel_dens0_densf,:],axis=0))
+    Flux_Clements_extended_mean = np.mean(np.mean(Flux_Clements_extended_interp[sel_dens0_densf, :], axis=0))
+    Flux_Clements_std = np.std(np.mean(Flux_Clements_interp[sel_dens0_densf,:],axis=0))
+    Flux_Clements_extended_std = np.std(np.mean(Flux_Clements_extended_interp[sel_dens0_densf, :], axis=0))
 
     ########################################################################################################################
     # Here I calculate the sinking speed of the isopycnal bin (in meters per day) and its mean width (in meters, anyway it's useless)
@@ -329,10 +354,16 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     POC_BGP_tonsC_day_std = np.sqrt(Flux_std**2 * surface_eddy_mean**2 + Flux_mean**2 * surface_eddy_std**2)/10**9
     POC_BGP_extended_tonsC_day = Flux_extended_mean * surface_eddy_mean/10**9
     POC_BGP_extended_tonsC_day_std = np.sqrt(Flux_extended_std**2 * surface_eddy_mean**2 + Flux_extended_mean**2 * surface_eddy_std**2)/10**9
+    POC_BGP_Clements_tonsC_day = Flux_Clements_mean * surface_eddy_mean/10**9
+    POC_BGP_Clements_tonsC_day_std = np.sqrt(Flux_Clements_std**2 * surface_eddy_mean**2 + Flux_Clements_mean**2 * surface_eddy_std**2)/10**9
+    POC_BGP_Clements_extended_tonsC_day = Flux_Clements_extended_mean * surface_eddy_mean/10**9
+    POC_BGP_Clements_extended_tonsC_day_std = np.sqrt(Flux_Clements_extended_std**2 * surface_eddy_mean**2 + Flux_Clements_extended_mean**2 * surface_eddy_std**2)/10**9
     ############### I return the data
-    return POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std, \
-           POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std, \
-           POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean
+    return (POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std,
+            POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std,
+            POC_BGP_tonsC_day, POC_BGP_tonsC_day_std, POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std,
+            POC_BGP_Clements_tonsC_day, POC_BGP_Clements_tonsC_day_std, POC_BGP_Clements_extended_tonsC_day, POC_BGP_Clements_extended_tonsC_day_std,
+            sink_speed, sink_speed_std, depth_mean, width_mean)
 # endregion
 #######################################################################
 # Parameters for the carbon budget calculation
@@ -360,6 +391,10 @@ POC_BGP_tonsC_day_list = np.array([])
 POC_BGP_tonsC_day_std_list = np.array([])
 POC_BGP_extended_tonsC_day_list = np.array([])
 POC_BGP_extended_tonsC_day_std_list = np.array([])
+POC_BGP_Clements_tonsC_day_list = np.array([])
+POC_BGP_Clements_tonsC_day_std_list = np.array([])
+POC_BGP_Clements_extended_tonsC_day_list = np.array([])
+POC_BGP_Clements_extended_tonsC_day_std_list = np.array([])
 sink_speed_list = np.array([])
 sink_speed_std_list = np.array([])
 depth_list = np.array([])
@@ -371,8 +406,10 @@ for dens0 in dens0_list:
     print('Loop %d out of %d' %(ct,dens0_list.size))
     densf = dens0 + dens_thickness
     (POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std,
-     POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
-     POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
+     POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std,
+     POC_BGP_tonsC_day, POC_BGP_tonsC_day_std, POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std,
+     POC_BGP_Clements_tonsC_day, POC_BGP_Clements_tonsC_day_std, POC_BGP_Clements_extended_tonsC_day, POC_BGP_Clements_extended_tonsC_day_std,
+     sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
 
     POC_subducted_tonsC_day_list=np.append(POC_subducted_tonsC_day_list,POC_subducted_tonsC_day)
     POC_subducted_tonsC_day_std_list=np.append(POC_subducted_tonsC_day_std_list,POC_subducted_tonsC_day_std)
@@ -384,6 +421,10 @@ for dens0 in dens0_list:
     POC_BGP_tonsC_day_std_list=np.append(POC_BGP_tonsC_day_std_list,POC_BGP_tonsC_day_std)
     POC_BGP_extended_tonsC_day_list=np.append(POC_BGP_extended_tonsC_day_list,POC_BGP_extended_tonsC_day)
     POC_BGP_extended_tonsC_day_std_list=np.append(POC_BGP_extended_tonsC_day_std_list,POC_BGP_extended_tonsC_day_std)
+    POC_BGP_Clements_tonsC_day_list=np.append(POC_BGP_Clements_tonsC_day_list,POC_BGP_Clements_tonsC_day)
+    POC_BGP_Clements_tonsC_day_std_list=np.append(POC_BGP_Clements_tonsC_day_std_list,POC_BGP_Clements_tonsC_day_std)
+    POC_BGP_Clements_extended_tonsC_day_list=np.append(POC_BGP_Clements_extended_tonsC_day_list,POC_BGP_Clements_extended_tonsC_day)
+    POC_BGP_Clements_extended_tonsC_day_std_list=np.append(POC_BGP_Clements_extended_tonsC_day_std_list,POC_BGP_Clements_extended_tonsC_day_std)
     sink_speed_list=np.append(sink_speed_list,sink_speed)
     sink_speed_std_list=np.append(sink_speed_std_list,sink_speed_std)
     depth_list=np.append(depth_list,depth_mean)
@@ -398,10 +439,13 @@ dens_eddy_core_down = 1027.2397618090454 #calculated at step 4 of Fig. 3a
 dens0=1026.1;densf = dens0 + dens_thickness
 (POC_subducted_tonsC_day, POC_subducted_tonsC_day_std, POC_subducted_extended_tonsC_day, POC_subducted_extended_tonsC_day_std,
  POC_subducted_noBBP_tonsC_day, POC_subducted_noBBP_tonsC_day_std, POC_BGP_tonsC_day, POC_BGP_tonsC_day_std,
- POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
+ POC_BGP_extended_tonsC_day, POC_BGP_extended_tonsC_day_std, POC_BGP_Clements_tonsC_day, POC_BGP_Clements_tonsC_day_std,
+ POC_BGP_Clements_extended_tonsC_day, POC_BGP_Clements_extended_tonsC_day_std, sink_speed, sink_speed_std, depth_mean, width_mean) = carbon_subduction_calculation(dens0, densf, day0, dayf)
 
 Martin_tonsC_day=POC_BGP_tonsC_day*(depth_list/100)**(-0.858)
 Martin_extended_tonsC_day=POC_BGP_extended_tonsC_day*(depth_list/100)**(-0.858)
+Martin_Clements_tonsC_day=POC_BGP_Clements_tonsC_day*(depth_list/100)**(-0.858)
+Martin_Clements_extended_tonsC_day=POC_BGP_Clements_extended_tonsC_day*(depth_list/100)**(-0.858)
 #######################################################################
 #region Plots
 ########################################################################################################################
@@ -519,6 +563,119 @@ ncfile.close()
 
 
 ########################################################################################################################
+######### Fig.: with BBP from Koestner and Flux from Clements
+########################################################################################################################
+idx1,idx2=0,depth_list.size-1
+set_ylim_lower=depth_list[idx1]
+set_ylim_upper=depth_list[idx2]
+fs=10
+width, height = 0.72, 0.8
+fig = plt.figure(1, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+plt.plot(POC_subducted_tonsC_day_list,depth_list, 'r')
+plt.scatter(POC_subducted_tonsC_day_list,depth_list, c='red',s=5)
+plt.fill_betweenx(depth_list, POC_subducted_tonsC_day_list-POC_subducted_tonsC_day_std_list, POC_subducted_tonsC_day_list+POC_subducted_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FECSP')
+plt.plot(POC_BGP_Clements_tonsC_day_list,depth_list, 'b')
+plt.scatter(POC_BGP_Clements_tonsC_day_list,depth_list, c='b',s=5)
+plt.fill_betweenx(depth_list, POC_BGP_Clements_tonsC_day_list-POC_BGP_Clements_tonsC_day_std_list, POC_BGP_Clements_tonsC_day_list+POC_BGP_Clements_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
+plt.plot(Martin_Clements_tonsC_day,depth_list, 'k--',label='Martin')
+# plt.fill_betweenx(depth_list, POC_BGP_tonsC_day_list-POC_BGP_tonsC_day_std_list, POC_BGP_tonsC_day_list+POC_BGP_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
+plt.xlim(0,1000)
+plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(depth_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
+plt.ylabel('Depth (m)', fontsize=fs)
+plt.xlabel('POC export rate (tons C/d)', fontsize=fs)
+plt.legend(fontsize=7)
+plt.gca().invert_yaxis()
+# #I set yticks
+# nyticks=6
+# yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
+# yticks_down=np.linspace((depth_list-width_list*0.5)[idx1], (depth_list-width_list*0.5)[idx2],nyticks)
+# yticks_up=np.linspace((depth_list+width_list*0.5)[idx1], (depth_list+width_list*0.5)[idx2],nyticks)
+# yticklabels=[]
+# for i in range(0,nyticks):
+#     yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_list,dens0_list) ))
+# ax.set_yticks(yticks)
+# ax.set_yticklabels(yticklabels,fontsize=6)
+# ax.text(-0.25, 1.075, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+# ax.text(1.075, 1.06, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an72/POC_sequestered_Clements_an72.pdf' ,dpi=200)
+plt.close()
+
+
+########################################################################################################################
+######### Fig.: Extended size spectrum with BBP from Koestner and flux from Clements
+########################################################################################################################
+idx1,idx2=0,depth_list.size-1
+set_ylim_lower=depth_list[idx1]
+set_ylim_upper=depth_list[idx2]
+fs=10
+width, height = 0.72, 0.8
+fig = plt.figure(1, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+plt.plot(POC_subducted_extended_tonsC_day_list,depth_list, 'r')
+plt.scatter(POC_subducted_extended_tonsC_day_list,depth_list, c='red',s=5)
+plt.fill_betweenx(depth_list, POC_subducted_extended_tonsC_day_list-POC_subducted_extended_tonsC_day_std_list, POC_subducted_extended_tonsC_day_list+POC_subducted_extended_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FECSP')
+plt.plot(POC_BGP_Clements_extended_tonsC_day_list,depth_list, 'b')
+plt.scatter(POC_BGP_Clements_extended_tonsC_day_list,depth_list, c='b',s=5)
+plt.fill_betweenx(depth_list, POC_BGP_Clements_extended_tonsC_day_list-POC_BGP_Clements_extended_tonsC_day_std_list, POC_BGP_Clements_extended_tonsC_day_list+POC_BGP_Clements_extended_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
+plt.plot(Martin_Clements_extended_tonsC_day,depth_list, 'k--',label='Martin')
+# plt.fill_betweenx(depth_list, POC_BGP_tonsC_day_list-POC_BGP_tonsC_day_std_list, POC_BGP_tonsC_day_list+POC_BGP_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
+plt.xlim(0,1000)
+plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(depth_list[1], xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod',linestyles='dotted',linewidth=5,zorder=20)
+plt.ylabel('Depth (m)', fontsize=fs)
+plt.xlabel('POC export rate (tons C/d)', fontsize=fs)
+plt.legend(fontsize=7)
+plt.gca().invert_yaxis()
+# #I set yticks
+# nyticks=6
+# yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
+# yticks_down=np.linspace((depth_list-width_list*0.5)[idx1], (depth_list-width_list*0.5)[idx2],nyticks)
+# yticks_up=np.linspace((depth_list+width_list*0.5)[idx1], (depth_list+width_list*0.5)[idx2],nyticks)
+# yticklabels=[]
+# for i in range(0,nyticks):
+#     yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_list,dens0_list) ))
+# ax.set_yticks(yticks)
+# ax.set_yticklabels(yticklabels,fontsize=6)
+ax.text(-0.15, 1.005, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+# ax.text(1.075, 1.06, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an72/POC_sequestered_Clements_extended_an72.pdf' ,dpi=200)
+plt.close()
+
+# region I save the data as netcdf
+filename_save = '../Data/Fig_05_Clements.nc'
+try:
+    ncfile.close()
+except:
+    pass
+    os.system('rm -f %s' % filename_save)
+    ncfile = nc.Dataset(filename_save, mode='w', format='NETCDF4')
+
+N_points_date = ncfile.createDimension('N_points', depth_list.size)
+
+Depth = ncfile.createVariable('Depth', np.float32, ('N_points'), zlib=True)
+FECSP = ncfile.createVariable('FECSP', np.float32, ('N_points'), zlib=True)
+FECSP_std = ncfile.createVariable('FECSP_std', np.float32, ('N_points'), zlib=True)
+BGP = ncfile.createVariable('BGP', np.float32, ('N_points'), zlib=True)
+BGP_std = ncfile.createVariable('BGP_std', np.float32, ('N_points'), zlib=True)
+Martin = ncfile.createVariable('Martin', np.float32, ('N_points'), zlib=True)
+
+Depth[:] = depth_list
+FECSP[:] = POC_subducted_extended_tonsC_day_list
+FECSP_std[:] = POC_subducted_extended_tonsC_day_std_list
+BGP[:] = POC_BGP_Clements_extended_tonsC_day_list
+BGP_std[:] = POC_BGP_Clements_extended_tonsC_day_std_list
+Martin[:] = Martin_Clements_extended_tonsC_day
+
+ncfile.close()
+# endregion
+
+########################################################################################################################
 ######### Supplementary Fig. 04A: without BBP
 ########################################################################################################################
 idx1,idx2=0,depth_list.size-1
@@ -559,6 +716,47 @@ plt.close()
 
 
 
+########################################################################################################################
+######### Supplementary Fig. 04A: without BBP and with flux from Clements
+########################################################################################################################
+idx1,idx2=0,depth_list.size-1
+set_ylim_lower=depth_list[idx1]
+set_ylim_upper=depth_list[idx2]
+fs=10
+width, height = 0.72, 0.8
+fig = plt.figure(1, figsize=(3.5, 3.5))
+ax = fig.add_axes([0.23, 0.15, width, height], ylim=(set_ylim_lower, set_ylim_upper))
+plt.plot(POC_subducted_noBBP_tonsC_day_list,depth_list, 'r')
+plt.scatter(POC_subducted_noBBP_tonsC_day_list,depth_list, c='red',s=5)
+plt.fill_betweenx(depth_list, POC_subducted_noBBP_tonsC_day_list-POC_subducted_noBBP_tonsC_day_std_list, POC_subducted_noBBP_tonsC_day_list+POC_subducted_noBBP_tonsC_day_std_list, facecolor='b',color='red', alpha=0.5, label='FECSP')
+plt.plot(POC_BGP_Clements_tonsC_day_list,depth_list, 'b')
+plt.scatter(POC_BGP_Clements_tonsC_day_list,depth_list, c='b',s=5)
+plt.fill_betweenx(depth_list, POC_BGP_Clements_tonsC_day_list-POC_BGP_Clements_tonsC_day_std_list, POC_BGP_Clements_tonsC_day_list+POC_BGP_Clements_tonsC_day_std_list, facecolor='b',color='blue', alpha=0.5, label='BGP')
+plt.xlim(0,1000)
+plt.hlines(200, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+plt.hlines(600, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], color='darkgoldenrod')
+# plt.ylabel('Dens (kg/m$^3$)', fontsize=fs)
+plt.xlabel('POC export rate (tons C/d)', fontsize=fs)
+plt.legend(fontsize=7)
+plt.gca().invert_yaxis()
+# #I set yticks
+# nyticks=6
+# yticks=np.linspace(set_ylim_lower, set_ylim_upper,nyticks)
+# yticks_down=np.linspace((depth_list-width_list*0.5)[idx1], (depth_list-width_list*0.5)[idx2],nyticks)
+# yticks_up=np.linspace((depth_list+width_list*0.5)[idx1], (depth_list+width_list*0.5)[idx2],nyticks)
+# yticklabels=[]
+# for i in range(0,nyticks):
+#     yticklabels.append('[%d–%dm]\n%0.2f kg/m$^3$' % (yticks_down[i],yticks_up[i], np.interp(yticks[i],depth_list,dens0_list) ))
+# ax.set_yticks(yticks)
+# ax.set_yticklabels(yticklabels,fontsize=6)
+# ax.text(-0.25, 1.075, 'a', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+# ax.text(1.075, 1.06, 'b', transform=ax.transAxes, fontsize=18, fontweight='bold',va='top', ha='right')  # ,fontfamily='helvetica'
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.savefig('../Plots/an72/POC_sequestered_noBBP_Clements_an72.pdf' ,dpi=200)
+plt.close()
+
+
+
 #endregion
 #######################################################################
 
@@ -571,6 +769,14 @@ filename='%s/GIT/AC_Agulhas_eddy_2021/Data/data_latex_Agulhas.dat' % home
 #These values are extracted from the bulk POC and PARR calculated in the eddy core considering only one unique layer
 depth2 = np.r_[depth_list.min():depth_list.max():10]
 sel_inEddyCore = (depth2>200)&(depth2<600)
+tmp = np.interp(depth2,depth_list,POC_BGP_tonsC_day_list)
+argument = 'BGP_0413to0731_tonsC_day'
+BGP_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % BGP_0413to0731_tonsC_day)
+tmp = np.interp(depth2,depth_list,POC_BGP_tonsC_day_std_list)
+argument = 'BGP_std_0413to0731_tonsC_day'
+BGP_std_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % BGP_std_0413to0731_tonsC_day)
 tmp = np.interp(depth2,depth_list,POC_BGP_extended_tonsC_day_list)
 argument = 'BGP_extended_0413to0731_tonsC_day'
 BGP_extended_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
@@ -579,6 +785,30 @@ tmp = np.interp(depth2,depth_list,POC_BGP_extended_tonsC_day_std_list)
 argument = 'BGP_extended_std_0413to0731_tonsC_day'
 BGP_extended_std_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
 write_latex_data(filename,argument,'%d' % BGP_extended_std_0413to0731_tonsC_day)
+tmp = np.interp(depth2,depth_list,POC_BGP_Clements_tonsC_day_list)
+argument = 'BGP_Clements_0413to0731_tonsC_day'
+BGP_Clements_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % BGP_Clements_0413to0731_tonsC_day)
+tmp = np.interp(depth2,depth_list,POC_BGP_Clements_tonsC_day_std_list)
+argument = 'BGP_Clements_std_0413to0731_tonsC_day'
+BGP_Clements_std_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % BGP_Clements_std_0413to0731_tonsC_day)
+tmp = np.interp(depth2,depth_list,POC_BGP_Clements_extended_tonsC_day_list)
+argument = 'BGP_Clements_extended_0413to0731_tonsC_day'
+BGP_Clements_extended_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % BGP_Clements_extended_0413to0731_tonsC_day)
+tmp = np.interp(depth2,depth_list,POC_BGP_Clements_extended_tonsC_day_std_list)
+argument = 'BGP_Clements_extended_std_0413to0731_tonsC_day'
+BGP_Clements_extended_std_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % BGP_Clements_extended_std_0413to0731_tonsC_day)
+tmp = np.interp(depth2,depth_list,POC_subducted_tonsC_day_list)
+argument = 'POC_subducted_0413to0731_tonsC_day'
+POC_subducted_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % POC_subducted_0413to0731_tonsC_day)
+tmp = np.interp(depth2,depth_list,POC_subducted_tonsC_day_std_list)
+argument = 'POC_subducted_std_0413to0731_tonsC_day'
+POC_subducted_std_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
+write_latex_data(filename,argument,'%d' % POC_subducted_std_0413to0731_tonsC_day)
 tmp = np.interp(depth2,depth_list,POC_subducted_extended_tonsC_day_list)
 argument = 'POC_subducted_extended_0413to0731_tonsC_day'
 POC_subducted_extended_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
@@ -588,15 +818,28 @@ argument = 'POC_subducted_extended_std_0413to0731_tonsC_day'
 POC_subducted_extended_std_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
 write_latex_data(filename,argument,'%d' % POC_subducted_extended_std_0413to0731_tonsC_day)
 argument = 'Tot_POC_export_extended_0413to0731_tonsC_day'
+Tot_POC_export_0413to0731_tonsC_day= BGP_0413to0731_tonsC_day + POC_subducted_0413to0731_tonsC_day
 Tot_POC_export_extended_0413to0731_tonsC_day= BGP_extended_0413to0731_tonsC_day + POC_subducted_extended_0413to0731_tonsC_day
 write_latex_data(filename,argument,'%d' % Tot_POC_export_extended_0413to0731_tonsC_day)
 argument = 'Tot_POC_export_extended_std_0413to0731_tonsC_day'
 arg_value= np.sqrt(BGP_extended_std_0413to0731_tonsC_day**2 + POC_subducted_extended_std_0413to0731_tonsC_day**2)
 write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Ratio_POC_subduction2BGP_0413to0731_tonsC_day'
+arg_value= POC_subducted_0413to0731_tonsC_day/BGP_0413to0731_tonsC_day*100
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Ratio_POC_subduction2BGP_Clements_0413to0731_tonsC_day'
+arg_value= POC_subducted_0413to0731_tonsC_day/BGP_Clements_0413to0731_tonsC_day*100
+write_latex_data(filename,argument,'%d' % arg_value)
 argument = 'Ratio_POC_subduction2BGP_extended_0413to0731_tonsC_day'
 arg_value= POC_subducted_extended_0413to0731_tonsC_day/BGP_extended_0413to0731_tonsC_day*100
 write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Ratio_POC_subduction2BGP_Clements_extended_0413to0731_tonsC_day'
+arg_value= POC_subducted_extended_0413to0731_tonsC_day/BGP_Clements_extended_0413to0731_tonsC_day*100
+write_latex_data(filename,argument,'%d' % arg_value)
 argument = 'nPeople_equivalentCO2emitted'
+arg_value= Tot_POC_export_0413to0731_tonsC_day/(6.9/365)
+write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'nPeople_equivalentCO2emitted_extended'
 arg_value= Tot_POC_export_extended_0413to0731_tonsC_day/(6.9/365)
 write_latex_data(filename,argument,'%d' % arg_value)
 

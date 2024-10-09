@@ -462,27 +462,43 @@ dens[mask_dens]=dens_tmp+1000
 #######################################################################
 from oceanpy import bbp700toPOC
 from oceanpy import bbp700toPOC_Koestner
+from oceanpy import bbp700_Briggs2020filter
 sPOC=bbp700.copy()*0+99999
 sPOC_Koestner=bbp700.copy()*0+99999
+sPOC_noBriggsFilter=bbp700.copy()*0+99999
+sPOC_Koestner_noBriggsFilter=bbp700.copy()*0+99999
 i=0
 for i in range(0,bbp700.shape[0]):
-    bbp700tmp=bbp700[i,:]
-    depth_tmp=depth[i,:]
-    temp_tmp=temp[i,:]
-    chl_tmp=chla[i,:]
+    bbp700tmp = bbp700[i, :]
+    depth_tmp = depth[i, :]
+    temp_tmp = temp[i, :]
+    chl_tmp = chla[i, :]
     # I exclude nan values
-    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)&(chl_tmp!=99999)
-    bbp700tmp=bbp700tmp[sel]
-    depth_tmp=depth_tmp[sel]
-    temp_tmp=temp_tmp[sel]
-    chl_tmp=chl_tmp[sel]
+    sel0 = (depth_tmp != 99999) & (temp_tmp != 99999) & (chl_tmp != 99999)
+    sel = (bbp700tmp != 99999) & sel0
+    bbp700tmp = bbp700tmp[sel]
+    depth_tmp = depth_tmp[sel]
+    temp_tmp = temp_tmp[sel]
+    chl_tmp = chl_tmp[sel]
     # I convert to small POC (sPOC) and I set to 0 values <0
     sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
     sPOC_tmp[sPOC_tmp<0]=0
-    sPOC[i,sel]=sPOC_tmp
+    sPOC_noBriggsFilter[i,sel]=sPOC_tmp
     sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl_tmp)
     sPOC_tmp[np.isnan(sPOC_tmp)]=0
-    sPOC_Koestner[i,sel]=sPOC_tmp
+    sPOC_Koestner_noBriggsFilter[i,sel]=sPOC_tmp
+    # I convert to small POC (sPOC) and I set to 0 values <0 but before I remove spikes using the filtering function of Briggs
+    bbp700tmp = bbp700[i, :]
+    bbp700tmp=bbp700_Briggs2020filter(bbp700tmp)
+    sel = (bbp700tmp != 99999) & sel0
+    bbp700tmp = bbp700tmp[sel]
+    sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
+    sPOC_tmp[sPOC_tmp < 0] = 0
+    sPOC[i, sel] = sPOC_tmp
+    sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl_tmp)
+    sPOC_tmp[np.isnan(sPOC_tmp)] = 0
+    sPOC_Koestner[i, sel] = sPOC_tmp
+
 
 #######################################################################
 # I select the data only when the BGC Argo float was inside the eddy AND before day_end_timeseries (which fixes the x limit)
@@ -3018,7 +3034,6 @@ for dens0 in dens0_list:
     depth_isopycnal_down_list=np.append(depth_isopycnal_down_list,depth_isopycnal_down)
     depth_isopycnal_up_list=np.append(depth_isopycnal_up_list,depth_isopycnal_up)
     layer_thickness_list=np.append(layer_thickness_list,layer_thickness)
-    layer_thickness_list=np.append(layer_thickness_list,layer_thickness)
     fin = np.append(fin,fin0) # Flux in
     fins = np.append(fins,fins0) # Flux in std
     fine = np.append(fine,fine0) # Flux in extended
@@ -3633,17 +3648,18 @@ write_latex_data(filename,argument,'%0.3f' % arg_value)
 argument = 'bulkPOC_0413to0731_eddycore_extended_std'
 arg_value=np.mean(Theoretical_Budget_Koestner_extended_std_list[sel_eddycore])
 write_latex_data(filename,argument,'%0.3f' % arg_value)
+ml=np.mean(layer_thickness_list[sel_eddycore])
 
 print('EDDY CORE:\nBbp+MiP+Map (non extended spectrum)')
-print('Flux in : %0.3f±%0.3f. Flux out: %0.3f±%0.3f. DeltaFlux: %0.3f±%0.3f. '
-      %(np.mean(fin[sel_eddycore]),np.mean(fins[sel_eddycore]),np.mean(fout[sel_eddycore]),np.mean(fouts[sel_eddycore]),np.mean(df[sel_eddycore]),np.mean(dfs[sel_eddycore])))
+print('Flux in : %0.3f±%0.3fμgCm-2d-1. Flux out: %0.3f±%0.3fμgCm-2d-1. POC change due to flux: %0.3f±%0.3fμgCm-3d-1. '
+      %(np.mean(fin[sel_eddycore])*ml,np.mean(fins[sel_eddycore])*ml,np.mean(fout[sel_eddycore])*ml,np.mean(fouts[sel_eddycore])*ml,np.mean(df[sel_eddycore]),np.mean(dfs[sel_eddycore])))
 print('Initial POC : %0.3f±%0.3f. Final POC: %0.3f±%0.3f. DeltaPOC: %0.3f±%0.3f.  Daily DeltaPOC: %0.3f±%0.3f. '
       %(np.mean(poci[sel_eddycore])*ndays,np.mean(pocis[sel_eddycore])*ndays,np.mean(pocf[sel_eddycore])*ndays,np.mean(pocfs[sel_eddycore])*ndays,-np.mean(dpoc[sel_eddycore])*ndays,np.mean(dpocs[sel_eddycore])*ndays,-np.mean(dpoc[sel_eddycore]),np.mean(dpocs[sel_eddycore])))
 print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
       %(np.mean(Theoretical_Budget_Koestner_list[sel_eddycore]),np.mean(Theoretical_Budget_Koestner_std_list[sel_eddycore]),PARR_0413to0731_eddycore,PARR_0413to0731_eddycore_std,OxyCR_0413to0731_eddycore,OxyCR_0413to0731_eddycore_std))
 print('\nEDDY CORE:\nBbp+MiP+Map + Extended spectrum (25-102µm)')
-print('Flux in : %0.3f±%0.3f. Flux out: %0.3f±%0.3f. DeltaFlux: %0.3f±%0.3f. '
-      %(np.mean(fine[sel_eddycore]),np.mean(fines[sel_eddycore]),np.mean(foute[sel_eddycore]),np.mean(foutes[sel_eddycore]),np.mean(dfe[sel_eddycore]),np.mean(dfes[sel_eddycore])))
+print('Flux in : %0.3f±%0.3fμgCm-2d-1. Flux out: %0.3f±%0.3fμgCm-2d-1. POC change due to flux: %0.3f±%0.3fμgCm-3d-1. '
+      %(np.mean(fine[sel_eddycore])*ml,np.mean(fines[sel_eddycore])*ml,np.mean(foute[sel_eddycore])*ml,np.mean(foutes[sel_eddycore])*ml,np.mean(dfe[sel_eddycore]),np.mean(dfes[sel_eddycore])))
 print('Initial POC : %0.3f±%0.3f. Final POC: %0.3f±%0.3f. DeltaPOC: %0.3f±%0.3f.  Daily DeltaPOC: %0.3f±%0.3f. '
       %(np.mean(pocie[sel_eddycore])*ndays,np.mean(pocies[sel_eddycore])*ndays,np.mean(pocfe[sel_eddycore])*ndays,np.mean(pocfes[sel_eddycore])*ndays,-np.mean(dpoce[sel_eddycore])*ndays,np.mean(dpoces[sel_eddycore])*ndays,-np.mean(dpoce[sel_eddycore]),np.mean(dpoces[sel_eddycore])))
 print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
@@ -3654,6 +3670,8 @@ print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
 sel_320 = (depth_isopycnal_list>320)&(depth_isopycnal_list<600)
 bulk320 = np.mean(Theoretical_Budget_Koestner_extended_list[sel_320])
 bulk320_std = np.mean(Theoretical_Budget_Koestner_extended_std_list[sel_320])
+bulk320Clem = np.mean(Theoretical_Budget_Koestner_Clements_extended_list[sel_320])
+bulk320Clem_std = np.mean(Theoretical_Budget_Koestner_Clements_extended_std_list[sel_320])
 parr320 = np.mean(POC_resp_mgC_m3_d_list[sel_320,9] + bbpPARR_Koestner_mgC_m3_d_list[sel_320])
 parr320_std = np.mean(np.sqrt(POC_resp_mgC_m3_d_std_list[sel_320,9]**2+bbpPARR_Koestner_mgC_m3_d_std_list[sel_320]**2))
 parr320_NE = np.mean(POC_resp_mgC_m3_d_list[sel_320,2] + bbpPARR_Koestner_mgC_m3_d_list[sel_320]) #NE means "not extended"
@@ -3662,6 +3680,7 @@ oxy320 = np.mean(O2_resp_mgC_m3_d_list[sel_320])
 oxy320_std = np.mean(O2_resp_mgC_m3_d_ci_list[sel_320,1]-O2_resp_mgC_m3_d_ci_list[sel_320,0])
 #Before doing the t test, I verify that they are normally distributes (they are)
 shapiro(Theoretical_Budget_Koestner_extended_list[sel_320]) #it is gaussian
+shapiro(Theoretical_Budget_Koestner_Clements_extended_list[sel_320]) #it is gaussian
 shapiro(POC_resp_mgC_m3_d_list[sel_320,9] + bbpPARR_Koestner_mgC_m3_d_list[sel_320]) #it is gaussian
 shapiro(O2_resp_mgC_m3_d_list[sel_320]) #it is gaussian
 n_el=sum(sel_320)
@@ -3670,10 +3689,19 @@ t_ref=scipy.stats.t.ppf(.95, n_el*2-2)#,lower.tail = FALSE)
 tbo=np.abs( (bulk320-oxy320)/np.sqrt( bulk320_std**2/n_el+oxy320_std**2/n_el ) )
 tbp=abs( (bulk320-parr320)/np.sqrt( bulk320_std**2/n_el+parr320_std**2/n_el ) )
 tpo=abs( (parr320-oxy320)/np.sqrt( parr320_std**2/n_el+oxy320_std**2/n_el ) )
+tbco=np.abs( (bulk320Clem-oxy320)/np.sqrt( bulk320Clem_std**2/n_el+oxy320_std**2/n_el ) )
+tbcp=abs( (bulk320Clem-parr320)/np.sqrt( bulk320Clem_std**2/n_el+parr320_std**2/n_el ) )
+tb0=abs( (bulk320)/np.sqrt( bulk320_std**2/n_el ) )
+tbc0=np.abs( (bulk320Clem)/np.sqrt( bulk320Clem_std**2/n_el ) )
 str_mean_tbo='no';str_mean_tbp='no';str_mean_tpo='no'
+str_mean_tbco='no';str_mean_tbcp='no';str_mean_tbc0='no';str_mean_tb0='no'
 if (tbo<t_ref):   str_mean_tbo='yes'
 if (tbp<t_ref):   str_mean_tbp='yes'
 if (tpo<t_ref):   str_mean_tpo='yes'
+if (tbco<t_ref):   str_mean_tbco='yes'
+if (tbcp<t_ref):   str_mean_tbcp='yes'
+if (tbc0<t_ref):   str_mean_tbc0='yes'
+if (tb0<t_ref):   str_mean_tb0='yes'
 argument = 'oxy320'
 arg_value=oxy320
 write_latex_data(filename,argument,'%0.3f' % arg_value)
@@ -3702,17 +3730,17 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 argument = 'tpo'
 arg_value=tpo
 write_latex_data(filename,argument,'%0.2f' % arg_value)
-
+ml=np.mean(layer_thickness_list[sel_320])
 print('EDDY CORE below 320m:\nBbp+MiP+Map (non extended spectrum)')
-print('Flux in : %0.3f±%0.3f. Flux out: %0.3f±%0.3f. DeltaFlux: %0.3f±%0.3f. '
-      %(np.mean(fin[sel_320]),np.mean(fins[sel_320]),np.mean(fout[sel_320]),np.mean(fouts[sel_320]),np.mean(df[sel_320]),np.mean(dfs[sel_320])))
+print('Flux in : %0.3f±%0.3fμgCm-2d-1. Flux out: %0.3f±%0.3fμgCm-2d-1. DeltaFlux: %0.3f±%0.3fμgCm-3d-1. '
+      %(np.mean(fin[sel_320])*ml,np.mean(fins[sel_320])*ml,np.mean(fout[sel_320])*ml,np.mean(fouts[sel_320])*ml,np.mean(df[sel_320]),np.mean(dfs[sel_320])))
 print('Initial POC : %0.3f±%0.3f. Final POC: %0.3f±%0.3f. DeltaPOC: %0.3f±%0.3f.  Daily DeltaPOC: %0.3f±%0.3f. '
       %(np.mean(poci[sel_320])*ndays,np.mean(pocis[sel_320])*ndays,np.mean(pocf[sel_320])*ndays,np.mean(pocfs[sel_320])*ndays,-np.mean(dpoc[sel_320])*ndays,np.mean(dpocs[sel_320])*ndays,-np.mean(dpoc[sel_320]),np.mean(dpocs[sel_320])))
 print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
       %(np.mean(Theoretical_Budget_Koestner_list[sel_320]),np.mean(Theoretical_Budget_Koestner_std_list[sel_320]),parr320_NE,parr320_std_NE,oxy320,oxy320_std))
 print('\nEDDY CORE below 320m:\nBbp+MiP+Map + Extended spectrum (25-102µm)')
-print('Flux in : %0.3f±%0.3f. Flux out: %0.3f±%0.3f. DeltaFlux: %0.3f±%0.3f. '
-      %(np.mean(fine[sel_320]),np.mean(fines[sel_320]),np.mean(foute[sel_320]),np.mean(foutes[sel_320]),np.mean(dfe[sel_320]),np.mean(dfes[sel_320])))
+print('Flux in : %0.3f±%0.3fμgCm-2d-1. Flux out: %0.3f±%0.3fμgCm-2d-1. DeltaFlux: %0.3f±%0.3fμgCm-3d-1. '
+      %(np.mean(fine[sel_320])*ml,np.mean(fines[sel_320])*ml,np.mean(foute[sel_320])*ml,np.mean(foutes[sel_320])*ml,np.mean(dfe[sel_320]),np.mean(dfes[sel_320])))
 print('Initial POC : %0.3f±%0.3f. Final POC: %0.3f±%0.3f. DeltaPOC: %0.3f±%0.3f.  Daily DeltaPOC: %0.3f±%0.3f. '
       %(np.mean(pocie[sel_320])*ndays,np.mean(pocies[sel_320])*ndays,np.mean(pocfe[sel_320])*ndays,np.mean(pocfes[sel_320])*ndays,-np.mean(dpoce[sel_320])*ndays,np.mean(dpoces[sel_320])*ndays,-np.mean(dpoce[sel_320]),np.mean(dpoces[sel_320])))
 print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
