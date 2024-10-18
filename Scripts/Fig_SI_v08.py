@@ -493,6 +493,7 @@ dens[mask_dens]=dens_tmp+1000
 #######################################################################
 from oceanpy import bbp700toPOC
 from oceanpy import bbp700toPOC_Koestner
+from oceanpy import bbp700_Briggs2020filter
 sPOC=bbp700.copy()*0+99999
 sPOC_Koestner=bbp700.copy()*0+99999
 i=0
@@ -501,8 +502,10 @@ for i in range(0,bbp700.shape[0]):
     depth_tmp=depth[i,:]
     temp_tmp=temp[i,:]
     chl_tmp=chla[i,:]
-    # I exclude nan values
-    sel=(bbp700tmp!=99999)&(depth_tmp!=99999)&(temp_tmp!=99999)&(chl_tmp!=99999)
+    # I exclude spikes with Briggs and nan values
+    sel0 = (depth_tmp != 99999) & (temp_tmp != 99999) & (chl_tmp != 99999)
+    bbp700tmp = bbp700_Briggs2020filter(bbp700tmp)
+    sel = (bbp700tmp != 99999) & sel0
     bbp700tmp=bbp700tmp[sel]
     depth_tmp=depth_tmp[sel]
     temp_tmp=temp_tmp[sel]
@@ -1351,7 +1354,7 @@ for i_depth in range(0,list_depths_plot.size-1):
     set_ylim_lower, set_ylim_upper = 0.5*10**-3, 5*10 ** 3
     set_xlim_lower, set_xlim_upper = 0.0009, 2.7
     a=0
-    b=5
+    b=6
     ##############
     #POC plot
     ##############

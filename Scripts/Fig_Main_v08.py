@@ -2308,11 +2308,11 @@ def carbon_budget_calculation(dens0,densf,day0,dayf):
     Date_Time=np.array(data['Date_Time'][sel_filename])
     depth=np.array(data['Depth [m]'][sel_filename])
     dens=np.array(data['Potential density [kg/m3]'][sel_filename])
-    Flux=np.array(data['Flux_mgC_m2'][sel_filename])
-    Flux_Clements=np.array(data['Flux_Clements_mgC_m2'][sel_filename])
+    Flux=np.array(data['Flux_mgC_m2_d'][sel_filename])
+    Flux_Clements=np.array(data['Flux_Clements_mgC_m2_d'][sel_filename])
     # Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
-    Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
-    Flux_Clements_extended=np.array(data['Flux_Clements_mgC_m2_from0.0254sizeclass'][sel_filename])
+    Flux_extended=np.array(data['Flux_mgC_m2_d_from0.0254sizeclass_eta0.62_b132'][sel_filename])
+    Flux_Clements_extended=np.array(data['Flux_Clements_mgC_m2_d_from0.0254sizeclass'][sel_filename])
     # Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
     MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
     MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
@@ -3665,6 +3665,49 @@ print('Initial POC : %0.3f±%0.3f. Final POC: %0.3f±%0.3f. DeltaPOC: %0.3f±%0.
 print('Bulk POC : %0.3f±%0.3f. PARR: %0.3f±%0.3f. OxyCons: %0.3f±%0.3f. '
       %(np.mean(Theoretical_Budget_Koestner_extended_list[sel_eddycore]),np.mean(Theoretical_Budget_Koestner_extended_std_list[sel_eddycore]),PARR_0413to0731_eddycore_extended,PARR_0413to0731_eddycore_extended_std,OxyCR_0413to0731_eddycore,OxyCR_0413to0731_eddycore_std))
 #endregion
+#region I compare extended bulk, ext parr, and oxy cons in the eddy core and I verify if they are significantly different from 0
+sel_eddycore =  (depth_isopycnal_list>200)&(depth_isopycnal_list<600)
+bulkEC = np.mean(Theoretical_Budget_Koestner_list[sel_eddycore])
+bulkEC_std = np.mean(Theoretical_Budget_Koestner_std_list[sel_eddycore])
+bulkEC_ext = np.mean(Theoretical_Budget_Koestner_extended_list[sel_eddycore])
+bulkEC_ext_std = np.mean(Theoretical_Budget_Koestner_extended_std_list[sel_eddycore])
+bulkECClem = np.mean(Theoretical_Budget_Koestner_Clements_list[sel_eddycore])
+bulkECClem_std = np.mean(Theoretical_Budget_Koestner_Clements_std_list[sel_eddycore])
+bulkECClem_ext = np.mean(Theoretical_Budget_Koestner_Clements_extended_list[sel_eddycore])
+bulkECClem_ext_std = np.mean(Theoretical_Budget_Koestner_Clements_extended_std_list[sel_eddycore])
+parrEC = np.mean(POC_resp_mgC_m3_d_list[sel_eddycore,2] + bbpPARR_Koestner_mgC_m3_d_list[sel_eddycore])
+parrEC_std = np.mean(np.sqrt(POC_resp_mgC_m3_d_std_list[sel_eddycore,2]**2+bbpPARR_Koestner_mgC_m3_d_std_list[sel_eddycore]**2))
+parrEC_ext = np.mean(POC_resp_mgC_m3_d_list[sel_eddycore,9] + bbpPARR_Koestner_mgC_m3_d_list[sel_eddycore])
+parrEC_ext_std = np.mean(np.sqrt(POC_resp_mgC_m3_d_std_list[sel_eddycore,9]**2+bbpPARR_Koestner_mgC_m3_d_std_list[sel_eddycore]**2))
+oxyEC = np.mean(O2_resp_mgC_m3_d_list[sel_eddycore])
+oxyEC_std = np.mean(O2_resp_mgC_m3_d_ci_list[sel_eddycore,1]-O2_resp_mgC_m3_d_ci_list[sel_eddycore,0])/2
+#Before doing the t test, I verify that they are normally distributes (they are cos ShapiroResult(statistic>1) )
+shapiro(Theoretical_Budget_Koestner_list[sel_eddycore]) #it is gaussian
+shapiro(Theoretical_Budget_Koestner_Clements_list[sel_eddycore]) #it is gaussian
+shapiro(Theoretical_Budget_Koestner_extended_list[sel_eddycore]) #it is gaussian
+shapiro(Theoretical_Budget_Koestner_Clements_extended_list[sel_eddycore]) #it is gaussian
+shapiro(POC_resp_mgC_m3_d_list[sel_eddycore,2] + bbpPARR_Koestner_mgC_m3_d_list[sel_eddycore]) #it is gaussian
+shapiro(POC_resp_mgC_m3_d_list[sel_eddycore,9] + bbpPARR_Koestner_mgC_m3_d_list[sel_eddycore]) #it is gaussian
+shapiro(O2_resp_mgC_m3_d_list[sel_eddycore]) #it is gaussian
+n_el=sum(sel_eddycore)
+t_ref=scipy.stats.t.ppf(.95, n_el*2-2)#,lower.tail = FALSE)
+#I do the t test to verify whether they are significantly different from 0
+tb0=abs( (bulkEC)/np.sqrt( bulkEC_std**2/n_el ) )
+tb0_e=abs( (bulkEC_ext)/np.sqrt( bulkEC_ext_std**2/n_el ) )
+tbc0=np.abs( (bulkECClem)/np.sqrt( bulkECClem_std**2/n_el ) )
+tbc0_e=np.abs( (bulkECClem_ext)/np.sqrt( bulkECClem_ext_std**2/n_el ) )
+tp0=abs( (parrEC)/np.sqrt( parrEC_std**2/n_el ) )
+tp0_e=abs( (parrEC_ext)/np.sqrt( parrEC_ext_std**2/n_el ) )
+to0=abs( (oxyEC)/np.sqrt( oxyEC_std**2/n_el ) )
+str_mean_tb0='no';str_mean_tb0_e='no';str_mean_tbc0='no';str_mean_tbc0_e='no';str_mean_tp0='no';str_mean_tp0_e='no';str_mean_tp0_e='no';str_mean_to0='no'
+if (tb0<t_ref):   str_mean_tb0='yes'
+if (tb0_e<t_ref):   str_mean_tb0_e='yes'
+if (tbc0<t_ref):   str_mean_tbc0='yes'
+if (tbc0_e<t_ref):   str_mean_tbc0_e='yes'
+if (tp0<t_ref):   str_mean_tp0='yes'
+if (tp0_e<t_ref):   str_mean_tp0_e='yes'
+if (to0<t_ref):   str_mean_to0='yes'
+#endregion
 
 #region I compare extended bulk, ext parr, and oxy cons below 320m
 sel_320 = (depth_isopycnal_list>320)&(depth_isopycnal_list<600)
@@ -3677,7 +3720,7 @@ parr320_std = np.mean(np.sqrt(POC_resp_mgC_m3_d_std_list[sel_320,9]**2+bbpPARR_K
 parr320_NE = np.mean(POC_resp_mgC_m3_d_list[sel_320,2] + bbpPARR_Koestner_mgC_m3_d_list[sel_320]) #NE means "not extended"
 parr320_std_NE = np.mean(np.sqrt(POC_resp_mgC_m3_d_std_list[sel_320,2]**2+bbpPARR_Koestner_mgC_m3_d_std_list[sel_320]**2))
 oxy320 = np.mean(O2_resp_mgC_m3_d_list[sel_320])
-oxy320_std = np.mean(O2_resp_mgC_m3_d_ci_list[sel_320,1]-O2_resp_mgC_m3_d_ci_list[sel_320,0])
+oxy320_std = np.mean(O2_resp_mgC_m3_d_ci_list[sel_320,1]-O2_resp_mgC_m3_d_ci_list[sel_320,0])/2
 #Before doing the t test, I verify that they are normally distributes (they are)
 shapiro(Theoretical_Budget_Koestner_extended_list[sel_320]) #it is gaussian
 shapiro(Theoretical_Budget_Koestner_Clements_extended_list[sel_320]) #it is gaussian

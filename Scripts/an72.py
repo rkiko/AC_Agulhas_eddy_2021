@@ -75,12 +75,12 @@ def carbon_subduction_calculation(dens0,densf,day0,dayf):
     Date_Time=np.array(data['Date_Time'][sel_filename])
     depth=np.array(data['Depth [m]'][sel_filename])
     dens=np.array(data['Potential density [kg/m3]'][sel_filename])
-    Flux=np.array(data['Flux_mgC_m2'][sel_filename])
-    Flux_Clements=np.array(data['Flux_Clements_mgC_m2'][sel_filename])
-    # Flux_eta_b=np.array(data['Flux_mgC_m2_from0.1200sizeclass_eta0.62_b66'][sel_filename])
-    Flux_extended=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b132'][sel_filename])
-    Flux_Clements_extended=np.array(data['Flux_Clements_mgC_m2_from0.0254sizeclass'][sel_filename])
-    # Flux_extended_eta_b=np.array(data['Flux_mgC_m2_from0.0254sizeclass_eta0.62_b66'][sel_filename])
+    Flux=np.array(data['Flux_mgC_m2_d'][sel_filename])
+    Flux_Clements=np.array(data['Flux_Clements_mgC_m2_d'][sel_filename])
+    # Flux_eta_b=np.array(data['Flux_mgC_m2_d_from0.1200sizeclass_eta0.62_b66'][sel_filename])
+    Flux_extended=np.array(data['Flux_mgC_m2_d_from0.0254sizeclass_eta0.62_b132'][sel_filename])
+    Flux_Clements_extended=np.array(data['Flux_Clements_mgC_m2_d_from0.0254sizeclass'][sel_filename])
+    # Flux_extended_eta_b=np.array(data['Flux_mgC_m2_d_from0.0254sizeclass_eta0.62_b66'][sel_filename])
     MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
     MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
     MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
@@ -817,25 +817,42 @@ tmp = np.interp(depth2,depth_list,POC_subducted_extended_tonsC_day_std_list)
 argument = 'POC_subducted_extended_std_0413to0731_tonsC_day'
 POC_subducted_extended_std_0413to0731_tonsC_day=np.mean(tmp[sel_inEddyCore])
 write_latex_data(filename,argument,'%d' % POC_subducted_extended_std_0413to0731_tonsC_day)
-argument = 'Tot_POC_export_extended_0413to0731_tonsC_day'
+Tot_POC_export_std_0413to0731_tonsC_day= np.sqrt(BGP_std_0413to0731_tonsC_day**2 + POC_subducted_std_0413to0731_tonsC_day**2)
 Tot_POC_export_0413to0731_tonsC_day= BGP_0413to0731_tonsC_day + POC_subducted_0413to0731_tonsC_day
+argument = 'Tot_POC_export_extended_0413to0731_tonsC_day'
 Tot_POC_export_extended_0413to0731_tonsC_day= BGP_extended_0413to0731_tonsC_day + POC_subducted_extended_0413to0731_tonsC_day
 write_latex_data(filename,argument,'%d' % Tot_POC_export_extended_0413to0731_tonsC_day)
 argument = 'Tot_POC_export_extended_std_0413to0731_tonsC_day'
-arg_value= np.sqrt(BGP_extended_std_0413to0731_tonsC_day**2 + POC_subducted_extended_std_0413to0731_tonsC_day**2)
-write_latex_data(filename,argument,'%d' % arg_value)
-argument = 'Ratio_POC_subduction2BGP_0413to0731_tonsC_day'
+Tot_POC_export_extended_std_0413to0731_tonsC_day= np.sqrt(BGP_extended_std_0413to0731_tonsC_day**2 + POC_subducted_extended_std_0413to0731_tonsC_day**2)
+write_latex_data(filename,argument,'%d' % Tot_POC_export_extended_std_0413to0731_tonsC_day)
+Tot_POC_export_Clements_0413to0731_tonsC_day= BGP_Clements_0413to0731_tonsC_day + POC_subducted_0413to0731_tonsC_day
+Tot_POC_export_Clements_std_0413to0731_tonsC_day= np.sqrt(BGP_Clements_std_0413to0731_tonsC_day**2 + POC_subducted_std_0413to0731_tonsC_day**2)
+Tot_POC_export_Clements_extended_0413to0731_tonsC_day= BGP_Clements_extended_0413to0731_tonsC_day + POC_subducted_extended_0413to0731_tonsC_day
+Tot_POC_export_Clements_extended_std_0413to0731_tonsC_day= np.sqrt(BGP_Clements_extended_std_0413to0731_tonsC_day**2 + POC_subducted_extended_std_0413to0731_tonsC_day**2)
+argument = 'Ratio_FECSP2BGP_0413to0731_tonsC_day'
 arg_value= POC_subducted_0413to0731_tonsC_day/BGP_0413to0731_tonsC_day*100
 write_latex_data(filename,argument,'%d' % arg_value)
-argument = 'Ratio_POC_subduction2BGP_Clements_0413to0731_tonsC_day'
+argument = 'Ratio_FECSP2BGP_Clements_0413to0731_tonsC_day'
 arg_value= POC_subducted_0413to0731_tonsC_day/BGP_Clements_0413to0731_tonsC_day*100
 write_latex_data(filename,argument,'%d' % arg_value)
-argument = 'Ratio_POC_subduction2BGP_extended_0413to0731_tonsC_day'
+argument = 'Ratio_FECSP2BGP_extended_0413to0731_tonsC_day'
 arg_value= POC_subducted_extended_0413to0731_tonsC_day/BGP_extended_0413to0731_tonsC_day*100
 write_latex_data(filename,argument,'%d' % arg_value)
-argument = 'Ratio_POC_subduction2BGP_Clements_extended_0413to0731_tonsC_day'
+argument = 'Ratio_FECSP2BGP_Clements_extended_0413to0731_tonsC_day'
 arg_value= POC_subducted_extended_0413to0731_tonsC_day/BGP_Clements_extended_0413to0731_tonsC_day*100
 write_latex_data(filename,argument,'%d' % arg_value)
+argument = 'Ratio_FECSP2TotPOCExport_0413to0731_tonsC_day'
+arg_value= POC_subducted_0413to0731_tonsC_day/(BGP_0413to0731_tonsC_day+POC_subducted_0413to0731_tonsC_day)*100
+write_latex_data(filename,argument,'%d' % np.round(arg_value))
+argument = 'Ratio_FECSP2TotPOCExport_Clements_0413to0731_tonsC_day'
+arg_value= POC_subducted_0413to0731_tonsC_day/(BGP_Clements_0413to0731_tonsC_day+POC_subducted_0413to0731_tonsC_day)*100
+write_latex_data(filename,argument,'%d' % np.round(arg_value))
+argument = 'Ratio_FECSP2TotPOCExport_extended_0413to0731_tonsC_day'
+arg_value= POC_subducted_extended_0413to0731_tonsC_day/(BGP_extended_0413to0731_tonsC_day+POC_subducted_extended_0413to0731_tonsC_day)*100
+write_latex_data(filename,argument,'%d' % np.round(arg_value))
+argument = 'Ratio_FECSP2TotPOCExport_Clements_extended_0413to0731_tonsC_day'
+arg_value= POC_subducted_extended_0413to0731_tonsC_day/(BGP_Clements_extended_0413to0731_tonsC_day+POC_subducted_extended_0413to0731_tonsC_day)*100
+write_latex_data(filename,argument,'%d' % np.round(arg_value))
 argument = 'nPeople_equivalentCO2emitted'
 arg_value= Tot_POC_export_0413to0731_tonsC_day/(6.9/365)
 write_latex_data(filename,argument,'%d' % arg_value)
@@ -873,8 +890,10 @@ for depth_tmp in depth2write:
     write_latex_data(filename,argument,'%d' %  np.round(np.sqrt(FESP_std**2+BGP_std**2)))
     argument = 'Martin_export_extended_std_0413to0731_%dm_tonsC_day' % (depth_tmp)
     write_latex_data(filename,argument,'%d' %  np.round( POC_BGP_extended_tonsC_day*(depth_tmp/100)**(-0.858) ))
-    argument = 'Ratio_POC_subduction2BGP_extended_0413to0731_%dm_tonsC_day' % (depth_tmp)
+    argument = 'Ratio_FECSP2BGP_extended_0413to0731_%dm_tonsC_day' % (depth_tmp)
     write_latex_data(filename, argument, '%d' % np.round(FECSP/BGP*100))
+    argument = 'Ratio_FECSP2TotPOCExport_extended_0413to0731_%dm_tonsC_day' % (depth_tmp)
+    write_latex_data(filename, argument, '%d' % np.round(FECSP/(BGP+FECSP)*100))
 
 # endregion
 #######################################################################

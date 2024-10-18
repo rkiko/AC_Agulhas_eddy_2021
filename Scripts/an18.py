@@ -134,10 +134,10 @@ for i in range(0,bbp700.shape[0]):
     bbp700tmp=bbp700_Briggs2020filter(bbp700tmp)
     sel = (bbp700tmp != 99999) & sel0
     bbp700tmp = bbp700tmp[sel]
-    sPOC_tmp = bbp700toPOC(bbp700tmp, depth_tmp, temp_tmp)
+    sPOC_tmp = bbp700toPOC(bbp700tmp, depth[i,sel], temp[i,sel])
     sPOC_tmp[sPOC_tmp < 0] = 0
     bbp_POC[i, sel] = sPOC_tmp
-    sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl_tmp)
+    sPOC_tmp = bbp700toPOC_Koestner(bbp700tmp, chl[i,sel])
     sPOC_tmp[np.isnan(sPOC_tmp)] = 0
     bbp_POC_Koestner[i, sel] = sPOC_tmp
 
