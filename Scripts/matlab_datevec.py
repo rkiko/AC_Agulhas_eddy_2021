@@ -12,7 +12,7 @@ def matlab_datevec(x):
     minute=np.floor(hourfrac*60)
     minutefrac=hourfrac*60-minute
     seconds=minutefrac*60
-    result=np.array([y.year,y.month,y.day,hour,minute,seconds])
+    result=np.array([y.year,y.month,y.day,hour,minute,seconds]).astype(int)
     return result
 
 if __name__ == "__main__":
