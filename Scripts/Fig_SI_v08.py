@@ -1126,7 +1126,7 @@ write_latex_data(filename,argument,'%0.2f' % arg_value)
 
 # endregion
 # endregion
-
+#endregion
 
 ########################################################################################################################
 ########################################################################################################################
@@ -2410,29 +2410,332 @@ for dens0 in dens0_list:
 
     dict['depth%0.2f_%0.2fkgm3' % (dens0,densf)] = depth_isopycnal_tmp
     dict['Dist%0.2f_%0.2fkgm3' % (dens0,densf)] = Distance_centroid_tmp
+    dict['Datenum%0.2f_%0.2fkgm3' % (dens0,densf)] = Date_Num_isopycnal
 #endregion
 #region I plot
 dens0_list_plot=np.r_[1026.8:1027.25:0.1];dens0=dens0_list_plot[0]
 fig, ax = plt.subplots(1,dens0_list_plot.size, figsize=(3*dens0_list_plot.size, 3), sharey=True)
 # plt.subplots_adjust(hspace=0.05)
-width, height = 0.72/dens0_list_plot.size, 0.7
+width, height = 0.72/dens0_list_plot.size, 0.66
 ct=0
 for dens0 in dens0_list_plot:
     densf = dens0 + dens_thickness
     reference_isopycnal = (dens0 + densf) * 0.5
     x=dict['depth%0.2f_%0.2fkgm3' % (dens0,densf)]
     y=dict['Dist%0.2f_%0.2fkgm3' % (dens0,densf)]
+    z=dict['Datenum%0.2f_%0.2fkgm3' % (dens0,densf)]
     (_,_,_,signif,signif_label) = lin_fit(x,y);sl=''
     if signif==0: sl='not'
-    ax[ct].set_position([0.12+width*ct*1.1, 0.18, width, height])
-    ax[ct].plot(x,y,'.',label='%0.2fkg m$^{-3}$; fit: %s significant' % (reference_isopycnal,sl))
+    ax[ct].set_position([0.12+width*ct*1.1, 0.22, width, height])
+    plot1=ax[ct].scatter(x,y,c=z,s=5,vmin=Date_Num_limit[0],vmax=Date_Num_limit[1])
     ax[ct].grid(color='k', linestyle='dashed', linewidth=0.5)
     ax[ct].set_title('%0.2fkg m$^{-3}$\nLinear fit: %s significant' % (reference_isopycnal,sl),fontsize=9)
     ax[ct].set_xlabel('Depth [m]',fontsize=8)
     ct=ct+1
 
 ax[0].set_ylabel('Distance from eddy center [km]',fontsize=8)
+cbar_ax = fig.add_axes([0.902, 0.22, 0.015, 0.65])
+cbar=fig.colorbar(plot1, cax=cbar_ax)
+nxticks = 10
+xticks = np.linspace(Date_Num_limit[0], Date_Num_limit[1], nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append('%02d-%02d' % (matlab_datevec(i+matlab_datenum(1950,1,1))[2], matlab_datevec(i+matlab_datenum(1950,1,1))[1]))
+cbar.set_ticks(xticks)
+cbar.set_ticklabels(xticklabels)
 plt.savefig('../Plots/Fig_Main_v08/Supplementary/IsopycnalDepth_vs_DistFromEddyCenter_v08.pdf' ,dpi=200)
 plt.close()
+#endregion
+#endregion
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+######### SUPPLEMENTARY FIG POC CONTENT VS DISTANCE FROM EDDY CENTER
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+#region Supplementary Fig. POC content vs distance from eddy center
+
+# region import
+import numpy as np
+import pandas as pd
+import os,sys
+import netCDF4 as nc
+import pickle
+import matplotlib.pyplot as plt
+from pathlib import Path
+home = str(Path.home())
+sys.path.insert(0, "%s/GIT/AC_Agulhas_eddy_2021/Scripts" % home)
+os.chdir('%s/GIT/AC_Agulhas_eddy_2021/Scripts/' % home) #changes directory
+from matlab_datevec import matlab_datevec
+from matlab_datenum import matlab_datenum
+storedir='%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+filename_coriolis='6903095_Sprof.nc'
+###########
+import datetime,calendar
+from scipy.signal import savgol_filter
+from scipy.interpolate import griddata
+from lin_fit import lin_fit
+#endregion
+#region processing the data
+#######################################################################
+# Parameters
+#######################################################################
+#Here I define the time at which I want to start and end the time series in the plot
+day_start_timeseries=np.array([2021,4,13])
+day_start_timeseries=matlab_datenum(day_start_timeseries)
+day_end_timeseries=np.array([2021,7,31])
+day_end_timeseries=matlab_datenum(day_end_timeseries)
+ndays=int(day_end_timeseries-day_start_timeseries+1)
+dens00=1026.82                   # starting isopycnal
+dens_thickness=0.13              # thickness of the layer considered (in kg/m3)
+delta_dens=0.13                  # every time I do a loop, how much I do increase depth0
+densff=1027.24                   # final isopycnal investigated
+
+dens0_list=np.r_[dens00:densff-dens_thickness+0.01:delta_dens]
+
+#######################################################################
+# I load float distance from eddy1 centroid
+#######################################################################
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+Date_Num_float = data_dist_radius['Datenum']
+Distance_centroid = data_dist_radius['Distance_Centroid']
+sel_time=(Date_Num_float>=day_start_timeseries)&(Date_Num_float<=day_end_timeseries)
+Date_Num_float = Date_Num_float[sel_time]
+Distance_centroid = Distance_centroid[sel_time]
+
+#######################################################################
+# I load the mixed layer depth
+#######################################################################
+a_file = open("%s/GIT/AC_Agulhas_eddy_2021/Data/an68/data_MLD_an68.pkl" % (home), "rb")
+data_an68 = pickle.load(a_file)
+mld = data_an68["mld"]#"Date_Num": Date_Num,"lon": lon,"lat": lat}
+mld_datenum = data_an68['Date_Num']
+a_file.close()
+#I convert datenum to calendar
+i=0
+for i in range(0,mld_datenum.size):
+    date_time_obj = matlab_datevec(mld_datenum[i]).astype(int)
+    date_time_obj = datetime.datetime(date_time_obj[0],date_time_obj[1],date_time_obj[2],date_time_obj[3],date_time_obj[4],date_time_obj[5])
+    mld_datenum[i] = calendar.timegm(date_time_obj.timetuple())
+
+#######################################################################
+# I load and process MiP and MaP data
+#######################################################################
+
+#I load the file with the flux and POC
+filename_ecopart='%s/GIT/AC_Agulhas_eddy_2021/Data/Ecopart_diagnostics_data_356.tsv' % home
+data=pd.read_csv(filename_ecopart, sep='\t', header=0)
+RAWfilename=data.RAWfilename
+
+#I select only the profiles data, which contain 'ASC' in the filename, and I exclude the parkings
+ct=0
+sel_filename = [True for i in range(RAWfilename.size)]
+for a in RAWfilename:
+    if a.split('-')[-1].split('_')[0] == 'ASC':
+        sel_filename[ct]=True
+    else:
+        sel_filename[ct] = False
+    ct+=1
+
+# I extract the data
+Date_Time=np.array(data['Date_Time'][sel_filename])
+depth=np.array(data['Depth [m]'][sel_filename])
+dens=np.array(data['Potential density [kg/m3]'][sel_filename])
+Flux=np.array(data['Flux_mgC_m2_d'][sel_filename])
+Flux_eta_b=np.array(data['Flux_mgC_m2_d_from0.1200sizeclass_eta0.62_b66'][sel_filename])
+Flux_extended=np.array(data['Flux_mgC_m2_d_from0.0254sizeclass_eta0.62_b132'][sel_filename])
+Flux_extended_eta_b=np.array(data['Flux_mgC_m2_d_from0.0254sizeclass_eta0.62_b66'][sel_filename])
+MiP_POC=np.array(data['Mip_POC_cont_mgC_m3'][sel_filename])
+MiP_POC_extended=np.array(data['Mip_POC_cont_mgC_m3_extendendTo0.0254sizeclass'][sel_filename])
+MaP_POC=np.array(data['Map_POC_cont_mgC_m3'][sel_filename])
+
+# I convert the dates to float values (in seconds from 1970 1 1)
+Date_Num=np.r_[0:Flux.size]
+for i in Date_Num:
+    date_time_obj = datetime.datetime.strptime(Date_Time[i], '%Y-%m-%dT%H:%M:%S')
+    Date_Num[i] = calendar.timegm(date_time_obj.timetuple())
+    #datetime.utcfromtimestamp(Date_Num[i])
+
+list_dates=np.unique(Date_Num)
+
+#######################################################################
+# I select the data only in the period when the BGC Argo float was inside the eddy
+#######################################################################
+filename_dist_radius=Path("%s/GIT/AC_Agulhas_eddy_2021/Data/an64/Distance_and_Radius_an64py.csv" % home).expanduser()
+data_dist_radius=pd.read_csv(filename_dist_radius, sep=',', header=0)
+
+sel_insideEddy = data_dist_radius['sel_insideEddy']
+datenum_profiles = data_dist_radius['Datenum']
+sel_insideEddy = (datenum_profiles<=day_end_timeseries)&(sel_insideEddy==1)
+
+list_dates=list_dates[0:sel_insideEddy.__len__()]
+list_dates=list_dates[sel_insideEddy[0:list_dates.size]]
+mld=mld[sel_insideEddy]
+mld_datenum=mld_datenum[sel_insideEddy]
+
+#######################################################################
+# I load and process bbp data
+#######################################################################
+
+# I load the bbp data and I select only those in the prescribed period
+storedir = '%s/GIT/AC_Agulhas_eddy_2021/Data' % home
+a_file = open("%s/an18/data_an18.pkl" % storedir, "rb")
+data_an18 = pickle.load(a_file)
+bbp_POC = data_an18['bbp_POC']
+bbp_POC_Koestner = data_an18['bbp_POC_Koestner']
+Date_Num_bbp = data_an18['Date_Num_bbp']
+Date_Vec_bbp = data_an18['Date_Vec_bbp']
+depth_bbp = data_an18['depth_bbp']
+dens_bbp = data_an18['dens_bbp']
+a_file.close()
+
+sel_dates = sel_insideEddy[0:Date_Num_bbp.size]
+Date_Num_bbp = Date_Num_bbp[sel_dates]
+Date_Vec_bbp = Date_Vec_bbp[sel_dates,:]
+depth_bbp = depth_bbp[sel_dates,:]
+dens_bbp = dens_bbp[sel_dates,:]
+bbp_POC = bbp_POC[sel_dates, :]
+bbp_POC_Koestner = bbp_POC_Koestner[sel_dates, :]
+
+# I convert the dates to float values (in seconds from 1970 1 1)
+Date_Num_bbp_calendar = Date_Num_bbp.copy()
+for i in range(0,Date_Num_bbp_calendar.size):
+    date_time_obj = datetime.datetime(Date_Vec_bbp[i,0],Date_Vec_bbp[i,1],Date_Vec_bbp[i,2],
+                             Date_Vec_bbp[i,3],Date_Vec_bbp[i,4],Date_Vec_bbp[i,5])
+    Date_Num_bbp_calendar[i] = calendar.timegm(date_time_obj.timetuple())
+    # datetime.utcfromtimestamp(Date_Num[i])
+#endregion
+#region analysing the data
+########################################################################################################################
+# Here I calculate the integrated POC (i.e., MiP+MaP+bbp). To do so, (i) I filter it with a savgol function, then (ii) I
+# calculate for each density layer defined in the parameters, plus for the entire eddy core
+########################################################################################################################
+
+##############################################
+# Step 1 and 2, filter and interpolation
+MiP_list=np.zeros((len(list_dates),len(dens0_list)+2))
+MaP_list=np.zeros((len(list_dates),len(dens0_list)+2))
+bbp_list=np.zeros((len(list_dates),len(dens0_list)+2))
+
+i=0
+for i in range(0,list_dates.size):
+    sel=Date_Num==list_dates[i]
+    z=MiP_POC[sel];x=Date_Num[sel];y=dens[sel];y2=depth[sel];sel2=~np.isnan(z);z=z[sel2];x=x[sel2];y=y[sel2];y2=y2[sel2]
+    if sum(sel2) > 0:
+        z = savgol_filter(z, 5, 1)
+        j=0
+        for j in range(0,len(dens0_list)+2):
+            if j==0:
+                sel3=(y>=1026.82)&(y<1027.24)
+            elif j==1:
+                sel3=y2<mld[i]
+            else:
+                sel3 = (y>=dens0_list[j-2]) & ( y < (dens0_list[j-2]+dens_thickness) )
+            MiP_list[i, j] = np.mean(z[sel3])
+
+    z=MaP_POC[sel];x=Date_Num[sel];y=dens[sel];y2=depth[sel];sel2=~np.isnan(z);z=z[sel2];x=x[sel2];y=y[sel2];y2=y2[sel2]
+    if sum(sel2) > 0:
+        z = savgol_filter(z, 5, 1)
+        j = 0
+        for j in range(0, len(dens0_list) + 2):
+            if j == 0:
+                sel3 = (y >= 1026.82) & (y < 1027.24)
+            elif j == 1:
+                sel3 = y2 < mld[i]
+            else:
+                sel3 = (y >= dens0_list[j - 2]) & (y < (dens0_list[j - 2] + dens_thickness))
+            MaP_list[i, j] = np.mean(z[sel3])
+
+    #bbp from Koestner
+    z=bbp_POC_Koestner[i,:];y=dens_bbp[i,:];y2=depth_bbp[i,:];x = Date_Num_bbp_calendar[i]
+    z[z>100] = 99999
+    sel2=(~np.isnan(z)) & (z != 99999);z=z[sel2];y=y[sel2];y2=y2[sel2]
+    sel3=z==0
+    if sum(sel2) > 0:
+        z = savgol_filter(z, 5, 1)
+        j = 0
+        for j in range(0, len(dens0_list) + 2):
+            if j == 0:
+                sel3 = (y >= 1026.82) & (y < 1027.24)
+            elif j==1:
+                sel3=y2<mld[i]
+            else:
+                sel3 = (y >= dens0_list[j - 2]) & (y < (dens0_list[j - 2] + dens_thickness))
+            bbp_list[i, j] = np.mean(z[sel3])
+
+POC_list =MiP_list+ MaP_list+bbp_list
+#endregion
+#region plotting
+fig, ax = plt.subplots(1, (dens0_list.size+1), figsize=(3 * (dens0_list.size+1), 3), sharey=True)
+width, height = 0.72 / (dens0_list.size+1), 0.7
+ct = 0;i=0
+for i in range(0,len(dens0_list)+2):
+    if i==0:
+        dens0 = dens0_list[i]
+        densf = 1027.24
+        reference_isopycnal = 'Eddy core'
+    elif i == 1:
+        continue
+    else:
+        dens0 = dens0_list[i-2]
+        densf = dens0 + dens_thickness
+        reference_isopycnal = '%0.2fkg m$^{-3}$' % ((dens0 + densf) * 0.5)
+    x = Distance_centroid.copy()
+    y = POC_list[:,i]
+    z = Date_Num_bbp
+    (_, _, _, signif, signif_label) = lin_fit(x, y);sl = ''
+    if signif == 0: sl = 'not'
+    ax[ct].set_position([0.12 + width * ct * 1.1, 0.18, width, height])
+    plot1 = ax[ct].scatter(x, y, c=z, s=5, vmin=Date_Num_bbp[0], vmax=Date_Num_bbp[-1])
+    ax[ct].grid(color='k', linestyle='dashed', linewidth=0.5)
+    ax[ct].grid(color='k', linestyle='dashed', linewidth=0.5)
+    ax[ct].set_title('%s\nLinear fit: %s significant' % (reference_isopycnal, sl), fontsize=9)
+    ax[ct].set_xlabel('Distance from\neddy center [km]', fontsize=8)
+    ct = ct + 1
+
+ax[0].set_ylabel('POC [mgC/m$^3$]', fontsize=8)
+cbar_ax = fig.add_axes([0.902, 0.22, 0.015, 0.65])
+cbar=fig.colorbar(plot1, cax=cbar_ax)
+nxticks = 10
+xticks = np.linspace(Date_Num_bbp[0], Date_Num_bbp[-1], nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2], matlab_datevec(i)[1]))
+cbar.set_ticks(xticks)
+cbar.set_ticklabels(xticklabels)
+plt.savefig('../Plots/Fig_Main_v08/Supplementary/POC_vs_DistFromEddyCenter_v08.pdf', dpi=200)
+plt.close()
+
+fig = plt.figure(1, figsize=(3 , 3))
+width, height = 0.7, 0.7
+ax = fig.add_axes([0.2, 0.18, width, height])
+ct = 0;i=1
+reference_isopycnal = 'MLD'
+x = Distance_centroid.copy()
+y = POC_list[:,i]
+z = Date_Num_bbp
+(_, _, _, signif, signif_label) = lin_fit(x, y);sl = ''
+if signif == 0: sl = 'not'
+plot1 = plt.scatter(x, y, c=z, s=5, vmin=Date_Num_bbp[0], vmax=Date_Num_bbp[-1])
+plt.grid(color='k', linestyle='dashed', linewidth=0.5)
+plt.title('%s\nLinear fit: %s significant' % (reference_isopycnal, sl), fontsize=9)
+plt.xlabel('Distance from\neddy center [km]', fontsize=8)
+plt.ylabel('POC [mgC/m$^3$]', fontsize=8)
+cbar = plt.colorbar(plot1)
+nxticks = 10
+xticks = np.linspace(Date_Num_bbp[0], Date_Num_bbp[-1], nxticks)
+xticklabels = []
+for i in xticks:
+    xticklabels.append('%02d-%02d' % (matlab_datevec(i)[2], matlab_datevec(i)[1]))
+cbar.set_ticks(xticks)
+cbar.set_ticklabels(xticklabels)
+plt.savefig('../Plots/Fig_Main_v08/Supplementary/POCinML_vs_DistFromEddyCenter_v08.pdf', dpi=200)
+plt.close()
+
 #endregion
 #endregion
