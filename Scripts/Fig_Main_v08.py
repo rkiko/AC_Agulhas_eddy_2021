@@ -3707,6 +3707,13 @@ if (tbc0_e<t_ref):   str_mean_tbc0_e='yes'
 if (tp0<t_ref):   str_mean_tp0='yes'
 if (tp0_e<t_ref):   str_mean_tp0_e='yes'
 if (to0<t_ref):   str_mean_to0='yes'
+
+argument = 'BulkParr_percOxy_min'
+BulkParr_percOxy_min=np.min((bulkEC,bulkECClem,parrEC))/oxyEC*100
+write_latex_data(filename,argument,'%d' % BulkParr_percOxy_min)
+argument = 'BulkParr_percOxy_max'
+BulkParr_percOxy_max=np.max((bulkEC_ext,bulkECClem_ext,parrEC_ext))/oxyEC*100
+write_latex_data(filename,argument,'%d' % BulkParr_percOxy_max)
 #endregion
 
 #region I compare extended bulk, ext parr, and oxy cons below 320m
@@ -3813,6 +3820,47 @@ t_ref=scipy.stats.t.ppf(.95, n_el*2-2)#,lower.tail = FALSE)
 str_mean_tkc='no';str_mean_tkce='no'
 if (tkc<t_ref):   str_mean_tkc='yes'
 if (tkce<t_ref):   str_mean_tkce='yes'
+
+#endregion
+#region Test: I compare bulk POC by Koestener and by Koestner + Clements in the eddy core, layer by layer
+sel_200=np.where((depth_isopycnal_list>200)&(depth_isopycnal_list<600))[0]
+n_el=2;t_ref = scipy.stats.t.ppf(.95, n_el * 2 - 2);i=0
+tbk_p=[False for i in range(0,len(sel_200))]
+tbk_p_e=[False for i in range(0,len(sel_200))]
+tbkc_p=[False for i in range(0,len(sel_200))]
+tbkc_p_e=[False for i in range(0,len(sel_200))]
+tbk_o=[False for i in range(0,len(sel_200))]
+tbk_o_e=[False for i in range(0,len(sel_200))]
+tbkc_o=[False for i in range(0,len(sel_200))]
+tbkc_o_e=[False for i in range(0,len(sel_200))]
+tp_o=[False for i in range(0,len(sel_200))]
+tp_o_e=[False for i in range(0,len(sel_200))]
+for i in range(0,len(sel_200)):
+    tbk = Theoretical_Budget_Koestner_list[sel_200[i]]
+    tbks = Theoretical_Budget_Koestner_std_list[sel_200[i]]
+    tbkc = Theoretical_Budget_Koestner_Clements_list[sel_200[i]]
+    tbkcs = Theoretical_Budget_Koestner_Clements_std_list[sel_200[i]]
+    tbke = Theoretical_Budget_Koestner_extended_list[sel_200[i]]
+    tbkes = Theoretical_Budget_Koestner_extended_std_list[sel_200[i]]
+    tbkce = Theoretical_Budget_Koestner_Clements_extended_list[sel_200[i]]
+    tbkces = Theoretical_Budget_Koestner_Clements_extended_std_list[sel_200[i]]
+    parr = POC_resp_mgC_m3_d_list[sel_200[i],9] + bbpPARR_Koestner_mgC_m3_d_list[sel_200[i]]
+    parr_std = np.sqrt(POC_resp_mgC_m3_d_std_list[sel_200[i],9]**2+bbpPARR_Koestner_mgC_m3_d_std_list[sel_200[i]]**2)
+    parr_NE = POC_resp_mgC_m3_d_list[sel_200[i],2] + bbpPARR_Koestner_mgC_m3_d_list[sel_200[i]] #NE means "not extended"
+    parr_std_NE = np.sqrt(POC_resp_mgC_m3_d_std_list[sel_200[i],2]**2+bbpPARR_Koestner_mgC_m3_d_std_list[sel_200[i]]**2)
+    oxy = O2_resp_mgC_m3_d_list[sel_200[i]]
+    oxy_std = O2_resp_mgC_m3_d_ci_list[sel_200[i],1]-O2_resp_mgC_m3_d_ci_list[sel_200[i],0]/2
+
+    tmp = np.abs((tbk - parr_NE) / np.sqrt(tbks ** 2 / n_el + parr_std_NE ** 2 / n_el));tbk_p[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((tbke - parr) / np.sqrt(tbkes ** 2 / n_el + parr_std ** 2 / n_el));tbk_p_e[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((tbkc - parr_NE) / np.sqrt(tbkcs ** 2 / n_el + parr_std_NE ** 2 / n_el));tbkc_p[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((tbkce - parr) / np.sqrt(tbkces ** 2 / n_el + parr_std ** 2 / n_el));tbkc_p_e[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((tbk - oxy) / np.sqrt(tbks ** 2 / n_el + oxy_std ** 2 / n_el));tbk_o[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((tbke - oxy) / np.sqrt(tbkes ** 2 / n_el + oxy_std ** 2 / n_el));tbk_o_e[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((tbkc - oxy) / np.sqrt(tbkcs ** 2 / n_el + oxy_std ** 2 / n_el));tbkc_o[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((tbkce - oxy) / np.sqrt(tbkces ** 2 / n_el + oxy_std ** 2 / n_el));tbkc_o_e[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((parr_NE - oxy) / np.sqrt(parr_std_NE ** 2 / n_el + oxy_std ** 2 / n_el));tp_o[i] = True if tmp < t_ref else tbk_p[i]
+    tmp = np.abs((parr - oxy) / np.sqrt(parr_std ** 2  + oxy_std ** 2 ));tp_o_e[i] = True if tmp < t_ref else tbk_p[i]
 
 #endregion
 
